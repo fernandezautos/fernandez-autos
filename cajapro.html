@@ -1956,55 +1956,6 @@ function cerrarNotifs(){ document.getElementById('modalNotifs').style.display='n
 document.addEventListener('click', function(e){ var m=document.getElementById('modalNotifs'); if(m&&e.target===m) cerrarNotifs(); });
 setInterval(cargarNotifs,10000);
 
-init();
-</script>
-<!-- MODAL NOTIFICACIONES -->
-<div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
-  <div style="background:#fff;border-radius:14px;width:380px;max-height:500px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);">
-    <div style="padding:16px 20px;border-bottom:1px solid #f0ede4;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-weight:600;font-size:0.95rem;font-family:Arial,sans-serif;">Notificaciones</div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="marcarTodasLeidas()" style="font-size:0.75rem;color:#2558a3;background:none;border:none;cursor:pointer;">Marcar todas leidas</button>
-        <button onclick="cerrarNotifs()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#9b9890;">X</button>
-      </div>
-    </div>
-    <div id="notifsLista" style="padding:8px 0;">
-      <div style="text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;">Cargando...</div>
-    </div>
-  </div>
-</div>
-<div id="toastNotif" style="display:none;position:fixed;bottom:24px;right:24px;background:#1a1917;color:#fff;border-radius:12px;padding:14px 18px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;">
-  <div style="font-weight:600;font-size:0.88rem;margin-bottom:4px;" id="toastTitulo"></div>
-  <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
-</div>
-<!-- MODAL PROCESAR MOVIMIENTO PENDIENTE -->
-<div id="modalMovPendiente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:14px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="font-size:1rem;font-weight:600;color:#7c3aed;">Procesar movimiento</div>
-      <button onclick="cerrarModalMovPendiente()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">X</button>
-    </div>
-    <div style="background:#f4f3ee;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;font-weight:500;" id="mpConcepto"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Monto</label>
-        <input type="number" id="mpMonto" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
-      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Moneda</label>
-        <select id="mpMoneda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
-      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Metodo de pago</label>
-        <select id="mpMetodo" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option>Efectivo</option><option>Transferencia</option><option>Cheque</option></select></div>
-      <div><label id="mpFechaAgendaLabel" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Fecha agenda (opcional)</label>
-        <input type="date" id="mpFechaAgenda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
-    </div>
-    <div style="margin-bottom:16px;"><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Observaciones</label>
-      <input type="text" id="mpObs" placeholder="Opcional..." style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;">
-      <button onclick="cerrarModalMovPendiente()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
-      <button onclick="confirmarMovPendiente()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar pago</button>
-    </div>
-  </div>
-</div>
-</body>
-</html>// ═══ MOVIMIENTOS PENDIENTES ═══════════════════════════════════
 async function cargarMovPendientes() {
   const raw = await sbGet('movimientos_pendientes','select=*&estado=eq.pendiente&order=created_at.asc');
   const pendientes = raw || [];
@@ -2106,4 +2057,53 @@ function cerrarModalMovPendiente() {
 
 let _movPendienteActivo = null;
 
+init();
+</script>
+<!-- MODAL NOTIFICACIONES -->
+<div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
+  <div style="background:#fff;border-radius:14px;width:380px;max-height:500px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);">
+    <div style="padding:16px 20px;border-bottom:1px solid #f0ede4;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-weight:600;font-size:0.95rem;font-family:Arial,sans-serif;">Notificaciones</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button onclick="marcarTodasLeidas()" style="font-size:0.75rem;color:#2558a3;background:none;border:none;cursor:pointer;">Marcar todas leidas</button>
+        <button onclick="cerrarNotifs()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#9b9890;">X</button>
+      </div>
+    </div>
+    <div id="notifsLista" style="padding:8px 0;">
+      <div style="text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;">Cargando...</div>
+    </div>
+  </div>
+</div>
+<div id="toastNotif" style="display:none;position:fixed;bottom:24px;right:24px;background:#1a1917;color:#fff;border-radius:12px;padding:14px 18px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;">
+  <div style="font-weight:600;font-size:0.88rem;margin-bottom:4px;" id="toastTitulo"></div>
+  <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
+</div>
+<!-- MODAL PROCESAR MOVIMIENTO PENDIENTE -->
+<div id="modalMovPendiente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:1rem;font-weight:600;color:#7c3aed;">Procesar movimiento</div>
+      <button onclick="cerrarModalMovPendiente()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">X</button>
+    </div>
+    <div style="background:#f4f3ee;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;font-weight:500;" id="mpConcepto"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Monto</label>
+        <input type="number" id="mpMonto" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Moneda</label>
+        <select id="mpMoneda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Metodo de pago</label>
+        <select id="mpMetodo" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option>Efectivo</option><option>Transferencia</option><option>Cheque</option></select></div>
+      <div><label id="mpFechaAgendaLabel" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Fecha agenda (opcional)</label>
+        <input type="date" id="mpFechaAgenda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+    </div>
+    <div style="margin-bottom:16px;"><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Observaciones</label>
+      <input type="text" id="mpObs" placeholder="Opcional..." style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="cerrarModalMovPendiente()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmarMovPendiente()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar pago</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>// ═══ MOVIMIENTOS PENDIENTES ═══════════════════════════════════
 
