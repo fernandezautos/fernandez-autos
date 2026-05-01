@@ -203,12 +203,11 @@ select.filter:focus{border-color:var(--accent)}
 .hidden{display:none!important}
 @media(max-width:700px){.fr{grid-template-columns:1fr}.legajos-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="topbar">
-  <div><span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.15rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span></div>
+  <div><img src="https://i.imgur.com/6cMQaeJ.png" style="height:32px;object-fit:contain;" alt="FA"></div>
   <div class="tb-search-wrap">
     <span class="tb-search-icon">🔍</span>
     <input type="text" id="busqGlobal" placeholder="Buscar dominio, cliente..." autocomplete="off">
@@ -1030,7 +1029,6 @@ function abrirDetTrf(id) {
       '<button class="btn sm" onclick="cerrar(\'ovDetTrf\');avanzarTrf(\''+t.id+'\')">→ Avanzar estado</button>'+
       (t.honorario&&t.honorarioEst!=='cobrado'?'<button class="btn sm success" onclick="marcarCobrado(\''+t.id+'\')">💰 Marcar cobrado</button>':'')+
       '<button class="btn sm" onclick="exportarPdfTrf(\''+t.id+'\')">📄 Exportar PDF</button>'+
-      (t.legajoOrigen?'<button class="btn sm" style="background:#7c3aed;color:#fff;border-color:#7c3aed;" onclick="confirmarDocOk(\''+t.id+'\')">✅ Documentación completa</button>':'')+
       (puedeEliminar?'<button class="btn sm danger" onclick="cerrar(\'ovDetTrf\');pedirElimTrf(\''+t.id+'\')">🗑 Eliminar</button>':'<span style="font-size:12px;color:var(--text3);font-style:italic">🔒 No se puede eliminar — ya en escribanía</span>')+
     '</div>';
   g('ovDetTrf').classList.remove('hidden');
@@ -1087,50 +1085,6 @@ async function guardarTrf() {
   ocultarCargando();
   cerrar('ovTrf');render();
 }
-async function confirmarDocOk(trfId) {
-  const t = trfs.find(x=>x.id===trfId);
-  if(!t||!t.legajoOrigen) return;
-  if(!confirm('¿Confirmar que la documentación está completa?\n\nEsto avisará a caja para que proceda con el pago total.')) return;
-  mostrarCargando('Notificando a caja...');
-  const raw = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&legajo_origen=eq.'+t.legajoOrigen+'&limit=1');
-  if(raw&&raw.length) {
-    const orden = raw[0];
-    await fetch(SB_URL+'/rest/v1/ordenes_compra?id=eq.'+orden.id,{
-      method:'PATCH', headers:sbH,
-      body:JSON.stringify({doc_ok:true, doc_ok_fecha:new Date().toISOString()})
-    });
-    const saldo = parseFloat(orden.precio||0) - parseFloat(orden.senia||0);
-    const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
-    // Crear movimiento pendiente en caja
-    await fetch(SB_URL+'/rest/v1/movimientos_pendientes',{
-      method:'POST', headers:sbH,
-      body:JSON.stringify({
-        tipo:'pago_total',
-        concepto:'Saldo de compra — '+orden.vehiculo_texto+' (doc OK)',
-        monto:saldo, moneda:orden.moneda||'ARS',
-        solicitado_por:'Gestoria',
-        referencia_id:orden.id, referencia_tipo:'orden_compra',
-        estado:'pendiente',
-        obs:'Documentacion aprobada por gestoria. Proceder con pago.'
-      })
-    });
-    await fetch(SB_URL+'/rest/v1/notificaciones',{
-      method:'POST', headers:sbH,
-      body:JSON.stringify({para:'caja',tipo:'doc_ok',leida:false,
-        titulo:'✅ Documentacion OK — nueva tarea pendiente',
-        mensaje:'La documentacion de '+orden.vehiculo_texto+' esta completa. Saldo: '+fmtN(saldo,orden.moneda||'ARS')+'. Revisar movimientos pendientes.'
-      })
-    });
-    ocultarCargando();
-    cerrar('ovDetTrf');
-    alert('Caja fue notificada. El pago aparecera en movimientos pendientes.');
-  } else {
-    ocultarCargando();
-    alert('No se encontro la orden de compra asociada a este legajo.');
-  }
-}
-
-
 async function avanzarTrf(id) {
   const t=trfs.find(x=>x.id===id);
   const idx=ESTADOS.indexOf(t.estado);
@@ -1280,12 +1234,8 @@ g('filtroTrf').addEventListener('change',render);
 
 function render(){if(pagActiva==='legajos') renderLegs(); else renderTrfs();}
 cargarDatos();
-
-cargarDatos().then(function(){
-  setTimeout(function(){ cargarNotifs(); }, 500);
-});
 </script>
-<!-- NOTIFICACIONES -->
+<!-- MODAL NOTIFICACIONES -->
 <div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
   <div style="background:#fff;border-radius:14px;width:380px;max-height:500px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);">
     <div style="padding:16px 20px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;align-items:center;">
@@ -1303,6 +1253,40 @@ cargarDatos().then(function(){
   <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
 </div>
 <script>
+
+async function confirmarDocOk(trfId) {
+  const t = trfs.find(x=>x.id===trfId);
+  if(!t||!t.legajoOrigen) return;
+  if(!confirm('Confirmar que la documentacion esta completa? Esto avisara a caja para que proceda con el pago total.')) return;
+  mostrarCargando('Notificando a caja...');
+  const raw = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&legajo_origen=eq.'+t.legajoOrigen+'&limit=1');
+  if(raw&&raw.length) {
+    const orden = raw[0];
+    await sbUpdate('ordenes_compra','id',orden.id,{doc_ok:true, doc_ok_fecha:new Date().toISOString()});
+    const saldo = parseFloat(orden.precio||0) - parseFloat(orden.senia||0);
+    const fmtN = function(n,m){ return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR'); };
+    await sbInsert('movimientos_pendientes',{
+      tipo:'pago_total',
+      concepto:'Saldo de compra — '+orden.vehiculo_texto+' (doc OK)',
+      monto:saldo, moneda:orden.moneda||'ARS',
+      solicitado_por:'Gestoria', referencia_id:orden.id,
+      referencia_tipo:'orden_compra', estado:'pendiente',
+      obs:'Documentacion aprobada por gestoria.'
+    });
+    await sbInsert('notificaciones',{para:'caja',tipo:'doc_ok',leida:false,
+      titulo:'Doc OK — nueva tarea pendiente',
+      mensaje:'La documentacion de '+orden.vehiculo_texto+' esta completa. Saldo: '+fmtN(saldo,orden.moneda||'ARS')
+    });
+    ocultarCargando();
+    cerrar('ovDetTrf');
+    alert('Caja fue notificada.');
+  } else {
+    ocultarCargando();
+    alert('No se encontro la orden de compra asociada.');
+  }
+}
+
+
 var _notifs=[];
 function getRolNotif(){return(window._session&&window._session.rol)||"gestoria";}
 async function cargarNotifs(){try{var r=await sbGet("notificaciones","select=*&para=eq."+getRolNotif()+"&order=created_at.desc&limit=50");_notifs=r||[];renderNotifs();actualizarCampanita();mostrarToastsSinLeer();}catch(e){console.error(e);}}
@@ -1310,12 +1294,12 @@ function actualizarCampanita(){var n=_notifs.filter(function(x){return !x.leida;
 function mostrarToastsSinLeer(){var nl=_notifs.filter(function(x){return !x.leida;});if(!nl.length)return;var n=nl[0],t=document.getElementById("toastNotif");if(!t)return;document.getElementById("toastTitulo").textContent=n.titulo;document.getElementById("toastMensaje").textContent=n.mensaje;t.style.display="block";setTimeout(function(){t.style.display="none";},5000);}
 function renderNotifs(){var lista=document.getElementById("notifsLista");if(!lista)return;if(!_notifs.length){lista.innerHTML="<div style='text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;'>Sin notificaciones</div>";return;}var html="";_notifs.forEach(function(n){var bg=n.leida?"#fff":"#f0f4ff",fw=n.leida?"400":"600",ts="";if(n.created_at){var d=new Date(n.created_at);ts=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}html+="<div onclick='marcarLeida("+n.id+")' style='padding:14px 20px;border-bottom:1px solid #f8f6f0;cursor:pointer;background:"+bg+";'><div style='display:flex;justify-content:space-between;'><div style='font-weight:"+fw+";font-size:0.85rem;'>"+n.titulo+"</div><div style='font-size:0.7rem;color:#9b9890;'>"+ts+"</div></div><div style='font-size:0.8rem;color:#6b6960;margin-top:4px;'>"+n.mensaje+"</div>"+(n.leida?"":"<div style='width:8px;height:8px;background:#2558a3;border-radius:50%;margin-top:6px;'></div>")+"</div>";});lista.innerHTML=html;}
 async function marcarLeida(id){await fetch(SB_URL+"/rest/v1/notificaciones?id=eq."+id,{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});var n=_notifs.find(function(x){return x.id===id;});if(n)n.leida=true;renderNotifs();actualizarCampanita();}
-async function marcarTodasLeidas(){await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+getRolNotif()+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
+async function marcarTodasLeidas(){var rol=getRolNotif();await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+rol+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
 function abrirNotifs(){document.getElementById("modalNotifs").style.display="flex";cargarNotifs();}
 function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
 document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
 setInterval(cargarNotifs,10000);
-
+cargarDatos().then(function(){ setTimeout(function(){ cargarNotifs(); }, 500); });
 </script>
 
 </body>
