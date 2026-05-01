@@ -237,6 +237,7 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
     <button onclick="show('gestoria',this)">Gestoría</button>
     <button onclick="show('stock',this)">Stock</button>
     <button onclick="show('reportes',this)">Reportes</button>
+    <button onclick="show('propuestas',this)" id="btnNavPropuestas">Propuestas de precio</button>
     <button onclick="show('usuarios',this)">Usuarios</button>
     <button onclick="show('sistemas',this)">Sistemas</button>
   </nav>
@@ -749,7 +750,67 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
   </div>
 </section>
 
-<!-- ═══ USUARIOS ═══════════════════════════════════════════ -->
+<!-- ═══ PROPUESTAS DE PRECIO ════════════════════════════════ -->
+<section id="propuestas" class="section">
+  <div class="page-head">
+    <h2>Propuestas de cambio de precio</h2>
+    <div style="font-size:0.8rem;color:var(--text3);">Revisá y respondé las propuestas enviadas por los vendedores</div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="card-label">Pendientes</div><div class="card-value" style="color:#b45309;" id="pr-pendientes">—</div><div class="card-sub">esperando respuesta</div></div>
+    <div class="card"><div class="card-label">Aprobadas</div><div class="card-value pos" id="pr-aprobadas">—</div><div class="card-sub">este mes</div></div>
+    <div class="card"><div class="card-label">Rechazadas</div><div class="card-value" style="color:#991b1b;" id="pr-rechazadas">—</div><div class="card-sub">este mes</div></div>
+    <div class="card"><div class="card-label">Contraofertas</div><div class="card-value" style="color:#1e40af;" id="pr-contraofertas">—</div><div class="card-sub">este mes</div></div>
+  </div>
+  <div class="fc" style="padding:0;overflow:hidden;">
+    <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;display:flex;align-items:center;justify-content:space-between;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Historial de propuestas</div>
+      <select id="filtroPropuestas" onchange="renderPropuestasAdmin()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Arial,sans-serif;font-size:0.82rem;background:#fff;">
+        <option value="pendiente">Pendientes</option>
+        <option value="todas">Todas</option>
+        <option value="aprobada">Aprobadas</option>
+        <option value="rechazada">Rechazadas</option>
+        <option value="contraoferta">Contraofertas</option>
+      </select>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th>Vehículo</th><th>Vendedor</th><th>Precio actual</th><th>Precio propuesto</th><th>Justificación</th><th>Estado</th><th>Acción</th>
+        </tr></thead>
+        <tbody id="tablaPropuestas"><tr class="empty-row"><td colspan="7">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL RESPONDER PROPUESTA -->
+<div id="modalPropuesta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:32px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:1rem;font-weight:600;">Responder propuesta</div>
+      <button onclick="cerrarModalPropuesta()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div id="modalPropuestaInfo" style="background:#f4f3ee;border-radius:8px;padding:14px;margin-bottom:20px;font-size:0.85rem;"></div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Mensaje para el vendedor (opcional)</label>
+        <input id="propRespuesta" type="text" placeholder="Ej: Buen criterio, aprobado." style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div id="propContraofertaWrap" style="display:none;">
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Precio de contraoferta</label>
+        <input id="propPrecioContra" type="number" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;">
+      <button onclick="responderPropuesta('aprobada')" style="flex:1;padding:10px;background:#065f46;color:#fff;border:none;border-radius:8px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">✅ Aprobar</button>
+      <button onclick="toggleContraoferta()" style="flex:1;padding:10px;background:#1e40af;color:#fff;border:none;border-radius:8px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">🔄 Contraoferta</button>
+      <button onclick="responderPropuesta('rechazada')" style="flex:1;padding:10px;background:#991b1b;color:#fff;border:none;border-radius:8px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">❌ Rechazar</button>
+    </div>
+  </div>
+</div>
+
+
 <section id="usuarios" class="section">
   <div class="page-head">
     <h2>Gestión de usuarios</h2>
@@ -861,6 +922,8 @@ const SB_URL = 'https://bjgkmrgkgjpydpanewsa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2ttcmdrZ2pweWRwYW5ld3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODU4NjgsImV4cCI6MjA5MzA2MTg2OH0.DLfBLH9H3UGSh1ISzylt4lLc6pExr6YOyy0sb-cbZec';
 const sbH = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
 async function sbGet(t,q=''){ const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:sbH}); if(!r.ok)return[]; return r.json(); }
+async function sbInsert(t,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}`,{method:'POST',headers:{...sbH,'Prefer':'return=representation'},body:JSON.stringify(data)}); if(!r.ok)return null; const res=await r.json(); return Array.isArray(res)?res[0]:res; }
+async function enviarNotificacion(para,tipo,titulo,mensaje,opId){ try{ await sbInsert('notificaciones',{para,tipo,titulo,mensaje,operacion_id:opId||null,leida:false}); }catch(e){console.error(e);} }
 function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML=`<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">${msg}</div>`;document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
 function ocultarCargando(){ const el=document.getElementById('_ld');if(el)el.remove(); }
 const LS = (k, def) => def; // ya no usamos localStorage
@@ -1934,14 +1997,148 @@ async function toggleUsuario(id, activo) {
   renderUsuarios();
 }
 
-// Cargar usuarios cuando se abre esa sección
-const _showOrig = show;
+
+// ═══ PROPUESTAS DE PRECIO ══════════════════════════════════
+let _propuestas = [];
+let _propuestaActivaId = null;
+
+async function cargarPropuestas() {
+  const raw = await sbGet('propuestas_precio','select=*&order=created_at.desc');
+  _propuestas = raw || [];
+  renderPropuestasAdmin();
+  actualizarBadgePropuestas();
+}
+
+function actualizarBadgePropuestas() {
+  const pendientes = _propuestas.filter(p=>p.estado==='pendiente').length;
+  const btn = document.getElementById('btnNavPropuestas');
+  if(btn) btn.textContent = 'Propuestas de precio' + (pendientes > 0 ? ' ('+pendientes+')' : '');
+}
+
+function renderPropuestasAdmin() {
+  const filtro = document.getElementById('filtroPropuestas')?.value || 'pendiente';
+  const lista = filtro === 'todas' ? _propuestas : _propuestas.filter(p=>p.estado===filtro);
+  const mesActual = new Date().toISOString().substring(0,7);
+
+  setText('pr-pendientes',    _propuestas.filter(p=>p.estado==='pendiente').length);
+  setText('pr-aprobadas',     _propuestas.filter(p=>p.estado==='aprobada'&&p.created_at?.startsWith(mesActual)).length);
+  setText('pr-rechazadas',    _propuestas.filter(p=>p.estado==='rechazada'&&p.created_at?.startsWith(mesActual)).length);
+  setText('pr-contraofertas', _propuestas.filter(p=>p.estado==='contraoferta'&&p.created_at?.startsWith(mesActual)).length);
+
+  const tbody = document.getElementById('tablaPropuestas');
+  if(!tbody) return;
+  if(!lista.length){tbody.innerHTML='<tr class="empty-row"><td colspan="7">No hay propuestas en esta categoría</td></tr>';return;}
+
+  const ESTADO_COLOR = {pendiente:'#b45309',aprobada:'#065f46',rechazada:'#991b1b',contraoferta:'#1e40af'};
+  const ESTADO_LABEL = {pendiente:'Pendiente',aprobada:'Aprobada',rechazada:'Rechazada',contraoferta:'Contraoferta'};
+
+  tbody.innerHTML = lista.map(p => {
+    const col = ESTADO_COLOR[p.estado]||'#555';
+    const accion = p.estado === 'pendiente'
+      ? '<button onclick="abrirModalPropuesta('+p.id+')" class="btn btn-sm" style="background:#2558a3;color:#fff;">Responder</button>'
+      : '<span style="font-size:0.75rem;color:#9b9890;">—</span>';
+    return '<tr>'+
+      '<td><div style="font-weight:500;">'+p.vehiculo_texto+'</div></td>'+
+      '<td>'+p.vendedor_nombre+'</td>'+
+      '<td>$ '+Number(p.precio_actual).toLocaleString('es-AR')+'</td>'+
+      '<td style="font-weight:600;color:#2558a3;">$ '+Number(p.precio_propuesto).toLocaleString('es-AR')+'</td>'+
+      '<td style="max-width:200px;font-size:0.82rem;color:#6b6960;">'+p.justificacion+'</td>'+
+      '<td><span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600;">'+ESTADO_LABEL[p.estado]+'</span></td>'+
+      '<td>'+accion+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function abrirModalPropuesta(id) {
+  _propuestaActivaId = id;
+  const p = _propuestas.find(x=>x.id===id);
+  document.getElementById('modalPropuesta').style.display='flex';
+  document.getElementById('propRespuesta').value='';
+  document.getElementById('propPrecioContra').value='';
+  document.getElementById('propContraofertaWrap').style.display='none';
+  document.getElementById('modalPropuestaInfo').innerHTML =
+    '<div style="font-weight:600;margin-bottom:8px;">'+p.vehiculo_texto+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+    '<div><div style="font-size:0.7rem;color:#9b9890;text-transform:uppercase;">Precio actual</div><div style="font-weight:600;">$ '+Number(p.precio_actual).toLocaleString('es-AR')+'</div></div>'+
+    '<div><div style="font-size:0.7rem;color:#9b9890;text-transform:uppercase;">Precio propuesto</div><div style="font-weight:600;color:#2558a3;">$ '+Number(p.precio_propuesto).toLocaleString('es-AR')+'</div></div>'+
+    '</div>'+
+    '<div style="font-size:0.82rem;color:#6b6960;"><b>Vendedor:</b> '+p.vendedor_nombre+'<br><b>Justificacion:</b> '+p.justificacion+'</div>';
+}
+
+function cerrarModalPropuesta() {
+  document.getElementById('modalPropuesta').style.display='none';
+  _propuestaActivaId = null;
+}
+
+function toggleContraoferta() {
+  const wrap = document.getElementById('propContraofertaWrap');
+  wrap.style.display = wrap.style.display==='none' ? 'block' : 'none';
+  if(wrap.style.display==='block') responderPropuesta('contraoferta');
+}
+
+async function responderPropuesta(decision) {
+  if(decision==='contraoferta' && document.getElementById('propContraofertaWrap').style.display==='none') return;
+  const p = _propuestas.find(x=>x.id===_propuestaActivaId);
+  const respuesta = document.getElementById('propRespuesta').value.trim();
+  const precioContra = parseFloat(document.getElementById('propPrecioContra').value)||null;
+
+  if(decision==='contraoferta'&&!precioContra){alert('Ingresa el precio de contraoferta');return;}
+
+  const precioFinal = decision==='aprobada' ? p.precio_propuesto : decision==='contraoferta' ? precioContra : p.precio_actual;
+
+  mostrarCargando('Procesando respuesta...');
+
+  // Actualizar propuesta
+  await fetch(SB_URL+'/rest/v1/propuestas_precio?id=eq.'+p.id,{
+    method:'PATCH', headers:sbH,
+    body:JSON.stringify({estado:decision, precio_final:precioFinal, respuesta_admin:respuesta||null})
+  });
+
+  // Si aprobada o contraoferta, actualizar precio del vehículo
+  if(decision==='aprobada'||decision==='contraoferta'){
+    await fetch(SB_URL+'/rest/v1/vehiculos?id=eq.'+p.vehiculo_id,{
+      method:'PATCH', headers:sbH, body:JSON.stringify({precio:precioFinal})
+    });
+    await sbInsert('vehiculo_precios',{vehiculo_id:p.vehiculo_id,precio:precioFinal,nota:'Propuesta '+decision+' por administrador'+(respuesta?' — '+respuesta:'')});
+  }
+
+  // Notificar al vendedor que hizo la propuesta
+  const DECISION_LABEL = {aprobada:'aprobada ✅',rechazada:'rechazada ❌',contraoferta:'con contraoferta 🔄'};
+  const fmt2 = n => '$ '+Number(n).toLocaleString('es-AR');
+  let msgVend = 'Tu propuesta de precio para '+p.vehiculo_texto+' fue '+DECISION_LABEL[decision]+'.';
+  if(decision==='aprobada') msgVend += ' Nuevo precio: '+fmt2(precioFinal)+'.';
+  if(decision==='contraoferta') msgVend += ' Precio acordado: '+fmt2(precioFinal)+'.';
+  if(respuesta) msgVend += ' Mensaje del admin: '+respuesta;
+  await enviarNotificacion('vendedor','respuesta_propuesta','💰 Respuesta a tu propuesta de precio',msgVend,null);
+
+  // Notificar a todos los vendedores si el precio cambió
+  if(decision==='aprobada'||decision==='contraoferta'){
+    const msgTodos = 'El precio de '+p.vehiculo_texto+' fue actualizado a '+fmt2(precioFinal)+'.';
+    await enviarNotificacion('vendedor','precio_actualizado','📋 Precio actualizado en stock',msgTodos,null);
+  }
+
+  // Notificar al admin también
+  const msgAdmin = 'Propuesta de '+p.vendedor_nombre+' para '+p.vehiculo_texto+' — Decision: '+decision+'. Precio final: '+fmt2(precioFinal)+'.';
+  await enviarNotificacion('admin','propuesta_resuelta','💰 Propuesta resuelta',msgAdmin,null);
+
+  // Actualizar local
+  p.estado = decision; p.precio_final = precioFinal; p.respuesta_admin = respuesta;
+  ocultarCargando();
+  cerrarModalPropuesta();
+  renderPropuestasAdmin();
+  actualizarBadgePropuestas();
+  alert('Respuesta enviada correctamente.');
+}
+
+const _showOrigAdmin = show;
 show = function(sec, btn) {
-  _showOrig(sec, btn);
+  _showOrigAdmin(sec, btn);
+  if(sec === 'propuestas') cargarPropuestas();
   if(sec === 'usuarios') cargarUsuarios();
 };
 
 cargarDatos();
+cargarPropuestas();
 </script>
 </body>
 </html>
