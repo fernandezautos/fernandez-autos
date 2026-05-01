@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Central de Vendedores — Fernández Autos</title>
+<title>Central de Vendedores — Fernandez Autos</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -212,14 +212,13 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
   nav button{font-size:0.75rem;padding:6px 10px;}
 }
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-icon">CV</div>
-    Central de Vendedores
-    <span>Fernández Autos</span>
+    <span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.15rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span>
   </div>
   <nav id="mainNav">
     <button class="active" onclick="show('dashboard')">Dashboard</button>
@@ -855,21 +854,24 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:var(--mono);font-weight:600;">Historial de precios</div>
 
-        <!-- Cambiar precio -->
+        <!-- Proponer cambio de precio -->
         <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;">
-          <div style="font-size:0.76rem;font-weight:600;color:var(--text);margin-bottom:10px;">Actualizar precio</div>
+          <div style="font-size:0.76rem;font-weight:600;color:var(--text);margin-bottom:6px;">Proponer cambio de precio</div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px;">Tu propuesta sera enviada al administrador para su aprobacion.</div>
           <div class="fg" style="gap:8px;">
             <div class="fgi">
-              <label>Nuevo precio</label>
+              <label>Precio propuesto</label>
               <input type="number" id="mvNuevoPrecio" placeholder="0" min="0">
             </div>
             <div class="fgi">
-              <label>Motivo</label>
-              <input type="text" id="mvMotivoPrecio" placeholder="Ajuste de mercado, oferta...">
+              <label>Justificacion</label>
+              <input type="text" id="mvMotivoPrecio" placeholder="Ej: lleva 30 dias en stock...">
             </div>
           </div>
-          <button class="btn btn-sm btn-a" style="margin-top:10px;" onclick="actualizarPrecioVehiculo()">Actualizar precio</button>
+          <button class="btn btn-sm btn-a" style="margin-top:10px;" onclick="enviarPropuestaPrecio()">Enviar propuesta</button>
+          <div id="mvPropuestaMsg" style="display:none;margin-top:8px;font-size:0.8rem;color:var(--green);font-weight:600;">Propuesta enviada al administrador</div>
         </div>
+        <div id="mvPropuestasPendientes"></div>
 
         <!-- Timeline de precios -->
         <div id="mvHistorialPrecios" style="overflow-y:auto;max-height:280px;"></div>
@@ -1604,6 +1606,7 @@ function abrirModalVehiculo(id){
   renderHistorialPrecios(v);
   document.getElementById('btnVenderModal').style.display=v.estado==='Disponible'?'inline-flex':'none';
   document.getElementById('modalVehiculo').classList.add('open');
+  renderPropuestasPendientes(id);
 }
 
 function renderHistorialPrecios(v){
@@ -1634,23 +1637,56 @@ function renderHistorialPrecios(v){
   }).join('');
 }
 
-async function actualizarPrecioVehiculo(){
+async function enviarPropuestaPrecio(){
   const v=stock.find(x=>x.id===vehiculoModalId);
   const nuevoPrecio=parseFloat(document.getElementById('mvNuevoPrecio').value);
   const motivo=document.getElementById('mvMotivoPrecio').value.trim();
-  if(!nuevoPrecio||nuevoPrecio<=0){alert('Ingresá un precio válido');return;}
-  if(!motivo){alert('Ingresá el motivo del cambio');return;}
-  mostrarCargando('Actualizando precio...');
-  await sbUpdate('vehiculos',v.id,{precio:nuevoPrecio});
-  await sbInsert('vehiculo_precios',{vehiculo_id:v.id,precio:nuevoPrecio,nota:motivo});
-  if(!v.historialPrecios) v.historialPrecios=[];
-  v.historialPrecios.push({precio:nuevoPrecio,fecha:new Date().toISOString(),nota:motivo});
-  v.precio=nuevoPrecio;
+  if(!nuevoPrecio||nuevoPrecio<=0){alert('Ingresa un precio valido');return;}
+  if(nuevoPrecio>=v.precio){alert('El precio propuesto debe ser menor al precio actual');return;}
+  if(!motivo){alert('Ingresa una justificacion');return;}
+  mostrarCargando('Enviando propuesta...');
+  const vendedorNombre = (window._session&&window._session.nombre)||'Vendedor';
+  const vTexto = v.marca+' '+v.modelo+' '+v.anio+(v.dominio?' · '+v.dominio:'');
+  const propuesta = await sbInsert('propuestas_precio',{
+    vehiculo_id:v.id, vehiculo_texto:vTexto,
+    precio_actual:v.precio, precio_propuesto:nuevoPrecio,
+    moneda:v.moneda||'ARS', justificacion:motivo,
+    vendedor_nombre:vendedorNombre, estado:'pendiente'
+  });
+  if(propuesta){
+    const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
+    const msg = vTexto+' — Propuesta: '+fmt2(v.precio,v.moneda||'ARS')+' → '+fmt2(nuevoPrecio,v.moneda||'ARS')+'. Motivo: '+motivo;
+    await enviarNotificacion('admin','propuesta_precio','💰 Propuesta de cambio de precio',msg,null);
+    document.getElementById('mvNuevoPrecio').value='';
+    document.getElementById('mvMotivoPrecio').value='';
+    const msgEl=document.getElementById('mvPropuestaMsg');
+    msgEl.style.display='block';
+    setTimeout(()=>msgEl.style.display='none',4000);
+    renderPropuestasPendientes(v.id);
+  }
   ocultarCargando();
-  document.getElementById('mvNuevoPrecio').value='';
-  document.getElementById('mvMotivoPrecio').value='';
-  abrirModalVehiculo(vehiculoModalId);
-  renderStock();
+}
+
+async function renderPropuestasPendientes(vehiculoId){
+  const raw = await sbGet('propuestas_precio','select=*&vehiculo_id=eq.'+vehiculoId+'&order=created_at.desc&limit=5');
+  const cont = document.getElementById('mvPropuestasPendientes');
+  if(!cont) return;
+  if(!raw||!raw.length){cont.innerHTML='';return;}
+  const ESTADO_LABEL = {pendiente:'⏳ Pendiente',aprobada:'✅ Aprobada',rechazada:'❌ Rechazada',contraoferta:'🔄 Contraoferta'};
+  const ESTADO_COLOR = {pendiente:'#b45309',aprobada:'#065f46',rechazada:'#991b1b',contraoferta:'#1e40af'};
+  let html='<div style="margin-top:12px;"><div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);font-weight:600;margin-bottom:8px;">Propuestas recientes</div>';
+  raw.forEach(p=>{
+    const col=ESTADO_COLOR[p.estado]||'#555';
+    html+='<div style="background:#fff;border:1px solid #e8e5dc;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:0.8rem;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+    html+='<span style="font-weight:600;">'+Number(p.precio_propuesto).toLocaleString('es-AR')+'</span>';
+    html+='<span style="color:'+col+';font-weight:600;font-size:0.75rem;">'+ESTADO_LABEL[p.estado]+'</span></div>';
+    if(p.justificacion) html+='<div style="color:var(--text2);">'+p.justificacion+'</div>';
+    if(p.respuesta_admin) html+='<div style="color:'+col+';margin-top:4px;font-style:italic;">Admin: '+p.respuesta_admin+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  cont.innerHTML=html;
 }
 
 function generarFichaPublica(id){
@@ -1660,7 +1696,7 @@ function generarFichaPublica(id){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${v.marca} ${v.modelo} ${v.anio} — Fernández Autos</title>
+<title>${v.marca} ${v.modelo} ${v.anio} — Fernandez Autos</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -1691,7 +1727,7 @@ body{font-family:Arial,sans-serif;background:#f2f1ed;color:#1a1917;min-height:10
 <body>
 <div class="card">
   <div class="header">
-    <div class="agencia">Fernández Autos</div>
+    <div class="agencia">Fernandez Autos</div>
     <div class="titulo">${v.marca} ${v.modelo}</div>
     <div class="subtitulo">${v.anio} · ${v.carroceria||v.tipo} · <span class="badge b-${v.tipo.toLowerCase()}">${v.tipo==='Nuevo'?'0 km':'Usado'}</span></div>
     <div class="precio-box">
@@ -1712,7 +1748,7 @@ body{font-family:Arial,sans-serif;background:#f2f1ed;color:#1a1917;min-height:10
     ${v.obs?`<div class="divider"></div><div class="obs">${v.obs}</div>`:''}
   </div>
   <div class="footer">
-    <div class="footer-text">Ficha generada por Fernández Autos</div>
+    <div class="footer-text">Ficha generada por Fernandez Autos</div>
     <div class="footer-contacto">Consultanos por este vehículo</div>
   </div>
 </div>
