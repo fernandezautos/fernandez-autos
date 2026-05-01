@@ -1131,6 +1131,7 @@ async function confirmarDocOk(trfId) {
 }
 
 
+async function avanzarTrf(id) {
   const t=trfs.find(x=>x.id===id);
   const idx=ESTADOS.indexOf(t.estado);
   if(idx>=ESTADOS.length-1){alert('Este trámite ya está finalizado.');return;}
@@ -1279,6 +1280,10 @@ g('filtroTrf').addEventListener('change',render);
 
 function render(){if(pagActiva==='legajos') renderLegs(); else renderTrfs();}
 cargarDatos();
+
+cargarDatos().then(function(){
+  setTimeout(function(){ cargarNotifs(); }, 500);
+});
 </script>
 <!-- NOTIFICACIONES -->
 <div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
@@ -1310,10 +1315,7 @@ function abrirNotifs(){document.getElementById("modalNotifs").style.display="fle
 function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
 document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
 setInterval(cargarNotifs,10000);
-cargarDatos().then(function(){
-  // Pequeño delay para asegurar que la sesión esté cargada
-  setTimeout(function(){ cargarNotifs(); }, 500);
-});
+
 </script>
 
 </body>
