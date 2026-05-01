@@ -225,6 +225,8 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     <button onclick="show('stock')">Stock</button>
     <button onclick="show('clientes')">Clientes</button>
     <button onclick="show('operacion')">Nueva Operación</button>
+    <button onclick="show('compra')">Orden de Compra</button>
+    <button onclick="show('consignacion')">Consignación</button>
     <button onclick="show('misventas')">Mis Ventas</button>
   </nav>
   <div class="header-right">
@@ -648,6 +650,144 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
       <tbody id="tbMisVentas"></tbody>
     </table></div>
     <div id="tbMisVentasEmpty" class="empty">Aún no tenés operaciones registradas este mes</div>
+  </div>
+</section>
+
+<!-- ═══ ORDEN DE COMPRA ══════════════════════════════════ -->
+<section id="compra" class="section">
+  <div class="fc">
+    <div class="fc-title">Nueva orden de compra</div>
+    <div style="font-size:0.82rem;color:var(--text2);margin-bottom:18px;">Registrá la compra de un auto. Se creará en el stock como "A ingresar" y se notificará a caja y gestoría.</div>
+
+    <div class="fg t3" style="margin-bottom:14px;">
+      <!-- Cliente vendedor -->
+      <div class="fgi" style="grid-column:1/-1;">
+        <label>Cliente que nos vende el auto</label>
+        <div style="position:relative;">
+          <input type="text" id="ocCliente" placeholder="Escribí para buscar o agregar..." autocomplete="off"
+            oninput="filtrarClientesOC(this.value)" onfocus="filtrarClientesOC(this.value)"
+            onblur="setTimeout(()=>document.getElementById('ocClienteDrop').style.display='none',200)">
+          <div id="ocClienteDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:200px;overflow-y:auto;margin-top:2px;"></div>
+        </div>
+        <input type="hidden" id="ocClienteId">
+      </div>
+      <!-- Datos del auto -->
+      <div class="fgi"><label>Marca</label><input type="text" id="ocMarca" placeholder="Toyota"></div>
+      <div class="fgi"><label>Modelo</label><input type="text" id="ocModelo" placeholder="Hilux"></div>
+      <div class="fgi"><label>Año</label><input type="number" id="ocAnio" placeholder="2022" min="1990" max="2030"></div>
+      <div class="fgi"><label>Dominio</label><input type="text" id="ocDominio" placeholder="AB123CD" style="text-transform:uppercase;"></div>
+      <div class="fgi"><label>Color</label><input type="text" id="ocColor" placeholder="Blanco"></div>
+      <!-- Precio -->
+      <div class="fgi">
+        <label>Precio de compra</label>
+        <input type="number" id="ocPrecio" placeholder="0" min="0">
+      </div>
+      <div class="fgi">
+        <label>Moneda</label>
+        <select id="ocMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+      </div>
+      <div class="fgi">
+        <label>Forma de pago</label>
+        <select id="ocFormaPago" onchange="toggleOCSenia()">
+          <option value="Total">Pago total</option>
+          <option value="Seña + Saldo">Seña + Saldo</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Seña (condicional) -->
+    <div id="ocSeniaWrap" style="display:none;" class="fg t3" style="margin-bottom:14px;">
+      <div class="fgi">
+        <label>Monto de seña</label>
+        <input type="number" id="ocSenia" placeholder="0" min="0">
+      </div>
+      <div class="fgi">
+        <label>Moneda seña</label>
+        <select id="ocMonedaSenia"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+      </div>
+    </div>
+
+    <div class="fgi" style="margin-bottom:18px;">
+      <label>Observaciones</label>
+      <textarea id="ocObs" placeholder="Condición del auto, acuerdos, etc." style="min-height:70px;"></textarea>
+    </div>
+
+    <button class="btn btn-a" onclick="guardarOrdenCompra()">Registrar orden de compra</button>
+    <span id="ocMsg" style="display:none;margin-left:12px;font-size:0.82rem;color:var(--green);font-weight:600;">✓ Orden registrada correctamente</span>
+  </div>
+
+  <!-- Lista de órdenes -->
+  <div class="fc" style="margin-top:20px;padding:0;overflow:hidden;">
+    <div style="padding:16px 22px 12px;border-bottom:1px solid var(--border);"><div class="fc-title" style="margin:0;">Órdenes de compra</div></div>
+    <div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Auto</th><th>Vendedor</th><th>Precio</th><th>Forma pago</th><th>Estado</th></tr></thead>
+      <tbody id="tbOrdenesCompra"><tr class="empty-row"><td colspan="6">Sin órdenes registradas</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ═══ CONSIGNACIÓN ══════════════════════════════════════ -->
+<section id="consignacion" class="section">
+  <div class="fc">
+    <div class="fc-title">Nueva consignación</div>
+    <div style="font-size:0.82rem;color:var(--text2);margin-bottom:18px;">Registrá un auto que el dueño nos deja para vender en su nombre.</div>
+
+    <div class="fg t3" style="margin-bottom:14px;">
+      <!-- Dueño -->
+      <div class="fgi" style="grid-column:1/-1;">
+        <label>Dueño del auto</label>
+        <div style="position:relative;">
+          <input type="text" id="csCliente" placeholder="Escribí para buscar o agregar..." autocomplete="off"
+            oninput="filtrarClientesCS(this.value)" onfocus="filtrarClientesCS(this.value)"
+            onblur="setTimeout(()=>document.getElementById('csClienteDrop').style.display='none',200)">
+          <div id="csClienteDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:200px;overflow-y:auto;margin-top:2px;"></div>
+        </div>
+        <input type="hidden" id="csClienteId">
+      </div>
+      <!-- Datos del auto -->
+      <div class="fgi"><label>Marca</label><input type="text" id="csMarca" placeholder="Toyota"></div>
+      <div class="fgi"><label>Modelo</label><input type="text" id="csModelo" placeholder="Corolla"></div>
+      <div class="fgi"><label>Año</label><input type="number" id="csAnio" placeholder="2021" min="1990" max="2030"></div>
+      <div class="fgi"><label>Dominio</label><input type="text" id="csDominio" placeholder="AB123CD" style="text-transform:uppercase;"></div>
+      <div class="fgi"><label>Color</label><input type="text" id="csColor" placeholder="Gris"></div>
+      <div class="fgi"><label>Km</label><input type="number" id="csKm" placeholder="0" min="0"></div>
+      <!-- Precio de publicación -->
+      <div class="fgi"><label>Precio de publicación</label><input type="number" id="csPrecio" placeholder="0" min="0"></div>
+      <div class="fgi"><label>Moneda</label><select id="csMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
+      <!-- Acuerdo -->
+      <div class="fgi">
+        <label>Tipo de acuerdo</label>
+        <select id="csTipoAcuerdo" onchange="toggleCSAcuerdo()">
+          <option value="precio_minimo">Precio mínimo</option>
+          <option value="porcentaje">Porcentaje para el dueño</option>
+        </select>
+      </div>
+      <div class="fgi" id="csPrecioMinWrap">
+        <label>Precio mínimo acordado</label>
+        <input type="number" id="csPrecioMin" placeholder="0" min="0">
+      </div>
+      <div class="fgi" id="csPorcentajeWrap" style="display:none;">
+        <label>% para el dueño</label>
+        <input type="number" id="csPorcentaje" placeholder="70" min="0" max="100">
+      </div>
+    </div>
+
+    <div class="fgi" style="margin-bottom:18px;">
+      <label>Observaciones</label>
+      <textarea id="csObs" placeholder="Condición del auto, acuerdos adicionales, etc." style="min-height:70px;"></textarea>
+    </div>
+
+    <button class="btn btn-a" onclick="guardarConsignacion()">Registrar consignación</button>
+    <span id="csMsg" style="display:none;margin-left:12px;font-size:0.82rem;color:var(--green);font-weight:600;">✓ Consignación registrada</span>
+  </div>
+
+  <!-- Lista de consignaciones -->
+  <div class="fc" style="margin-top:20px;padding:0;overflow:hidden;">
+    <div style="padding:16px 22px 12px;border-bottom:1px solid var(--border);"><div class="fc-title" style="margin:0;">Consignaciones activas</div></div>
+    <div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Auto</th><th>Dueño</th><th>Precio pub.</th><th>Acuerdo</th><th>Estado</th></tr></thead>
+      <tbody id="tbConsignaciones"><tr class="empty-row"><td colspan="6">Sin consignaciones activas</td></tr></tbody>
+    </table></div>
   </div>
 </section>
 
@@ -2239,10 +2379,222 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('headerAvatar').textContent=VENDEDOR.iniciales;
   document.getElementById('headerNombre').textContent=VENDEDOR.nombre;
   renderDashboard();
+
+  // Cargar listas al abrir secciones
+  const _showOrig = show;
+  show = function(sec, btn) {
+    _showOrig(sec, btn);
+    if(sec==='compra') cargarOrdenesCompra();
+    if(sec==='consignacion') cargarConsignaciones();
+  };
 });
 document.querySelectorAll('.moverlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
-// ═══ NOTIFICACIONES (envío) ═══════════════════════════════
+
+// ═══ ORDEN DE COMPRA ══════════════════════════════════════
+function toggleOCSenia() {
+  const wrap = document.getElementById('ocSeniaWrap');
+  wrap.style.display = document.getElementById('ocFormaPago').value === 'Seña + Saldo' ? 'grid' : 'none';
+}
+
+function filtrarClientesOC(q) {
+  const drop = document.getElementById('ocClienteDrop');
+  const lista = clientes.filter(c => !q || c.nombre.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  if(!lista.length){drop.style.display='none';return;}
+  drop.style.display='block';
+  drop.innerHTML = lista.map(c =>
+    '<div onclick="selOCCliente(\''+c.id+'\',\''+c.nombre.replace(/'/g,"\\'")+'\')" style="padding:9px 14px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid #f0ede4;" onmouseover="this.style.background=\'#f4f3ee\'" onmouseout="this.style.background=\'#fff\'">'
+    +'<span style="font-weight:500;">'+c.nombre+'</span>'+(c.dni?'<span style="font-size:0.75rem;color:#9b9890;margin-left:8px;">'+c.dni+'</span>':'')+'</div>'
+  ).join('');
+}
+function selOCCliente(id, nombre) {
+  document.getElementById('ocCliente').value = nombre;
+  document.getElementById('ocClienteId').value = id;
+  document.getElementById('ocClienteDrop').style.display = 'none';
+}
+
+async function guardarOrdenCompra() {
+  const marca = document.getElementById('ocMarca').value.trim();
+  const modelo = document.getElementById('ocModelo').value.trim();
+  const cliente = document.getElementById('ocCliente').value.trim();
+  const precio = parseFloat(document.getElementById('ocPrecio').value)||0;
+  if(!marca||!modelo||!cliente||!precio){alert('Completá marca, modelo, cliente y precio.');return;}
+
+  mostrarCargando('Registrando orden de compra...');
+  const dominio = document.getElementById('ocDominio').value.trim().toUpperCase();
+  const anio = parseInt(document.getElementById('ocAnio').value)||new Date().getFullYear();
+  const moneda = document.getElementById('ocMoneda').value;
+  const formaPago = document.getElementById('ocFormaPago').value;
+  const senia = parseFloat(document.getElementById('ocSenia').value)||0;
+  const obs = document.getElementById('ocObs').value.trim();
+  const clienteId = document.getElementById('ocClienteId').value||null;
+  const vTexto = marca+' '+modelo+' '+anio+(dominio?' · '+dominio:'');
+  const vendedorNombre = (window._session&&window._session.nombre)||'Vendedor';
+
+  // Crear vehículo en stock como "A ingresar"
+  const nuevoAuto = await sbInsert('vehiculos',{
+    marca, modelo, anio, dominio, color:document.getElementById('ocColor').value.trim(),
+    precio, moneda_precio:moneda, estado:'A ingresar', tipo:'Usado',
+    procedencia:'Propio', cliente_entrega_id:clienteId||null, obs
+  });
+
+  if(nuevoAuto){
+    // Crear orden de compra
+    await sbInsert('ordenes_compra',{
+      vehiculo_id:nuevoAuto.id, vehiculo_texto:vTexto,
+      cliente_id:clienteId||null, cliente_nombre:cliente,
+      precio, moneda, forma_pago:formaPago,
+      senia:senia||0, moneda_senia:document.getElementById('ocMonedaSenia').value,
+      estado:'pendiente', cargado_por:vendedorNombre, obs
+    });
+
+    // Notificaciones
+    const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
+    const msgCaja = vTexto+' — Compra a '+cliente+'. '+fmt2(precio,moneda)+(formaPago==='Seña + Saldo'?' (Seña: '+fmt2(senia,moneda)+')':'')+'. Preparar pago.';
+    const msgGest = vTexto+' — Auto ingresando por compra. Asignar legajo y comenzar documentación.';
+    await enviarNotificacion('caja','orden_compra','🛒 Nueva orden de compra',msgCaja,null);
+    await enviarNotificacion('gestoria','orden_compra','🛒 Auto a ingresar — asignar legajo',msgGest,null);
+    await enviarNotificacion('admin','orden_compra','🛒 Nueva orden de compra registrada',msgCaja,null);
+
+    // Agregar al stock local
+    stock.push({id:nuevoAuto.id,marca,modelo,anio,dominio,color:nuevoAuto.color||'',
+      precio,moneda:moneda,estado:'A ingresar',procedencia:'Propio',obs,historialPrecios:[]});
+
+    ['ocMarca','ocModelo','ocAnio','ocDominio','ocColor','ocPrecio','ocSenia','ocObs','ocCliente'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.value='';
+    });
+    document.getElementById('ocClienteId').value='';
+    const msg=document.getElementById('ocMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',3000);
+    cargarOrdenesCompra();
+  }
+  ocultarCargando();
+}
+
+async function cargarOrdenesCompra() {
+  const raw = await sbGet('ordenes_compra','select=*&order=created_at.desc&limit=20');
+  const tbody = document.getElementById('tbOrdenesCompra');
+  if(!tbody) return;
+  if(!raw||!raw.length){tbody.innerHTML='<tr class="empty-row"><td colspan="6">Sin órdenes registradas</td></tr>';return;}
+  const COL={pendiente:'#b45309',señado:'#1e40af',pagado:'#065f46',cancelado:'#991b1b'};
+  tbody.innerHTML = raw.map(o=>{
+    const col=COL[o.estado]||'#555';
+    const fmt2=(n,m)=>(m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
+    return '<tr>'+
+      '<td>'+o.created_at?.split('T')[0].split('-').reverse().join('/')+'</td>'+
+      '<td style="font-weight:500;">'+o.vehiculo_texto+'</td>'+
+      '<td>'+o.cliente_nombre+'</td>'+
+      '<td>'+fmt2(o.precio,o.moneda)+'</td>'+
+      '<td>'+o.forma_pago+(o.senia>0?' (Seña: '+fmt2(o.senia,o.moneda_senia)+')':'')+'</td>'+
+      '<td><span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:2px 10px;font-size:0.75rem;font-weight:600;">'+o.estado+'</span></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ═══ CONSIGNACIÓN ══════════════════════════════════════════
+function toggleCSAcuerdo() {
+  const tipo = document.getElementById('csTipoAcuerdo').value;
+  document.getElementById('csPrecioMinWrap').style.display = tipo==='precio_minimo' ? 'block' : 'none';
+  document.getElementById('csPorcentajeWrap').style.display = tipo==='porcentaje' ? 'block' : 'none';
+}
+
+function filtrarClientesCS(q) {
+  const drop = document.getElementById('csClienteDrop');
+  const lista = clientes.filter(c => !q || c.nombre.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  if(!lista.length){drop.style.display='none';return;}
+  drop.style.display='block';
+  drop.innerHTML = lista.map(c =>
+    '<div onclick="selCSCliente(\''+c.id+'\',\''+c.nombre.replace(/'/g,"\\'")+'\')" style="padding:9px 14px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid #f0ede4;" onmouseover="this.style.background=\'#f4f3ee\'" onmouseout="this.style.background=\'#fff\'">'
+    +'<span style="font-weight:500;">'+c.nombre+'</span>'+(c.dni?'<span style="font-size:0.75rem;color:#9b9890;margin-left:8px;">'+c.dni+'</span>':'')+'</div>'
+  ).join('');
+}
+function selCSCliente(id, nombre) {
+  document.getElementById('csCliente').value = nombre;
+  document.getElementById('csClienteId').value = id;
+  document.getElementById('csClienteDrop').style.display = 'none';
+}
+
+async function guardarConsignacion() {
+  const marca = document.getElementById('csMarca').value.trim();
+  const modelo = document.getElementById('csModelo').value.trim();
+  const cliente = document.getElementById('csCliente').value.trim();
+  const precio = parseFloat(document.getElementById('csPrecio').value)||0;
+  if(!marca||!modelo||!cliente||!precio){alert('Completá marca, modelo, dueño y precio.');return;}
+
+  mostrarCargando('Registrando consignación...');
+  const dominio = document.getElementById('csDominio').value.trim().toUpperCase();
+  const anio = parseInt(document.getElementById('csAnio').value)||new Date().getFullYear();
+  const moneda = document.getElementById('csMoneda').value;
+  const tipoAcuerdo = document.getElementById('csTipoAcuerdo').value;
+  const precioMin = parseFloat(document.getElementById('csPrecioMin').value)||null;
+  const porcentaje = parseFloat(document.getElementById('csPorcentaje').value)||null;
+  const obs = document.getElementById('csObs').value.trim();
+  const clienteId = document.getElementById('csClienteId').value||null;
+  const km = parseInt(document.getElementById('csKm').value)||0;
+  const vTexto = marca+' '+modelo+' '+anio+(dominio?' · '+dominio:'');
+  const vendedorNombre = (window._session&&window._session.nombre)||'Vendedor';
+
+  // Crear vehículo en stock como Consignación
+  const nuevoAuto = await sbInsert('vehiculos',{
+    marca, modelo, anio, dominio, color:document.getElementById('csColor').value.trim(),
+    precio, moneda_precio:moneda, km, estado:'Disponible',
+    tipo:'Usado', procedencia:'Consignación',
+    cliente_entrega_id:clienteId||null, obs
+  });
+
+  if(nuevoAuto){
+    // Crear consignación
+    await sbInsert('consignaciones',{
+      vehiculo_id:nuevoAuto.id, vehiculo_texto:vTexto,
+      cliente_id:clienteId||null, cliente_nombre:cliente,
+      tipo_acuerdo:tipoAcuerdo, precio_minimo:precioMin,
+      porcentaje, estado:'activa',
+      fecha_ingreso:new Date().toISOString().split('T')[0],
+      cargado_por:vendedorNombre, obs
+    });
+
+    // Notificaciones
+    const acuerdo = tipoAcuerdo==='precio_minimo'
+      ? 'Precio mínimo: $'+Number(precioMin).toLocaleString('es-AR')
+      : 'Porcentaje dueño: '+porcentaje+'%';
+    const msg = vTexto+' — Dueño: '+cliente+'. '+acuerdo+'. Asignar legajo.';
+    await enviarNotificacion('gestoria','consignacion','🚙 Nueva consignación ingresada',msg,null);
+    await enviarNotificacion('admin','consignacion','🚙 Nueva consignación ingresada',msg,null);
+
+    stock.push({id:nuevoAuto.id,marca,modelo,anio,dominio,color:nuevoAuto.color||'',
+      precio,moneda:moneda,estado:'Disponible',procedencia:'Consignación',km,obs,historialPrecios:[]});
+
+    ['csMarca','csModelo','csAnio','csDominio','csColor','csKm','csPrecio','csPrecioMin','csPorcentaje','csObs','csCliente'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.value='';
+    });
+    document.getElementById('csClienteId').value='';
+    const msg2=document.getElementById('csMsg');msg2.style.display='inline';setTimeout(()=>msg2.style.display='none',3000);
+    cargarConsignaciones();
+  }
+  ocultarCargando();
+}
+
+async function cargarConsignaciones() {
+  const raw = await sbGet('consignaciones','select=*&estado=eq.activa&order=created_at.desc');
+  const tbody = document.getElementById('tbConsignaciones');
+  if(!tbody) return;
+  if(!raw||!raw.length){tbody.innerHTML='<tr class="empty-row"><td colspan="6">Sin consignaciones activas</td></tr>';return;}
+  tbody.innerHTML = raw.map(c=>{
+    const fmt2=(n,m)=>(m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+    const acuerdo = c.tipo_acuerdo==='precio_minimo'
+      ? 'Mín: '+fmt2(c.precio_minimo,'ARS')
+      : c.porcentaje+'% al dueño';
+    return '<tr>'+
+      '<td>'+c.created_at?.split('T')[0].split('-').reverse().join('/')+'</td>'+
+      '<td style="font-weight:500;">'+c.vehiculo_texto+'</td>'+
+      '<td>'+c.cliente_nombre+'</td>'+
+      '<td>'+fmt2(c.precio_minimo||0,'ARS')+'</td>'+
+      '<td>'+acuerdo+'</td>'+
+      '<td><span style="background:#d1fae5;color:#065f46;border-radius:20px;padding:2px 10px;font-size:0.75rem;font-weight:600;">Activa</span></td>'+
+    '</tr>';
+  }).join('');
+}
+
+
 async function enviarNotificacion(para, tipo, titulo, mensaje, operacionId) {
   try {
     await sbInsert('notificaciones', {
