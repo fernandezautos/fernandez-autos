@@ -1988,16 +1988,26 @@ async function cargarMovPendientes() {
 }
 
 function abrirProcesarPendiente(id, conceptoEnc, monto, moneda, esCompra, referenciaId, precioTotal) {
-  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra, referenciaId: referenciaId||0, precioTotal: precioTotal||0};
+  const saldo = (precioTotal > 0 && monto > 0) ? precioTotal - monto : 0;
+  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra, referenciaId: referenciaId||0, precioTotal: precioTotal||0, saldo};
   document.getElementById('mpConcepto').textContent = decodeURIComponent(conceptoEnc);
   document.getElementById('mpMonto').value = monto > 0 ? monto : '';
   document.getElementById('mpMoneda').value = moneda;
   document.getElementById('mpMetodo').value = 'Efectivo';
   document.getElementById('mpFechaAgenda').value = '';
   document.getElementById('mpObs').value = '';
-  // Si es compra, la fecha de agenda es obligatoria
-  const fechaLabel = document.getElementById('mpFechaAgendaLabel');
-  if(fechaLabel) fechaLabel.textContent = esCompra ? 'Fecha estimada pago total *' : 'Fecha agenda (opcional)';
+  // Mostrar saldo calculado si es compra con seña
+  const saldoWrap = document.getElementById('mpSaldoWrap');
+  const saldoValor = document.getElementById('mpSaldoValor');
+  if(saldoWrap) {
+    if(esCompra && saldo > 0) {
+      saldoWrap.style.display = 'block';
+      const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
+      saldoValor.textContent = fmtN(saldo, moneda);
+    } else {
+      saldoWrap.style.display = 'none';
+    }
+  }
   document.getElementById('modalMovPendiente').style.display = 'flex';
 }
 
@@ -2023,27 +2033,14 @@ async function confirmarMovPendiente() {
 
   // Si hay fecha de agenda, crear ítem para el pago total
   if(fechaAgenda) {
-    let montoSaldo = 0;
-    // Buscar la orden de compra para calcular el saldo (precio - seña)
-    // Si tenemos el precio total guardado, calcular el saldo directamente
-    if(p.precioTotal && p.precioTotal > 0) {
-      montoSaldo = p.precioTotal - p.monto; // precio total - seña ya pagada
-    } else if(p.referenciaId) {
-      try {
-        const orden = await sbGet('ordenes_compra','select=precio,senia&id=eq.'+p.referenciaId);
-        if(orden && orden.length) {
-          montoSaldo = parseFloat(orden[0].precio||0) - parseFloat(orden[0].senia||0);
-        }
-      } catch(e) { console.error(e); }
-    }
-
+    const montoAgenda = p.saldo > 0 ? p.saldo : monto;
     await sbInsert('agenda',{
       tipo: 'pago',
       cliente: p.concepto,
       fecha: fechaAgenda,
-      monto: montoSaldo > 0 ? montoSaldo : monto,
+      monto: montoAgenda,
       moneda,
-      obs: 'Pago total coordinado desde movimientos pendientes',
+      obs: 'Pago total coordinado — saldo pendiente',
       estado: 'pendiente'
     });
   }
@@ -2098,14 +2095,19 @@ init();
     </div>
     <div style="background:#f4f3ee;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;font-weight:500;" id="mpConcepto"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Monto</label>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Monto seña a pagar</label>
         <input type="number" id="mpMonto" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
       <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Moneda</label>
         <select id="mpMoneda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
       <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Metodo de pago</label>
         <select id="mpMetodo" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option>Efectivo</option><option>Transferencia</option><option>Cheque</option></select></div>
-      <div><label id="mpFechaAgendaLabel" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Fecha agenda (opcional)</label>
+      <div><label id="mpFechaAgendaLabel" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Fecha estimada pago total *</label>
         <input type="date" id="mpFechaAgenda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+    </div>
+    <!-- Saldo calculado (solo compras) -->
+    <div id="mpSaldoWrap" style="display:none;background:#f0fdf4;border:1.5px solid #d1fae5;border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#065f46;font-weight:600;margin-bottom:4px;">Saldo a agendar (precio total − seña)</div>
+      <div id="mpSaldoValor" style="font-size:1.2rem;font-weight:700;color:#065f46;"></div>
     </div>
     <div style="margin-bottom:16px;"><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Observaciones</label>
       <input type="text" id="mpObs" placeholder="Opcional..." style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
