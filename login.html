@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fernández Autos — Ingresar</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#111009;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial, sans-serif;}
+.card{background:#fff;border-radius:14px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.logo{text-align:center;margin-bottom:32px;}
+.logo-icon{width:52px;height:52px;background:linear-gradient(135deg,#2558a3,#1a4a8a);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:Arial, sans-serif;font-size:14px;font-weight:700;color:#fff;margin:0 auto 14px;}
+.logo-name{font-family:Arial, sans-serif;font-size:1.4rem;color:#16150f;font-weight:400;}
+.logo-sub{font-size:0.78rem;color:#9b9890;margin-top:3px;font-family:Arial, sans-serif;}
+.fgi{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+label{font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:#6b6960;font-weight:600;}
+input{background:#f4f3ee;border:1.5px solid #e0ddd4;color:#16150f;font-family:Arial, sans-serif;font-size:0.95rem;padding:11px 14px;border-radius:8px;outline:none;transition:border-color .2s;width:100%;}
+input:focus{border-color:#1a4a8a;box-shadow:0 0 0 3px rgba(26,74,138,.1);}
+.btn{width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(135deg,#2558a3,#1a4a8a);color:#fff;font-family:Arial, sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;}
+.btn:hover{background:linear-gradient(135deg,#1a4a8a,#0f2d5a);box-shadow:0 4px 14px rgba(26,74,138,.35);}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+.error{background:#fdecea;border:1px solid #f0c8c8;color:#8b1c1c;border-radius:8px;padding:10px 14px;font-size:0.85rem;margin-top:12px;display:none;}
+.loading{display:none;text-align:center;color:#6b6960;font-size:0.85rem;margin-top:12px;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <img src="https://i.imgur.com/6cMQaeJ.png" style="height:70px;object-fit:contain;margin-bottom:8px;" alt="Fernández Autos"><div class="logo-sub" style="font-family:Arial,sans-serif;">Sistema de gestión</div>
+  </div>
+  <div class="fgi">
+    <label>Usuario</label>
+    <input type="text" id="usuario" placeholder="Tu usuario" autocomplete="username">
+  </div>
+  <div class="fgi">
+    <label>Contraseña</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <button class="btn" id="btnLogin" onclick="login()">Ingresar</button>
+  <div class="error" id="error">Usuario o contraseña incorrectos.</div>
+  <div class="loading" id="loading">Verificando...</div>
+</div>
+
+<script>
+const SB_URL = 'https://bjgkmrgkgjpydpanewsa.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2ttcmdrZ2pweWRwYW5ld3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODU4NjgsImV4cCI6MjA5MzA2MTg2OH0.DLfBLH9H3UGSh1ISzylt4lLc6pExr6YOyy0sb-cbZec';
+
+// Si ya está logueado, redirigir
+const session = JSON.parse(localStorage.getItem('fa_session')||'null');
+if(session) redirigir(session.rol);
+
+function redirigir(rol) {
+  const destino = {
+    admin:    'admin.html',
+    vendedor: 'vendedores.html',
+    caja:     'cajapro.html',
+    gestoria: 'gestoria.html'
+  }[rol];
+  if(destino) window.location.href = destino;
+}
+
+async function login() {
+  const usuario = document.getElementById('usuario').value.trim();
+  const password = document.getElementById('password').value;
+  if(!usuario || !password) return;
+
+  const btn = document.getElementById('btnLogin');
+  const err = document.getElementById('error');
+  const load = document.getElementById('loading');
+
+  btn.disabled = true;
+  err.style.display = 'none';
+  load.style.display = 'block';
+
+  try {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/usuarios?usuario=eq.${encodeURIComponent(usuario)}&password=eq.${encodeURIComponent(password)}&activo=eq.true&select=id,usuario,rol,nombre`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+    );
+    const data = await r.json();
+    if(data.length) {
+      const u = data[0];
+      localStorage.setItem('fa_session', JSON.stringify({id:u.id, usuario:u.usuario, rol:u.rol, nombre:u.nombre}));
+      redirigir(u.rol);
+    } else {
+      err.style.display = 'block';
+      btn.disabled = false;
+      load.style.display = 'none';
+    }
+  } catch(e) {
+    err.textContent = 'Error de conexión. Intentá de nuevo.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    load.style.display = 'none';
+  }
+}
+
+// Enter para loguear
+document.addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+</script>
+</body>
+</html>

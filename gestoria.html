@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestoría — Agencia</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f2f1ed; --surface:#fff; --surface2:#f0efe9;
+  --border:#e0ddd4; --border2:#c8c5bb;
+  --text:#1a1917; --text2:#6b6960; --text3:#9b9890;
+  --accent:#1a4a8a; --accent-bg:#e8eef8; --accent-dark:#0f2d5a;
+  --amber:#854f0b; --amber-bg:#fef3e2; --amber-border:#f0d090;
+  --green:#2d6a30; --green-bg:#e8f5e9; --green-border:#b8e0bb;
+  --red:#8b1c1c; --red-bg:#fdecea; --red-border:#f0c8c8;
+  --purple:#4a2d8a; --purple-bg:#eeebf8;
+  --orange:#b84f00; --orange-bg:#fff0e6;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  --r:6px; --rlg:10px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:0 4px 16px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+
+.topbar{background:var(--text);color:#fff;padding:0 1.5rem;display:flex;align-items:center;height:52px;gap:12px;position:sticky;top:0;z-index:50}
+.tb-logo{width:30px;height:30px;background:var(--accent);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:600;color:#fff;letter-spacing:-1px}
+.tb-title{font-size:15px;font-weight:500}
+.tb-sub{font-size:11px;color:rgba(255,255,255,.4);font-family:var(--mono)}
+.tb-search-wrap{flex:1;max-width:320px;margin-left:auto;position:relative}
+.tb-search-wrap input{width:100%;padding:7px 12px 7px 30px;border:1px solid rgba(255,255,255,.2);border-radius:var(--r);background:rgba(255,255,255,.1);font-family:var(--sans);font-size:13px;color:#fff;outline:none;transition:all .2s}
+.tb-search-wrap input::placeholder{color:rgba(255,255,255,.4)}
+.tb-search-wrap input:focus{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4)}
+.tb-search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(255,255,255,.4);pointer-events:none}
+.search-results{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh-md);z-index:200;max-height:320px;overflow-y:auto}
+.sr-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.sr-item:last-child{border-bottom:none}
+.sr-item:hover{background:var(--surface2)}
+.sr-type{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.sr-main{font-size:13px;font-weight:500;color:var(--text)}
+.sr-sub{font-size:12px;color:var(--text2);margin-top:1px}
+
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex}
+.nav-btn{padding:12px 20px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap;position:relative}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-alert{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+
+.page{display:none;padding:1.5rem;max-width:1200px;margin:0 auto}
+.page.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap}
+.page-title{font-size:17px;font-weight:600}
+.page-sub{font-size:13px;color:var(--text2);margin-top:2px}
+
+/* ALERTAS VTV */
+.alertas-banner{background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--rlg);padding:12px 16px;margin-bottom:1.25rem}
+.alertas-banner.warn{background:var(--orange-bg);border-color:#f0c090}
+.alertas-title{font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
+.alertas-banner.warn .alertas-title{color:var(--orange)}
+.alerta-item{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:4px}
+.alerta-item:last-child{margin-bottom:0}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:14px 16px;box-shadow:var(--sh)}
+.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-family:var(--mono)}
+.stat-value{font-size:26px;font-weight:600;font-family:var(--mono)}
+.stat.blue .stat-value{color:var(--accent)} .stat.green .stat-value{color:var(--green)}
+.stat.amber .stat-value{color:var(--amber)} .stat.red .stat-value{color:var(--red)}
+.stat.clickable{cursor:pointer;transition:all .15s;user-select:none}
+.stat.clickable:hover{border-color:var(--border2);box-shadow:0 2px 8px rgba(0,0,0,.10);transform:translateY(-1px)}
+.stat.clickable.activo{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg);transform:translateY(-1px)}
+.stat.clickable.activo .stat-label{color:var(--accent)}
+
+.btn{padding:7px 13px;font-family:var(--sans);font-size:13px;font-weight:500;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent-dark)}
+.btn.success{background:var(--green);border-color:var(--green);color:#fff}.btn.success:hover{background:#1e4d21}
+.btn.danger{background:transparent;border-color:var(--red-border);color:var(--red)}.btn.danger:hover{background:var(--red-bg)}
+.btn.sm{padding:5px 10px;font-size:12px} .btn.xs{padding:3px 8px;font-size:11px}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:500;font-family:var(--mono);white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge.doc-ok{background:var(--green-bg);color:var(--green)}.badge.doc-ok::before{background:var(--green)}
+.badge.doc-inc{background:var(--amber-bg);color:var(--amber)}.badge.doc-inc::before{background:var(--amber)}
+.badge.prep-doc{background:var(--surface2);color:var(--text2)}.badge.prep-doc::before{background:var(--text3)}
+.badge.en-escribania{background:var(--accent-bg);color:var(--accent-dark)}.badge.en-escribania::before{background:var(--accent)}
+.badge.retirado{background:var(--purple-bg);color:var(--purple)}.badge.retirado::before{background:var(--purple)}
+.badge.en-gestoria{background:var(--amber-bg);color:var(--amber)}.badge.en-gestoria::before{background:var(--amber)}
+.badge.para-entregar{background:#e8f0fe;color:#1a3a8a}.badge.para-entregar::before{background:#1a3a8a}
+.badge.finalizada{background:var(--green-bg);color:var(--green)}.badge.finalizada::before{background:var(--green)}
+.badge.cobrado{background:var(--green-bg);color:var(--green)}.badge.cobrado::before{background:var(--green)}
+.badge.pendiente-cobro{background:var(--amber-bg);color:var(--amber)}.badge.pendiente-cobro::before{background:var(--amber)}
+.badge.vtv-ok{background:var(--green-bg);color:var(--green)}.badge.vtv-ok::before{background:var(--green)}
+.badge.verif-ok{background:var(--green-bg);color:var(--green)}.badge.verif-ok::before{background:var(--green)}
+.badge.verif-prox{background:var(--orange-bg);color:var(--orange)}.badge.verif-prox::before{background:var(--orange)}
+.badge.verif-venc{background:var(--red-bg);color:var(--red)}.badge.verif-venc::before{background:var(--red)}
+.badge.vtv-prox{background:var(--orange-bg);color:var(--orange)}.badge.vtv-prox::before{background:var(--orange)}
+.badge.vtv-venc{background:var(--red-bg);color:var(--red)}.badge.vtv-venc::before{background:var(--red)}
+
+.legajos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px}
+.slot{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:14px 16px;box-shadow:var(--sh);transition:all .15s;cursor:pointer}
+.slot:hover{box-shadow:var(--sh-md);border-color:var(--border2)}
+.slot.libre{border:1.5px dashed var(--green-border);background:var(--green-bg)}.slot.libre:hover{background:#daf0db}
+.slot.ocupado{border-left:3px solid var(--accent)}
+.slot.docok{border-left:3px solid var(--green)}
+.slot.vtv-alert{border-left:3px solid var(--red) !important}
+.slot.vtv-warn{border-left:3px solid var(--orange) !important}
+.slot-num{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text3);margin-bottom:8px}
+.slot.libre .slot-num{color:var(--green)}.slot.ocupado .slot-num,.slot.docok .slot-num,.slot.vtv-alert .slot-num,.slot.vtv-warn .slot-num{color:var(--text)}
+.slot-libre-label{font-size:13px;color:var(--green);font-weight:500}
+.slot-cliente{font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-dom{font-family:var(--mono);font-size:12px;background:rgba(0,0,0,.05);display:inline-block;padding:2px 7px;border-radius:4px;margin-bottom:5px}
+.slot-veh{font-size:12px;color:var(--text2);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.slot-bar-fill{height:100%;border-radius:99px;transition:width .3s}
+.slot-bar-fill.ok{background:var(--green)}.slot-bar-fill.parcial{background:var(--amber)}
+.slot-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.slot-fecha{font-size:11px;color:var(--text3);font-family:var(--mono)}
+
+
+
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;box-shadow:var(--sh)}
+.table-wrap table{width:100%;border-collapse:collapse}
+.table-wrap thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);background:var(--surface2);border-bottom:1px solid var(--border)}
+.table-wrap tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.table-wrap tbody tr:last-child{border-bottom:none}
+.table-wrap tbody tr:hover{background:var(--surface2)}
+.table-wrap tbody td{padding:10px 14px;font-size:13px;vertical-align:middle}
+.td-mono{font-family:var(--mono);font-size:12px}
+.td-dom{font-family:var(--mono);background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:12px;display:inline-block}
+
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.sw{flex:1;min-width:180px;position:relative}
+.sw input{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.sw input:focus{border-color:var(--accent)}
+.sw-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+select.filter{padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);font-family:var(--sans);font-size:13px;color:var(--text);cursor:pointer;outline:none}
+select.filter:focus{border-color:var(--accent)}
+
+.overlay{position:fixed;inset:0;background:rgba(26,25,23,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
+.overlay.hidden{display:none}
+.modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border);box-shadow:var(--sh-md);width:100%;max-width:580px;max-height:90vh;overflow-y:auto}
+.modal.wide{max-width:700px} .modal.xwide{max-width:780px}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mh h3{font-size:16px;font-weight:600}
+.mbtn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:var(--r)}.mbtn:hover{background:var(--surface2)}
+.mb{padding:18px 22px}
+.mf{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--surface2);border-radius:0 0 var(--rlg) var(--rlg)}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
+.fg textarea{height:70px;resize:vertical}
+.fg input.accent-border{border-color:var(--accent)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ptabs{display:flex;border-bottom:1px solid var(--border);margin:6px 0 14px}
+.ptab{padding:8px 16px;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.conyuge-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-top:2px}
+.conyuge-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.confirm-box{background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r);padding:11px 14px;font-size:13px;color:var(--red);margin-bottom:12px}
+.vender-info{background:var(--accent-bg);border:1px solid #c0d0ea;border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--accent-dark);line-height:1.7}
+.fr2{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:8px}
+.fl{color:var(--text2)}.fv{font-weight:500;text-align:right}
+.notes-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;font-size:13px;color:var(--text2);line-height:1.6;margin-top:6px}
+.tl{display:flex;flex-direction:column}
+.tl-item{display:flex;gap:12px;align-items:flex-start}
+.tl-dot-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:3px}
+.tl-dot.current{background:var(--accent)}.tl-dot.done{background:var(--border2)}
+.tl-line{width:2px;flex:1;background:var(--border);min-height:18px;margin:3px 0}
+.tl-content{padding-bottom:12px;flex:1}
+.transferencia-val{color:var(--accent);font-weight:600;font-size:14px}
+.docs-list{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.dmi{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);font-size:13px;transition:all .15s}
+.dmi.on{background:var(--green-bg);border-color:var(--green-border)}
+.toggle{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on{background:var(--green)}.toggle.on::after{transform:translateX(16px)}
+.toggle.off{background:var(--border2)}
+.add-row{display:flex;gap:7px;margin-top:8px}
+.add-row input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--sans);font-size:13px;outline:none}
+.add-row input:focus{border-color:var(--accent)}
+/* NOTAS CON FECHA */
+.nota-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:6px}
+.nota-ts{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:3px}
+.nota-txt{font-size:13px;color:var(--text)}
+.nota-add-row{display:flex;gap:7px;margin-top:10px}
+.nota-add-row input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--sans);font-size:13px;outline:none}
+.nota-add-row input:focus{border-color:var(--accent)}
+.doc-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;margin-bottom:5px}
+.doc-item.ok{background:var(--green-bg);border-color:var(--green-border)}
+.doc-item.falta{background:var(--red-bg);border-color:var(--red-border)}
+.doc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-right:8px}
+.doc-dot.ok{background:var(--green)}.doc-dot.falta{background:var(--red)}
+.no-data{text-align:center;padding:3rem;color:var(--text3);font-size:14px}
+.alerta-item{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:6px;flex-wrap:wrap}
+.alerta-item:last-child{margin-bottom:0}
+.btn-silenciar{padding:3px 10px;font-size:11px;font-family:var(--sans);font-weight:500;border-radius:99px;border:1px solid currentColor;background:transparent;cursor:pointer;opacity:.7;transition:opacity .15s;white-space:nowrap}
+.btn-silenciar:hover{opacity:1}
+.hidden{display:none!important}
+@media(max-width:700px){.fr{grid-template-columns:1fr}.legajos-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><img src="https://i.imgur.com/6cMQaeJ.png" style="height:32px;object-fit:contain;" alt="FA"></div>
+  <div class="tb-search-wrap">
+    <span class="tb-search-icon">🔍</span>
+    <input type="text" id="busqGlobal" placeholder="Buscar dominio, cliente..." autocomplete="off">
+    <div class="search-results hidden" id="searchResults"></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="abrirNotifs()" id="bellBtn" style="background:none;border:none;cursor:pointer;font-size:1.3rem;position:relative;">&#x1F514;<span id="bellCount" style="display:none;position:absolute;top:-4px;right:-4px;background:#e53935;color:#fff;border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;line-height:18px;text-align:center;"></span></button>
+    <span id="headerUsuario" style="font-size:0.75rem;color:rgba(255,255,255,.5);"></span>
+    <button onclick="cerrarSesion()" style="background:none;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.8);font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;">Salir</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" id="navLeg" onclick="cambiarPag('legajos',this)">📁 Legajos físicos</button>
+  <button class="nav-btn" id="navTrf" onclick="cambiarPag('transf',this)">🔄 Transferencias</button>
+</nav>
+
+<!-- LEGAJOS -->
+<div class="page active" id="page-legajos">
+  <div class="page-header">
+    <div><div class="page-title">Legajos físicos</div><div class="page-sub">26 cajones de archivo — click en uno libre para asignar, click en uno ocupado para ver el detalle</div></div>
+  </div>
+  <div id="alertasVtv"></div>
+  <div class="stats-row" id="statsLeg"></div>
+
+  <div style="border-top:1px solid var(--border);margin:0 0 1.25rem"></div>
+  <div class="legajos-grid" id="legGrid"></div>
+</div>
+
+<!-- TRANSFERENCIAS -->
+<div class="page hidden" id="page-transf">
+  <div class="page-header">
+    <div><div class="page-title">Transferencias</div><div class="page-sub">Trámites activos y finalizados</div></div>
+    <button class="btn primary" onclick="abrirModalTrf()">+ Nueva transferencia</button>
+  </div>
+  <div class="stats-row" id="statsTrf"></div>
+  <div class="toolbar">
+    <div class="sw"><span class="sw-icon">🔍</span><input type="text" id="searchTrf" placeholder="Buscar por cliente, dominio..."></div>
+    <select class="filter" id="filtroTrf">
+      <option value="">Todos los estados</option>
+      <option value="prep-doc">Preparando documentación</option>
+      <option value="en-escribania">Doc. en escribanía</option>
+      <option value="retirado">Retirado de escribanía</option>
+      <option value="en-gestoria">En gestoría</option>
+      <option value="para-entregar">Para entregar doc.</option>
+      <option value="finalizada">Finalizada</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Vendedor</th><th>Comprador</th><th>Dominio</th><th>Vehículo</th><th>Precio transf.</th><th>Cobro</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody id="tblTrf"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: LEGAJO -->
+<div class="overlay hidden" id="ovLeg">
+<div class="modal">
+  <div class="mh"><h3 id="mLegTit">Asignar auto</h3><button class="mbtn" onclick="cerrar('ovLeg')">✕</button></div>
+  <div class="mb">
+    <div id="mLegNum" style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);margin-bottom:14px"></div>
+    <div class="fr"><div class="fg"><label>Dominio *</label><input id="lDom" type="text" placeholder="ABC 123" style="text-transform:uppercase"></div><div class="fg"><label>Vehículo</label><input id="lVeh" type="text" placeholder="VW Gol 2019"></div></div>
+    <div class="fr"><div class="fg"><label>Propietario *</label><input id="lCli" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI / CUIT</label><input id="lDni" type="text" placeholder="20-12345678-9"></div></div>
+    <div class="fr"><div class="fg"><label>Fecha de ingreso</label><input id="lFecha" type="date"></div><div class="fg"><label>Precio (referencia)</label><input id="lPrecio" type="text" placeholder="$ 0"></div></div>
+    <div class="fg"><label>Vencimiento VTV</label><input id="lVtv" type="date" title="Fecha de vencimiento de la VTV"></div>
+    <div class="fg">
+      <label>Verificación policial — fecha de realización <span style="font-size:11px;color:var(--text3)">(el sistema calcula los 150 días hábiles)</span></label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="lVerif" type="date" style="flex:1" onchange="calcularVerif()">
+        <div id="lVerifCalc" style="font-size:12px;color:var(--text2);font-family:var(--mono)"></div>
+      </div>
+    </div>
+    <div class="fg"><label>Notas</label><textarea id="lNotas" placeholder="Observaciones del vehículo..."></textarea></div>
+    <div class="fg">
+      <label>Documentación en el legajo</label>
+      <div class="docs-list" id="docsModalList"></div>
+      <div class="add-row"><input type="text" id="nuevoDoc" placeholder="Agregar documento..."><button class="btn sm primary" onclick="agregarDocM()">+ Agregar</button></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" onclick="cerrar('ovLeg')">Cancelar</button><button class="btn primary" onclick="guardarLeg()">Guardar</button></div>
+</div>
+</div>
+
+<!-- MODAL: DETALLE LEGAJO -->
+<div class="overlay hidden" id="ovDetLeg">
+<div class="modal wide">
+  <div class="mh"><h3>Detalle del legajo</h3><button class="mbtn" onclick="cerrar('ovDetLeg')">✕</button></div>
+  <div class="mb" id="detLegBody"></div>
+</div>
+</div>
+
+<!-- MODAL: VENDER -->
+<div class="overlay hidden" id="ovVender">
+<div class="modal wide">
+  <div class="mh"><h3>Registrar venta</h3><button class="mbtn" onclick="cerrar('ovVender')">✕</button></div>
+  <div class="mb">
+    <div class="vender-info" id="venderInfo"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Al confirmar, el legajo físico queda <strong>libre</strong> y se crea automáticamente una transferencia en seguimiento.</p>
+    <div class="section-label">Datos del comprador</div>
+    <div class="fr"><div class="fg"><label>Nombre y apellido *</label><input id="vComp" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="vDni" type="text" placeholder="12.345.678"></div></div>
+    <div class="fg"><label>Dirección completa</label><input id="vDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
+    <div class="fr"><div class="fg"><label>Teléfono</label><input id="vTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="vMail" type="text" placeholder="ejemplo@mail.com"></div></div>
+    <div class="fr">
+      <div class="fg"><label>Estado civil</label><select id="vCivil" onchange="toggleVCon()"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div>
+      <div class="fg"><label>Ocupación / Actividad</label><input id="vOcup" type="text" placeholder="Empleado, Comerciante..."></div>
+    </div>
+    <div id="vConBox" class="conyuge-box hidden">
+      <div class="conyuge-title">Datos del cónyuge</div>
+      <div class="fr"><div class="fg"><label>Nombre completo</label><input id="vCoNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="vCoDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fg"><label>Ocupación / Actividad</label><input id="vCoOcup" type="text" placeholder="Empleado, Comerciante..."></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+      <div class="section-label">Valores</div>
+      <div class="fr"><div class="fg"><label>Precio de venta del auto</label><input id="vPrecio" type="text" placeholder="$ 0"></div><div class="fg"><label>Precio de transferencia</label><input id="vHon" type="text" placeholder="$ 0" class="accent-border"></div></div>
+      <div class="fr"><div class="fg"><label>Estado del cobro</label><select id="vHonEst"><option value="pendiente-cobro">Pendiente de cobro</option><option value="cobrado">Cobrado</option></select></div><div class="fg"><label>Fecha de venta</label><input id="vFecha" type="date"></div></div>
+      <div class="fg"><label>Notas de la venta</label><textarea id="vNotas" placeholder="Escribanía, acuerdos, etc."></textarea></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" onclick="cerrar('ovVender')">Cancelar</button><button class="btn success" onclick="confirmarVenta()">✓ Confirmar venta y liberar legajo</button></div>
+</div>
+</div>
+
+<!-- MODAL: TRANSFERENCIA -->
+<div class="overlay hidden" id="ovTrf">
+<div class="modal xwide">
+  <div class="mh"><h3 id="mTrfTit">Nueva transferencia</h3><button class="mbtn" onclick="cerrar('ovTrf')">✕</button></div>
+  <div class="mb">
+    <div class="section-label">Vehículo</div>
+    <div class="fr"><div class="fg"><label>Dominio *</label><input id="tDom" type="text" placeholder="ABC 123" style="text-transform:uppercase"></div><div class="fg"><label>Vehículo</label><input id="tVeh" type="text" placeholder="VW Gol 2019"></div></div>
+    <div class="fr">
+      <div class="fg"><label>Estado</label><select id="tEst"><option value="prep-doc">Preparando documentación</option><option value="en-escribania">Doc. en escribanía</option><option value="retirado">Retirado de escribanía</option><option value="en-gestoria">En gestoría</option><option value="para-entregar">Para entregar doc.</option><option value="finalizada">Finalizada</option></select></div>
+      <div class="fg"><label>Fecha</label><input id="tFecha" type="date"></div>
+    </div>
+    <div class="ptabs"><button class="ptab active" id="ptabVend" onclick="switchTab('vend')">Vendedor</button><button class="ptab" id="ptabComp" onclick="switchTab('comp')">Comprador</button></div>
+    <div id="panelVend">
+      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><input id="tVNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tVDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fg"><label>Dirección completa</label><input id="tVDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
+      <div class="fr"><div class="fg"><label>Teléfono</label><input id="tVTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="tVMail" type="text" placeholder="ejemplo@mail.com"></div></div>
+      <div class="fr"><div class="fg"><label>Estado civil</label><select id="tVCivil" onchange="toggleCon('V')"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div><div class="fg"><label>Ocupación / Actividad</label><input id="tVOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
+      <div id="tVConBox" class="conyuge-box hidden"><div class="conyuge-title">Datos del cónyuge</div><div class="fr"><div class="fg"><label>Nombre completo</label><input id="tVCoNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tVCoDni" type="text" placeholder="12.345.678"></div></div><div class="fg"><label>Ocupación / Actividad</label><input id="tVCoOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
+    </div>
+    <div id="panelComp" class="hidden">
+      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><input id="tCNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tCDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fg"><label>Dirección completa</label><input id="tCDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
+      <div class="fr"><div class="fg"><label>Teléfono</label><input id="tCTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="tCMail" type="text" placeholder="ejemplo@mail.com"></div></div>
+      <div class="fr"><div class="fg"><label>Estado civil</label><select id="tCCivil" onchange="toggleCon('C')"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div><div class="fg"><label>Ocupación / Actividad</label><input id="tCOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
+      <div id="tCConBox" class="conyuge-box hidden"><div class="conyuge-title">Datos del cónyuge</div><div class="fr"><div class="fg"><label>Nombre completo</label><input id="tCCoNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tCCoDni" type="text" placeholder="12.345.678"></div></div><div class="fg"><label>Ocupación / Actividad</label><input id="tCCoOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+      <div class="section-label">Valores</div>
+      <div class="fr"><div class="fg"><label>Precio de venta del auto</label><input id="tPrecio" type="text" placeholder="$ 0"></div><div class="fg"><label>Precio de transferencia</label><input id="tHon" type="text" placeholder="$ 0" class="accent-border"></div></div>
+      <div class="fg"><label>Estado del cobro</label><select id="tHonEst"><option value="pendiente-cobro">Pendiente de cobro</option><option value="cobrado">Cobrado</option></select></div>
+      <div class="fg"><label>Notas generales</label><textarea id="tNotas" placeholder="Escribanía, acuerdos, observaciones..."></textarea></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+      <div class="section-label">Documentación</div>
+      <div class="docs-list" id="tDocsModalList"></div>
+      <div class="add-row">
+        <input type="text" id="tNuevoDoc" placeholder="Agregar documento...">
+        <button class="btn sm primary" onclick="agregarTDoc()">+ Agregar</button>
+      </div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" onclick="cerrar('ovTrf')">Cancelar</button><button class="btn primary" onclick="guardarTrf()">Guardar</button></div>
+</div>
+</div>
+
+<!-- MODAL: DETALLE TRANSFERENCIA -->
+<div class="overlay hidden" id="ovDetTrf">
+<div class="modal xwide">
+  <div class="mh"><h3>Detalle de transferencia</h3><button class="mbtn" onclick="cerrar('ovDetTrf')">✕</button></div>
+  <div class="mb" id="detTrfBody"></div>
+</div>
+</div>
+
+<!-- MODAL: ELIMINAR -->
+<div class="overlay hidden" id="ovElim">
+<div class="modal">
+  <div class="mh"><h3 id="elimTit">Confirmar eliminación</h3><button class="mbtn" onclick="cerrar('ovElim')">✕</button></div>
+  <div class="mb">
+    <div class="confirm-box" id="elimBox">⚠️ Esta acción no se puede deshacer.</div>
+    <p id="elimTxt" style="font-size:13px;color:var(--text2);margin-bottom:12px"></p>
+    <div id="elimRevSection" class="hidden">
+      <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--green)">🔄 Al eliminar esta transferencia, el auto se puede restaurar a un legajo físico.</div>
+      <div class="fg"><label id="elimLegLabel">Legajo donde restaurar el auto</label><select id="elimLegSel"><option value="">No restaurar (solo eliminar la transferencia)</option></select></div>
+      <div id="elimAutoInfo" style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.6"></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" onclick="cerrar('ovElim')">Cancelar</button><button class="btn danger" onclick="ejecutarElim()">Eliminar</button></div>
+</div>
+</div>
+
+<script>
+(function(){
+var s=JSON.parse(localStorage.getItem("fa_session")||"null");
+if(!s){window.location.href="login.html";return;}
+if(s.rol!=="gestoria"&&s.rol!=="admin"){window.location.href="login.html";return;}
+window._session=s;
+document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("headerUsuario");if(e)e.textContent=s.nombre||s.usuario;});
+})();
+function cerrarSesion(){localStorage.removeItem("fa_session");window.location.href="login.html";}
+</script>
+<script>
+// ═══ CONSTANTES ═══
+const DOCS_BASE = ['Título original','DNI titular','VTV vigente','Libre deuda patente','Cédula verde','Formulario 08 certificado','Libre deuda infracciones','Verificación policial','Grabado de autopartes','Informe de dominio','Copia de llaves','Manuales del vehículo','Historial de servicios'];
+const TOTAL = 26;
+const ELABELS = {'prep-doc':'Preparando documentación','en-escribania':'Doc. en escribanía','retirado':'Retirado de escribanía','en-gestoria':'En gestoría','para-entregar':'Para entregar doc.','finalizada':'Finalizada'};
+const ESTADOS = ['prep-doc','en-escribania','retirado','en-gestoria','para-entregar','finalizada'];
+const CIVIL_LABEL = {soltero:'Soltero/a',casado:'Casado/a',divorciado:'Divorciado/a',viudo:'Viudo/a',union:'Unión convivencial'};
+
+// ═══ UTILS ═══
+const hoy = () => new Date().toISOString().split('T')[0];
+const fmt = f => { if(!f) return '-'; const [y,m,d]=f.split('-'); return d+'/'+m+'/'+y.slice(2); };
+const fmtTs = ts => { if(!ts) return '-'; const d=new Date(ts),p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2)+' '+p(d.getHours())+':'+p(d.getMinutes()); };
+const load = (k,d) => d; // reemplazado por Supabase
+const save2 = (k,v) => {}; // reemplazado por Supabase
+
+// ═══ SUPABASE ═══════════════════════════════════════════════
+const SB_URL = 'https://bjgkmrgkgjpydpanewsa.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2ttcmdrZ2pweWRwYW5ld3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODU4NjgsImV4cCI6MjA5MzA2MTg2OH0.DLfBLH9H3UGSh1ISzylt4lLc6pExr6YOyy0sb-cbZec';
+const sbH = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Prefer':'return=representation'};
+async function sbGet(t,q=''){ const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:sbH}); if(!r.ok)return[]; return r.json(); }
+async function sbUpsert(t,data,match){ const r=await fetch(`${SB_URL}/rest/v1/${t}?on_conflict=${match}`,{method:'POST',headers:{...sbH,'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} const res=await r.json(); return Array.isArray(res)?res[0]:res; }
+async function sbInsert(t,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}`,{method:'POST',headers:sbH,body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} const res=await r.json(); return Array.isArray(res)?res[0]:res; }
+async function sbUpdate(t,col,val,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${val}`,{method:'PATCH',headers:sbH,body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} return r.json(); }
+async function sbDelete(t,col,val){ await fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${val}`,{method:'DELETE',headers:sbH}); }
+
+function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML=`<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">${msg}</div>`;document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
+function ocultarCargando(){ const el=document.getElementById('_ld');if(el)el.remove(); }
+
+// Guarda legajo completo en Supabase
+async function saveLeg(l) {
+  const data = {
+    numero: l.num, libre: l.libre,
+    dominio: l.auto?.dominio||null, vehiculo: l.auto?.vehiculo||null,
+    cliente: l.auto?.cliente||null, dni: l.auto?.dni||null,
+    fecha: l.auto?.fecha||null, precio: l.auto?.precio||null,
+    vtv: l.auto?.vtv||null, vtv_gestionada: l.auto?.vtv_gestionada||false,
+    verif: l.auto?.verif||null, notas: l.auto?.notas||null,
+    docs: l.auto?.docs||[], notas_hilo: l.auto?.notas_hilo||[],
+    updated_at: new Date().toISOString()
+  };
+  await sbUpdate('legajos','numero',l.num,data);
+}
+
+// Guarda transferencia (insert o update)
+async function saveTrf(t) {
+  const data = {
+    id: t.id, vendedor: t.vendedor, vendedor_data: t.vendedorData||null,
+    comprador: t.comprador, comprador_data: t.compradorData||null,
+    dominio: t.dominio, vehiculo: t.vehiculo||null,
+    estado: t.estado, fecha: t.fecha||null,
+    precio: t.precio||null, honorario: t.honorario||null,
+    honorario_est: t.honorarioEst||'pendiente-cobro',
+    legajo_origen: t.legajoOrigen||null, notas: t.notas||null,
+    historial: t.historial||[], docs: t.docs||[],
+    updated_at: new Date().toISOString()
+  };
+  await sbUpsert('transferencias', data, 'id');
+}
+
+const saveAll = () => {}; // ya no usamos localStorage
+const g = id => document.getElementById(id);
+const gv = id => (g(id)||{}).value||'';
+const sv = (id,v) => { const el=g(id); if(el) el.value=v||''; };
+
+// VTV helpers
+// ═══ FERIADOS ARGENTINA 2025-2027 ═══
+const FERIADOS_AR = new Set([
+  // 2025
+  '2025-01-01','2025-03-03','2025-03-04','2025-03-24','2025-04-02','2025-04-17','2025-04-18',
+  '2025-05-01','2025-05-25','2025-06-16','2025-06-20','2025-07-09','2025-08-17','2025-08-18',
+  '2025-10-12','2025-11-17','2025-11-20','2025-12-08','2025-12-25',
+  // 2026
+  '2026-01-01','2026-02-16','2026-02-17','2026-03-23','2026-03-24','2026-04-02','2026-04-03','2026-04-06',
+  '2026-05-01','2026-05-25','2026-06-15','2026-06-19','2026-06-20','2026-07-09','2026-08-17',
+  '2026-10-12','2026-11-20','2026-11-23','2026-12-08','2026-12-25',
+  // 2027
+  '2027-01-01','2027-03-08','2027-03-09','2027-03-24','2027-04-01','2027-04-02','2027-05-01',
+  '2027-05-25','2027-06-18','2027-06-20','2027-06-21','2027-07-09','2027-08-16','2027-10-11',
+  '2027-11-20','2027-11-22','2027-12-08','2027-12-25'
+]);
+
+function esDiaHabil(fecha) {
+  const d = new Date(fecha + 'T00:00:00');
+  const dow = d.getDay();
+  if(dow === 0 || dow === 6) return false; // domingo o sábado
+  return !FERIADOS_AR.has(fecha);
+}
+
+function sumarDiasHabiles(fechaInicio, dias) {
+  let d = new Date(fechaInicio + 'T00:00:00');
+  let contados = 0;
+  while(contados < dias) {
+    d.setDate(d.getDate() + 1);
+    const iso = d.toISOString().split('T')[0];
+    if(esDiaHabil(iso)) contados++;
+  }
+  return d.toISOString().split('T')[0];
+}
+
+function verificEstado(fechaVerif) {
+  if(!fechaVerif) return null;
+  const venc = sumarDiasHabiles(fechaVerif, 150);
+  const hoyD = new Date(); hoyD.setHours(0,0,0,0);
+  const vencD = new Date(venc + 'T00:00:00');
+  const diff = Math.floor((vencD - hoyD) / 86400000);
+  if(diff < 0) return {cls:'verif-venc', label:'Verif. policial vencida', venc, diff};
+  if(diff <= 20) return {cls:'verif-prox', label:'Verif. vence en '+diff+'d', venc, diff};
+  return {cls:'verif-ok', label:'Verif. ok (vence '+fmt(venc)+')', venc, diff};
+}
+
+function vtvEstado(fechaVtv) {
+  if(!fechaVtv) return null;
+  const hoyD = new Date(); hoyD.setHours(0,0,0,0);
+  const vtv = new Date(fechaVtv+'T00:00:00');
+  const diff = Math.floor((vtv-hoyD)/86400000);
+  if(diff < 0) return {cls:'vtv-venc', label:'VTV vencida', diff};
+  if(diff <= 30) return {cls:'vtv-prox', label:'VTV vence en '+diff+'d', diff};
+  return {cls:'vtv-ok', label:'VTV ok ('+fmt(fechaVtv)+')', diff};
+}
+
+// ═══ DATOS INICIALES ═══
+function initLegs() {
+  const arr = [];
+  for(let i=1;i<=TOTAL;i++) arr.push({num:i,libre:true,auto:null});
+  arr[0]={num:1,libre:false,auto:{dominio:'GHK 452',vehiculo:'Chevrolet Cruze 2021',cliente:'Martínez, Carlos',dni:'20-34567890-1',fecha:'2026-04-10',precio:'$18.500.000',vtv:'2026-12-15',notas:'Comprado en remate.',notas_hilo:[],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:true},{n:'Cédula verde',ok:true},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
+  arr[1]={num:2,libre:false,auto:{dominio:'JKL 789',vehiculo:'Toyota Hilux 2022',cliente:'Rodríguez, Ana',dni:'27-45678901-2',fecha:'2026-04-18',precio:'',vtv:'2026-05-10',notas:'',notas_hilo:[{ts:'2026-04-19T10:00:00.000Z',txt:'Llamé a la titular, trae el 08 la semana que viene.'}],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:false},{n:'Cédula verde',ok:false},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
+  arr[4]={num:5,libre:false,auto:{dominio:'MNO 234',vehiculo:'Ford Focus 2018',cliente:'López, Sergio',dni:'23-56789012-3',fecha:'2026-04-05',precio:'$9.200.000',vtv:'2027-03-20',notas:'Tiene prenda a cancelar.',notas_hilo:[],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:true},{n:'Libre deuda patente',ok:true},{n:'Cédula verde',ok:true},{n:'Formulario 08 certificado',ok:true},{n:'Libre deuda infracciones',ok:true},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:true},{n:'Historial de servicios',ok:true}]}};
+  arr[7]={num:8,libre:false,auto:{dominio:'STU 890',vehiculo:'Peugeot 208 2023',cliente:'González, Pablo',dni:'28-78901234-5',fecha:'2026-04-20',precio:'',vtv:'',notas:'',notas_hilo:[],docs:[{n:'Título original',ok:false},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:false},{n:'Cédula verde',ok:false},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:false},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
+  return arr;
+}
+
+function initTrfs() {
+  return [
+    {id:'TRF-001',vendedor:'Fernández, María',vendedorData:{nombre:'Fernández, María',dni:'25-67890-1',dir:'San Martín 1234, Mar del Plata',tel:'223-1234567',mail:'mfernandez@mail.com',civil:'casado',ocup:'Docente',conyuge:{nombre:'Pérez, Juan',dni:'22-11111-2',ocup:'Empleado'}},comprador:'Suárez, Ricardo',compradorData:{nombre:'Suárez, Ricardo',dni:'28-99999-3',dir:'Rivadavia 567, Mar del Plata',tel:'223-9876543',mail:'rsuarez@mail.com',civil:'soltero',ocup:'Comerciante',conyuge:null},dominio:'PQR 567',vehiculo:'Renault Sandero 2020',estado:'finalizada',fecha:'2026-03-28',precio:'$8.000.000',honorario:'$80.000',honorarioEst:'cobrado',legajoOrigen:12,notas:'Finalizado. Entregado el 15/04.',historial:[{estado:'prep-doc',label:'Preparando documentación',ts:'2026-03-28T09:00:00.000Z',nota:'Trámite creado.'},{estado:'en-escribania',label:'Doc. en escribanía',ts:'2026-03-30T10:30:00.000Z',nota:''},{estado:'retirado',label:'Retirado de escribanía',ts:'2026-04-05T11:00:00.000Z',nota:''},{estado:'en-gestoria',label:'En gestoría',ts:'2026-04-08T09:00:00.000Z',nota:''},{estado:'para-entregar',label:'Para entregar doc.',ts:'2026-04-12T15:00:00.000Z',nota:''},{estado:'finalizada',label:'Finalizada',ts:'2026-04-15T14:00:00.000Z',nota:'Entregado al comprador.'}]},
+    {id:'TRF-002',vendedor:'Gómez, Héctor',vendedorData:{nombre:'Gómez, Héctor',dni:'23-55555-4',dir:'Luro 890, Mar del Plata',tel:'223-5555555',mail:'hgomez@mail.com',civil:'casado',ocup:'Jubilado',conyuge:{nombre:'Ruiz, Carmen',dni:'24-44444-5',ocup:'Ama de casa'}},comprador:'Torres, Laura',compradorData:{nombre:'Torres, Laura',dni:'30-33333-6',dir:'Independencia 321, Mar del Plata',tel:'223-3333333',mail:'ltorres@mail.com',civil:'soltero',ocup:'Empleada',conyuge:null},dominio:'VWX 123',vehiculo:'Honda Civic 2017',estado:'en-escribania',fecha:'2026-04-14',precio:'$12.500.000',honorario:'$120.000',honorarioEst:'pendiente-cobro',legajoOrigen:3,notas:'Trámite urgente. Cliente viaja el 30/04.',historial:[{estado:'prep-doc',label:'Preparando documentación',ts:'2026-04-14T08:00:00.000Z',nota:'Trámite creado al registrar la venta.'},{estado:'en-escribania',label:'Doc. en escribanía',ts:'2026-04-16T10:00:00.000Z',nota:''}]}
+  ];
+}
+
+let legs = [];
+let trfs = [];
+
+async function cargarDatos() {
+  mostrarCargando('Conectando con la base de datos...');
+  try {
+    // Cargar legajos
+    const legsRaw = await sbGet('legajos','select=*&order=numero.asc');
+    legs = legsRaw.map(l => ({
+      num: l.numero, libre: l.libre,
+      auto: l.libre ? null : {
+        dominio: l.dominio||'', vehiculo: l.vehiculo||'',
+        cliente: l.cliente||'', dni: l.dni||'',
+        fecha: l.fecha||'', precio: l.precio||'',
+        vtv: l.vtv||'', vtv_gestionada: l.vtv_gestionada||false,
+        verif: l.verif||'', notas: l.notas||'',
+        docs: l.docs||[], notas_hilo: l.notas_hilo||[]
+      }
+    }));
+    // Asegurar que haya exactamente TOTAL legajos
+    while(legs.length < TOTAL) legs.push({num:legs.length+1, libre:true, auto:null});
+
+    // Cargar transferencias
+    const trfsRaw = await sbGet('transferencias','select=*&order=created_at.desc');
+    trfs = trfsRaw.map(t => ({
+      id: t.id, vendedor: t.vendedor, vendedorData: t.vendedor_data,
+      comprador: t.comprador, compradorData: t.comprador_data,
+      dominio: t.dominio, vehiculo: t.vehiculo||'',
+      estado: t.estado, fecha: t.fecha||'',
+      precio: t.precio||'', honorario: t.honorario||'',
+      honorarioEst: t.honorario_est||'pendiente-cobro',
+      legajoOrigen: t.legajo_origen, notas: t.notas||'',
+      historial: t.historial||[], docs: t.docs||[]
+    }));
+  } catch(err) {
+    console.error('Error cargando datos:', err);
+    alert('Error al conectar con la base de datos.');
+  }
+  ocultarCargando();
+  render();
+}
+
+// ═══ ESTADO UI ═══
+let pagActiva='legajos', filtroLeg=null, editLeg=null, editTrf=null, vendNum=null, elimTarget=null, docsTemp=[], tDocsTemp=[];
+
+// ═══ NAVEGACIÓN ═══
+function cambiarPag(p,btn) {
+  pagActiva=p;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(pg=>{pg.classList.remove('active');pg.classList.add('hidden');});
+  const pg=g('page-'+p); pg.classList.remove('hidden'); pg.classList.add('active');
+  render();
+}
+
+// ═══ BÚSQUEDA GLOBAL ═══
+function buscarGlobal(q) {
+  const res=g('searchResults');
+  if(!q||q.length<2) { res.classList.add('hidden'); return; }
+  const ql=q.toLowerCase();
+  const items=[];
+  legs.filter(l=>!l.libre).forEach(l=>{
+    const a=l.auto;
+    if(a.dominio.toLowerCase().includes(ql)||a.cliente.toLowerCase().includes(ql)||(a.vehiculo||'').toLowerCase().includes(ql)) {
+      items.push({tipo:'Legajo '+String(l.num).padStart(2,'0'),main:a.cliente,sub:a.dominio+' · '+(a.vehiculo||''),action:'leg',num:l.num});
+    }
+  });
+  trfs.forEach(t=>{
+    if(t.dominio.toLowerCase().includes(ql)||t.vendedor.toLowerCase().includes(ql)||t.comprador.toLowerCase().includes(ql)||t.id.toLowerCase().includes(ql)) {
+      items.push({tipo:'Transferencia '+t.id,main:t.vendedor+' → '+t.comprador,sub:t.dominio+' · '+ELABELS[t.estado],action:'trf',id:t.id});
+    }
+  });
+  if(!items.length) { res.classList.add('hidden'); return; }
+  res.innerHTML = items.slice(0,8).map((it,i)=>
+    '<div class="sr-item" data-idx="'+i+'"><div class="sr-type">'+it.tipo+'</div><div class="sr-main">'+it.main+'</div><div class="sr-sub">'+it.sub+'</div></div>'
+  ).join('');
+  res.querySelectorAll('.sr-item').forEach((el,i)=>{
+    el.onclick=()=>{
+      const it=items[i];
+      g('busqGlobal').value=''; res.classList.add('hidden');
+      if(it.action==='leg') { if(pagActiva!=='legajos'){cambiarPag('legajos',g('navLeg'));} setTimeout(()=>abrirDetLeg(it.num),50); }
+      else { if(pagActiva!=='transf'){cambiarPag('transf',g('navTrf'));} setTimeout(()=>abrirDetTrf(it.id),50); }
+    };
+  });
+  res.classList.remove('hidden');
+}
+g('busqGlobal').addEventListener('input',e=>buscarGlobal(e.target.value));
+document.addEventListener('click',e=>{ if(!g('busqGlobal').contains(e.target)&&!g('searchResults').contains(e.target)) g('searchResults').classList.add('hidden'); });
+
+// ═══ VTV ALERTAS ═══
+async function vtvGestionada(num) {
+  const l=legs.find(x=>x.num===num); if(!l||!l.auto) return;
+  l.auto.vtv_gestionada=true;
+  await saveLeg(l); renderLegs();
+}
+
+function renderAlertasVtv() {
+  const venc=[], prox=[], verifVenc=[], verifProx=[];
+  legs.filter(l=>!l.libre&&l.auto&&l.auto.vtv).forEach(l=>{
+    if(l.auto.vtv_gestionada) return; // silenciada
+    const st=vtvEstado(l.auto.vtv);
+    if(!st) return;
+    const info='Legajo '+String(l.num).padStart(2,'0')+' — '+l.auto.cliente+' ('+l.auto.dominio+')';
+    if(st.cls==='vtv-venc') venc.push({info,label:st.label,num:l.num});
+    else if(st.cls==='vtv-prox') prox.push({info,label:st.label,num:l.num});
+  });
+  // Verificación policial
+  legs.filter(l=>!l.libre&&l.auto&&l.auto.verif).forEach(l=>{
+    const st=verificEstado(l.auto.verif);
+    if(!st) return;
+    const info='Legajo '+String(l.num).padStart(2,'0')+' — '+l.auto.cliente+' ('+l.auto.dominio+')';
+    if(st.cls==='verif-venc') verifVenc.push({info,label:st.label,venc:st.venc});
+    else if(st.cls==='verif-prox') verifProx.push({info,label:st.label,venc:st.venc});
+  });
+
+  let html='';
+  if(venc.length) html+=
+    '<div class="alertas-banner"><div class="alertas-title">🚨 VTV vencida</div>'+
+    venc.map(v=>'<div class="alerta-item"><span class="badge vtv-venc">'+v.label+'</span><span style="flex:1">'+v.info+'</span><button class="btn-silenciar" style="color:var(--red)" onclick="vtvGestionada('+v.num+')">✓ Turno sacado</button></div>').join('')+
+    '</div>';
+  if(prox.length) html+=
+    '<div class="alertas-banner warn"><div class="alertas-title">⚠️ VTV por vencer</div>'+
+    prox.map(v=>'<div class="alerta-item"><span class="badge vtv-prox">'+v.label+'</span><span style="flex:1">'+v.info+'</span><button class="btn-silenciar" style="color:var(--orange)" onclick="vtvGestionada('+v.num+')">✓ Turno sacado</button></div>').join('')+
+    '</div>';
+  if(verifVenc.length) html+=
+    '<div class="alertas-banner"><div class="alertas-title">🚨 Verificación policial vencida</div>'+
+    verifVenc.map(v=>'<div class="alerta-item"><span class="badge verif-venc">'+v.label+'</span><span style="flex:1">'+v.info+' · venció '+fmt(v.venc)+'</span></div>').join('')+
+    '</div>';
+  if(verifProx.length) html+=
+    '<div class="alertas-banner warn"><div class="alertas-title">⚠️ Verificación policial por vencer</div>'+
+    verifProx.map(v=>'<div class="alerta-item"><span class="badge verif-prox">'+v.label+'</span><span style="flex:1">'+v.info+' · vence '+fmt(v.venc)+'</span></div>').join('')+
+    '</div>';
+  g('alertasVtv').innerHTML=html;
+  const hasAlert=venc.length+prox.length+verifVenc.length+verifProx.length>0;
+  let dot=g('navLeg').querySelector('.nav-alert');
+  if(hasAlert&&!dot){dot=document.createElement('span');dot.className='nav-alert';g('navLeg').appendChild(dot);}
+  else if(!hasAlert&&dot) dot.remove();
+}
+
+// ═══ LEGAJOS ═══
+function docSt(l) {
+  if(!l.auto||!(l.auto.docs||[]).length) return {ok:0,total:0,pct:0,full:false};
+  const ok=l.auto.docs.filter(d=>d.ok).length, total=l.auto.docs.length;
+  return {ok,total,pct:Math.round(ok/total*100),full:ok===total};
+}
+
+function renderLegs() {
+  renderAlertasVtv();
+  const libres=legs.filter(l=>l.libre).map(l=>l.num);
+  const ocupados=legs.filter(l=>!l.libre).length;
+  const docOk=legs.filter(l=>!l.libre&&docSt(l).full).length;
+  const docInc=ocupados-docOk;
+  const stats=[
+    {f:'',cls:'',label:'Total',val:TOTAL},
+    {f:'ocupado',cls:'blue',label:'Ocupados',val:ocupados},
+    {f:'libre',cls:'green',label:'Libres',val:libres.length},
+    {f:'docok',cls:'green',label:'Doc. lista',val:docOk},
+    {f:'docinc',cls:'amber',label:'Completando doc.',val:docInc},
+  ];
+  g('statsLeg').innerHTML=stats.map(s=>{
+    const isAct=(s.f===''&&filtroLeg===null)||(s.f!==''&&filtroLeg===s.f);
+    return '<div class="stat '+s.cls+' clickable'+(isAct?' activo':'')+'" data-filtro="'+s.f+'"><div class="stat-label">'+s.label+(isAct?' &times;':'')+' </div><div class="stat-value">'+s.val+'</div></div>';
+  }).join('');
+  g('statsLeg').querySelectorAll('.stat.clickable').forEach(el=>{
+    el.onclick=function(){
+      const f=this.getAttribute('data-filtro');
+      filtroLeg=(f===''||filtroLeg===f)?null:f;
+      renderLegs();
+    };
+  });
+
+  const legsFilt=legs.filter(l=>{
+    if(filtroLeg===null) return true;
+    if(filtroLeg==='libre') return l.libre;
+    if(filtroLeg==='ocupado') return !l.libre;
+    if(filtroLeg==='docok') return !l.libre&&docSt(l).full;
+    if(filtroLeg==='docinc') return !l.libre&&!docSt(l).full;
+    return true;
+  });
+  if(!legsFilt.length){g('legGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3);font-size:14px">No hay legajos que coincidan con el filtro.</div>';return;}
+  g('legGrid').innerHTML=legsFilt.map(l=>{
+    const n=String(l.num).padStart(2,'0');
+    if(l.libre) return '<div class="slot libre" onclick="abrirModalLeg('+l.num+')"><div class="slot-num">'+n+'</div><div class="slot-libre-label">+ Asignar auto</div></div>';
+    const st=docSt(l);
+    const vtv=vtvEstado(l.auto.vtv);
+    let cls=st.full?'docok':'ocupado';
+    if(vtv&&vtv.cls==='vtv-venc') cls+=' vtv-alert';
+    else if(vtv&&vtv.cls==='vtv-prox') cls+=' vtv-warn';
+    const barCls=st.full?'ok':'parcial';
+    const badgeCls=st.full?'doc-ok':'doc-inc';
+    const badgeTxt=st.full?'Doc. lista':'Completando doc.';
+    const vtvBadge=vtv&&vtv.cls!=='vtv-ok'?'<span class="badge '+vtv.cls+'">'+vtv.label+'</span>':'';
+    return '<div class="slot '+cls+'" onclick="abrirDetLeg('+l.num+')">'+
+      '<div class="slot-num">'+n+'</div>'+
+      '<div class="slot-cliente">'+l.auto.cliente+'</div>'+
+      '<div class="slot-dom">'+l.auto.dominio+'</div>'+
+      '<div class="slot-veh">'+(l.auto.vehiculo||'-')+'</div>'+
+      '<div class="slot-bar"><div class="slot-bar-fill '+barCls+'" style="width:'+st.pct+'%"></div></div>'+
+      '<div class="slot-footer"><span class="badge '+badgeCls+'">'+badgeTxt+'</span>'+vtvBadge+'<span class="slot-fecha">'+fmt(l.auto.fecha)+'</span></div>'+
+      '</div>';
+  }).join('');
+}
+
+// ═══ DETALLE LEGAJO ═══
+function abrirDetLeg(num) {
+  const l=legs.find(x=>x.num===num); if(!l||l.libre) return;
+  const st=docSt(l), a=l.auto, n=String(num).padStart(2,'0');
+  const vtv=vtvEstado(a.vtv);
+  const docsHtml=(a.docs||[]).map(d=>'<div class="doc-item '+(d.ok?'ok':'falta')+'"><div style="display:flex;align-items:center"><span class="doc-dot '+(d.ok?'ok':'falta')+'"></span>'+d.n+'</div><span style="font-size:11px;font-weight:500;color:'+(d.ok?'var(--green)':'var(--red)')+';">'+(d.ok?'✓ Presente':'✗ Falta')+'</span></div>').join('');
+  const notasHtml=(a.notas_hilo||[]).length
+    ? [...(a.notas_hilo||[])].reverse().map(nt=>'<div class="nota-item"><div class="nota-ts">'+fmtTs(nt.ts)+'</div><div class="nota-txt">'+nt.txt+'</div></div>').join('')
+    : '<div style="color:var(--text3);font-size:13px">Sin notas.</div>';
+
+  g('detLegBody').innerHTML=
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">'+
+      '<div style="font-family:var(--mono);font-size:26px;font-weight:600;color:var(--accent);margin-right:10px">'+n+'</div>'+
+      '<div><div style="font-size:16px;font-weight:600">'+a.cliente+'</div><div style="font-size:13px;color:var(--text2)">'+a.dominio+' · '+(a.vehiculo||'')+'</div></div>'+
+      '<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+
+        '<span class="badge '+(st.full?'doc-ok':'doc-inc')+'">'+(st.full?'Documentación lista':'Completando documentación')+'</span>'+
+        (vtv?'<span class="badge '+vtv.cls+'">'+vtv.label+'</span>':'')+
+        '<span style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+st.ok+'/'+st.total+' docs</span>'+
+      '</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">'+
+      '<div>'+
+        '<div class="section-label" style="margin-bottom:10px">Datos del vehículo</div>'+
+        '<div class="fr2"><span class="fl">Propietario</span><span class="fv">'+a.cliente+'</span></div>'+
+        '<div class="fr2"><span class="fl">DNI / CUIT</span><span class="fv">'+(a.dni||'-')+'</span></div>'+
+        '<div class="fr2"><span class="fl">Dominio</span><span class="fv" style="font-family:var(--mono)">'+a.dominio+'</span></div>'+
+        '<div class="fr2"><span class="fl">Vehículo</span><span class="fv">'+(a.vehiculo||'-')+'</span></div>'+
+        '<div class="fr2"><span class="fl">Ingreso</span><span class="fv" style="font-family:var(--mono)">'+fmt(a.fecha)+'</span></div>'+
+        (a.vtv?'<div class="fr2"><span class="fl">Venc. VTV</span><span class="fv" style="font-family:var(--mono)">'+fmt(a.vtv)+(a.vtv_gestionada?' <span style="font-size:11px;color:var(--green)">✓ Turno sacado</span>':'')+'</span></div>':'')+
+        (a.verif?(()=>{const vs=verificEstado(a.verif);return '<div class="fr2"><span class="fl">Verif. policial</span><span class="fv"><span style="font-family:var(--mono)">Realizada: '+fmt(a.verif)+'</span><br><span class="badge '+vs.cls+'" style="margin-top:3px">'+vs.label+'</span></span></div>';})():'')+ 
+        (a.precio?'<div class="fr2"><span class="fl">Precio ref.</span><span class="fv">'+a.precio+'</span></div>':'')+
+        (a.notas?'<div class="notes-box" style="margin-top:8px">'+a.notas+'</div>':'')+
+      '</div>'+
+      '<div>'+
+        '<div class="section-label" style="margin-bottom:10px">Documentación · '+st.ok+'/'+st.total+'</div>'+
+        (docsHtml||'<span style="color:var(--text3);font-size:13px">Sin documentos.</span>')+
+      '</div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px">'+
+      '<div class="section-label" style="margin-bottom:10px">Notas y seguimiento</div>'+
+      notasHtml+
+      '<div class="nota-add-row" style="margin-top:10px">'+
+        '<input type="text" id="nuevaNota'+num+'" placeholder="Agregar una nota..." onkeydown="if(event.key===\'Enter\')agregarNota('+num+')">'+
+        '<button class="btn sm primary" onclick="agregarNota('+num+')">+ Agregar</button>'+
+      '</div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)">'+
+      '<button class="btn sm" onclick="cerrar(\'ovDetLeg\');abrirModalLeg('+num+',true)">✏️ Editar</button>'+
+      '<button class="btn sm success" onclick="cerrar(\'ovDetLeg\');abrirVender('+num+')">🤝 Registrar venta</button>'+
+      '<button class="btn sm" onclick="exportarPdfLeg('+num+')">📄 Exportar PDF</button>'+
+      '<button class="btn sm danger" onclick="cerrar(\'ovDetLeg\');pedirElimLeg('+num+')">🗑 Liberar legajo</button>'+
+    '</div>';
+  g('ovDetLeg').classList.remove('hidden');
+}
+
+async function agregarNota(num) {
+  const inp=g('nuevaNota'+num);
+  if(!inp||!inp.value.trim()) return;
+  const l=legs.find(x=>x.num===num); if(!l||!l.auto) return;
+  if(!l.auto.notas_hilo) l.auto.notas_hilo=[];
+  l.auto.notas_hilo.push({ts:new Date().toISOString(),txt:inp.value.trim()});
+  await saveLeg(l);
+  abrirDetLeg(num);
+}
+
+// ═══ MODAL LEGAJO ═══
+function abrirModalLeg(num,editar=false) {
+  editLeg=num;
+  const l=legs.find(x=>x.num===num);
+  g('mLegTit').textContent=editar?'Editar legajo '+String(num).padStart(2,'0'):'Asignar auto — Legajo '+String(num).padStart(2,'0');
+  g('mLegNum').textContent='Legajo '+String(num).padStart(2,'0');
+  if(editar&&l.auto) {
+    const a=l.auto;
+    sv('lDom',a.dominio);sv('lVeh',a.vehiculo);sv('lCli',a.cliente);sv('lDni',a.dni);
+    sv('lFecha',a.fecha);sv('lPrecio',a.precio);sv('lVtv',a.vtv||'');sv('lVerif',a.verif||'');sv('lNotas',a.notas);calcularVerif();
+    docsTemp=JSON.parse(JSON.stringify(a.docs||[]));
+  } else {
+    ['lDom','lVeh','lCli','lDni','lPrecio','lVtv','lVerif','lNotas'].forEach(id=>sv(id,''));
+    if(g('lVerifCalc')) g('lVerifCalc').textContent='';
+    sv('lFecha',hoy()); docsTemp=DOCS_BASE.map(n=>({n,ok:false}));
+  }
+  renderDocsM(); g('ovLeg').classList.remove('hidden');
+}
+function calcularVerif() {
+  const fecha = gv('lVerif');
+  const div = g('lVerifCalc');
+  if(!fecha) { div.textContent = ''; return; }
+  const venc = sumarDiasHabiles(fecha, 150);
+  const st = verificEstado(fecha);
+  div.innerHTML = 'Vence: <strong>' + fmt(venc) + '</strong>' + (st && st.cls === 'verif-venc' ? ' <span style="color:var(--red)">⚠️ Ya vencida</span>' : st && st.cls === 'verif-prox' ? ' <span style="color:var(--orange)">⚠️ Próxima a vencer</span>' : '');
+}
+
+function renderDocsM() {
+  g('docsModalList').innerHTML=docsTemp.map((d,i)=>'<div class="dmi '+(d.ok?'on':'')+'"><div style="display:flex;align-items:center;gap:8px"><button class="toggle '+(d.ok?'on':'off')+'" onclick="toggleD('+i+')"></button><span>'+d.n+'</span></div><button class="btn xs danger" onclick="quitarD('+i+')">✕</button></div>').join('');
+}
+function toggleD(i){docsTemp[i].ok=!docsTemp[i].ok;renderDocsM();}
+function quitarD(i){docsTemp.splice(i,1);renderDocsM();}
+function agregarDocM(){const inp=g('nuevoDoc'),n=inp.value.trim();if(!n)return;docsTemp.push({n,ok:false});inp.value='';renderDocsM();}
+async function guardarLeg() {
+  const dom=gv('lDom').toUpperCase(), cli=gv('lCli');
+  if(!dom||!cli){alert('Dominio y propietario son obligatorios.');return;}
+  const l=legs.find(x=>x.num===editLeg);
+  const notasHiloExist=l.auto&&l.auto.notas_hilo?l.auto.notas_hilo:[];
+  l.libre=false;
+  const vtvNueva=gv('lVtv');
+  const vtvCambio=l.auto&&l.auto.vtv!==vtvNueva;
+  const verifNueva=gv('lVerif');
+  l.auto={dominio:dom,vehiculo:gv('lVeh'),cliente:cli,dni:gv('lDni'),fecha:gv('lFecha'),precio:gv('lPrecio'),vtv:vtvNueva,vtv_gestionada:vtvCambio?false:(l.auto&&l.auto.vtv_gestionada||false),verif:verifNueva,notas:gv('lNotas'),notas_hilo:notasHiloExist,docs:JSON.parse(JSON.stringify(docsTemp))};
+  mostrarCargando('Guardando...');
+  await saveLeg(l);
+  ocultarCargando();
+  cerrar('ovLeg');render();
+}
+
+// ═══ VENDER ═══
+function toggleVCon(){const c=gv('vCivil');g('vConBox').classList.toggle('hidden',c!=='casado'&&c!=='union');}
+function abrirVender(num) {
+  vendNum=num;
+  const l=legs.find(x=>x.num===num),a=l.auto;
+  g('venderInfo').innerHTML='<strong>Legajo '+String(num).padStart(2,'0')+'</strong> — '+a.cliente+'<br><span style="font-family:var(--mono)">'+a.dominio+'</span> · '+(a.vehiculo||'')+(a.precio?' · <strong>'+a.precio+'</strong>':'');
+  ['vComp','vDni','vDir','vTel','vMail','vOcup','vCoNom','vCoDni','vCoOcup','vHon','vNotas'].forEach(id=>sv(id,''));
+  sv('vPrecio',a.precio||'');sv('vCivil','');sv('vHonEst','pendiente-cobro');sv('vFecha',hoy());
+  g('vConBox').classList.add('hidden');g('ovVender').classList.remove('hidden');
+}
+async function confirmarVenta() {
+  const comp=gv('vComp');
+  if(!comp){alert('Ingresá el nombre del comprador.');return;}
+  const l=legs.find(x=>x.num===vendNum),a=l.auto;
+  const nums=trfs.map(t=>parseInt(t.id.replace('TRF-',''))||0);
+  const nn=String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+  const ts=new Date().toISOString();
+  const civil=gv('vCivil'),hasCon=civil==='casado'||civil==='union';
+  const compData={nombre:comp,dni:gv('vDni'),dir:gv('vDir'),tel:gv('vTel'),mail:gv('vMail'),civil,ocup:gv('vOcup'),conyuge:hasCon?{nombre:gv('vCoNom'),dni:gv('vCoDni'),ocup:gv('vCoOcup')}:null};
+  const nuevaTrf={id:'TRF-'+nn,vendedor:a.cliente,vendedorData:{nombre:a.cliente,dni:a.dni||''},comprador:comp,compradorData:compData,dominio:a.dominio,vehiculo:a.vehiculo||'',estado:'prep-doc',fecha:gv('vFecha'),precio:gv('vPrecio'),honorario:gv('vHon'),honorarioEst:gv('vHonEst'),legajoOrigen:vendNum,notas:gv('vNotas'),historial:[{estado:'prep-doc',label:'Preparando documentación',ts,nota:'Trámite creado al registrar la venta.'}],docs:[]};
+  trfs.unshift(nuevaTrf);
+  l.libre=true;l.auto=null;
+  mostrarCargando('Guardando venta...');
+  await saveTrf(nuevaTrf);
+  await saveLeg(l);
+  ocultarCargando();
+  cerrar('ovVender');render();
+  setTimeout(()=>alert('Venta registrada. Legajo '+String(vendNum).padStart(2,'0')+' liberado. Transferencia TRF-'+nn+' creada en seguimiento.'),80);
+}
+
+
+// ═══ TRANSFERENCIAS ═══
+let filtroTrfActivo = null;
+
+function filtTrfs() {
+  const q=(gv('searchTrf')||'').toLowerCase();
+  const est=gv('filtroTrf');
+  return trfs.filter(t=>{
+    const mq=!q||t.vendedor.toLowerCase().includes(q)||t.comprador.toLowerCase().includes(q)||t.dominio.toLowerCase().includes(q)||t.id.toLowerCase().includes(q);
+    const me=!est||t.estado===est;
+    let mf=true;
+    if(filtroTrfActivo==='en-curso') mf=t.estado!=='finalizada';
+    else if(filtroTrfActivo==='cobro-pend') mf=!!(t.honorario&&t.honorarioEst!=='cobrado');
+    else if(filtroTrfActivo) mf=t.estado===filtroTrfActivo;
+    return mq&&me&&mf;
+  });
+}
+
+function renderTrfRow(t) {
+  const op='';
+  return '<tr onclick="abrirDetTrf(\''+t.id+'\')" style="'+op+'">'+
+    '<td class="td-mono" style="color:var(--accent);font-weight:500">'+t.id+'</td>'+
+    '<td>'+t.vendedor+'</td><td>'+t.comprador+'</td>'+
+    '<td><span class="td-dom">'+t.dominio+'</span></td>'+
+    '<td style="color:var(--text2)">'+(t.vehiculo||'-')+'</td>'+
+    '<td style="font-weight:600;color:var(--accent)">'+(t.honorario||'-')+'</td>'+
+    '<td>'+(t.honorario?(t.honorarioEst==='cobrado'?'<span class="badge cobrado">Cobrado</span>':'<button class="btn xs primary" onclick="event.stopPropagation();marcarCobrado(\''+t.id+'\')" style="white-space:nowrap">&#x1F4B0; Cobrar</button>'):'-')+'</td>'+
+    '<td><span class="badge '+t.estado+'">'+ELABELS[t.estado]+'</span></td>'+
+    '<td class="td-mono" style="color:var(--text3)">'+fmt(t.fecha)+'</td>'+
+    '</tr>';
+}
+
+function renderTrfs() {
+  const c={};ESTADOS.forEach(e=>c[e]=0);trfs.forEach(t=>c[t.estado]=(c[t.estado]||0)+1);
+  const honPend=trfs.filter(t=>t.honorario&&t.honorarioEst!=='cobrado').length;
+  const enCurso=trfs.filter(t=>t.estado!=='finalizada').length;
+
+  const mkS=(f,cls,lbl,val)=>{
+    const act=filtroTrfActivo===f;
+    return '<div class="stat '+cls+' clickable'+(act?' activo':'')+'" data-f="'+f+'">'+
+      '<div class="stat-label">'+lbl+(act?' &times;':'')+' </div>'+
+      '<div class="stat-value">'+val+'</div></div>';
+  };
+  g('statsTrf').innerHTML=
+    '<div class="stat clickable'+(filtroTrfActivo===null?' activo':'')+'" data-f="">'+
+      '<div class="stat-label">Total'+(filtroTrfActivo===null?' &times;':'')+' </div>'+
+      '<div class="stat-value">'+trfs.length+'</div></div>'+
+    mkS('en-curso','blue','En curso',enCurso)+
+    mkS('en-escribania','blue','En escribanía',c['en-escribania']||0)+
+    mkS('en-gestoria','amber','En gestoría',c['en-gestoria']||0)+
+    mkS('para-entregar','blue','Para entregar',c['para-entregar']||0)+
+    mkS('finalizada','green','Finalizadas',c['finalizada']||0)+
+    mkS('cobro-pend','amber','Cobros pendientes',honPend);
+
+  g('statsTrf').querySelectorAll('.stat.clickable').forEach(el=>{
+    el.onclick=function(){
+      const f=this.getAttribute('data-f');
+      filtroTrfActivo=(f===''||filtroTrfActivo===f)?null:f;
+      renderTrfs();
+    };
+  });
+
+  const data=filtTrfs();
+  const tbody=g('tblTrf');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="9"><div class="no-data">No hay transferencias que coincidan.</div></td></tr>';return;}
+
+  const activas=data.filter(t=>t.estado!=='finalizada');
+  const finalizadas=data.filter(t=>t.estado==='finalizada');
+  let rows='';
+  if(activas.length&&finalizadas.length) {
+    rows=activas.map(renderTrfRow).join('');
+    rows+='<tr><td colspan="9" style="padding:6px 14px;background:var(--surface2);font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);border-top:2px solid var(--border)">Finalizadas</td></tr>';
+    rows+=finalizadas.map(renderTrfRow).join('');
+  } else {
+    rows=data.map(renderTrfRow).join('');
+  }
+  tbody.innerHTML=rows;
+}
+
+
+// ═══ DETALLE TRANSFERENCIA ═══
+function bloquePersona(titulo,p) {
+  if(!p||!p.nombre) return '';
+  const fr=(l,v)=>v?'<div class="fr2"><span class="fl">'+l+'</span><span class="fv">'+v+'</span></div>':'';
+  const conyuge=p.conyuge&&p.conyuge.nombre?'<div class="conyuge-box" style="margin-top:8px"><div class="conyuge-title">Cónyuge</div>'+fr('Nombre',p.conyuge.nombre)+fr('DNI',p.conyuge.dni)+fr('Actividad',p.conyuge.ocup)+'</div>':'';
+  return '<div><div class="section-label" style="margin-bottom:10px">'+titulo+'</div>'+fr('Nombre',p.nombre)+fr('DNI',p.dni)+fr('Dirección',p.dir)+fr('Teléfono',p.tel)+fr('Mail',p.mail)+fr('Estado civil',CIVIL_LABEL[p.civil]||p.civil)+fr('Ocupación',p.ocup)+conyuge+'</div>';
+}
+
+function abrirDetTrf(id) {
+  const t=trfs.find(x=>x.id===id);if(!t) return;
+  const hist=t.historial||[];
+  const histHtml=hist.length
+    ?[...hist].reverse().map((h,i)=>{
+        const isLast=i===hist.length-1;
+        return '<div class="tl-item"><div class="tl-dot-wrap"><div class="tl-dot '+(i===0?'current':'done')+'"></div>'+(!isLast?'<div class="tl-line"></div>':'')+'</div><div class="tl-content"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span class="badge '+h.estado+'">'+h.label+'</span><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+fmtTs(h.ts)+'</span></div>'+(h.nota?'<div style="font-size:12px;color:var(--text2);margin-top:3px">'+h.nota+'</div>':'')+'</div></div>';
+      }).join('')
+    :'<span style="font-size:13px;color:var(--text3)">Sin movimientos registrados.</span>';
+  const vD=t.vendedorData||{nombre:t.vendedor};
+  const cD=t.compradorData||{nombre:t.comprador};
+  const puedeEliminar=t.estado==='prep-doc';
+
+  // Docs checklist
+  const docsOk = (t.docs||[]).filter(d=>d.ok).length;
+  const docsTotal = (t.docs||[]).length;
+  const docsHtml = docsTotal
+    ? '<div style="margin-bottom:16px">'+
+      '<div class="section-label" style="margin-bottom:10px">Documentación · '+docsOk+'/'+docsTotal+'</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:5px">'+
+      (t.docs||[]).map(d=>
+        '<div class="doc-item '+(d.ok?'ok':'falta')+'" style="margin-bottom:0">'+
+        '<div style="display:flex;align-items:center"><span class="doc-dot '+(d.ok?'ok':'falta')+'"></span>'+d.n+'</div>'+
+        '<span style="font-size:11px;font-weight:500;color:'+(d.ok?'var(--green)':'var(--red)')+';">'+(d.ok?'✓':'✗')+'</span>'+
+        '</div>'
+      ).join('')+
+      '</div></div>'
+    : '';
+
+  g('detTrfBody').innerHTML=
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">'+
+      '<div><div style="font-family:var(--mono);font-size:12px;color:var(--text2);margin-bottom:3px">'+t.id+' · '+fmt(t.fecha)+(t.legajoOrigen?' · Leg. '+String(t.legajoOrigen).padStart(2,'0'):'')+' </div><div style="font-size:16px;font-weight:600">'+t.vendedor+' → '+t.comprador+'</div><div style="font-size:13px;color:var(--text2);font-family:var(--mono)">'+t.dominio+' · '+(t.vehiculo||'')+'</div></div>'+
+      '<span class="badge '+t.estado+'">'+ELABELS[t.estado]+'</span>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">'+bloquePersona('Vendedor',vD)+bloquePersona('Comprador',cD)+'</div>'+
+    docsHtml+
+    ((t.precio||t.honorario||t.notas)
+      ?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px"><div><div class="section-label" style="margin-bottom:10px">Valores</div>'+(t.precio?'<div class="fr2"><span class="fl">Precio del auto</span><span class="fv">'+t.precio+'</span></div>':'')+(t.honorario?'<div class="fr2"><span class="fl">Precio de transferencia</span><span class="fv transferencia-val">'+t.honorario+'</span></div>':'')+(t.honorario?'<div class="fr2"><span class="fl">Estado cobro</span><span class="fv"><span class="badge '+(t.honorarioEst||'pendiente-cobro')+'">'+(t.honorarioEst==='cobrado'?'Cobrado':'Pendiente de cobro')+'</span></span></div>':'')+(t.notas?'<div class="notes-box" style="margin-top:8px">'+t.notas+'</div>':'')+'</div><div><div class="section-label" style="margin-bottom:10px">Historial de movimientos</div><div class="tl">'+histHtml+'</div></div></div>'
+      :'<div><div class="section-label" style="margin-bottom:10px">Historial de movimientos</div><div class="tl">'+histHtml+'</div></div>')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">'+
+      '<button class="btn sm" onclick="cerrar(\'ovDetTrf\');abrirModalTrf(\''+t.id+'\')">✏️ Editar</button>'+
+      '<button class="btn sm" onclick="cerrar(\'ovDetTrf\');avanzarTrf(\''+t.id+'\')">→ Avanzar estado</button>'+
+      (t.honorario&&t.honorarioEst!=='cobrado'?'<button class="btn sm success" onclick="marcarCobrado(\''+t.id+'\')">💰 Marcar cobrado</button>':'')+
+      '<button class="btn sm" onclick="exportarPdfTrf(\''+t.id+'\')">📄 Exportar PDF</button>'+
+      (puedeEliminar?'<button class="btn sm danger" onclick="cerrar(\'ovDetTrf\');pedirElimTrf(\''+t.id+'\')">🗑 Eliminar</button>':'<span style="font-size:12px;color:var(--text3);font-style:italic">🔒 No se puede eliminar — ya en escribanía</span>')+
+    '</div>';
+  g('ovDetTrf').classList.remove('hidden');
+}
+
+
+function renderTDocsM() {
+  const el = g('tDocsModalList');
+  if(!el) return;
+  el.innerHTML = tDocsTemp.map((d,i) =>
+    '<div class="dmi '+(d.ok?'on':'')+'">'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+    '<button class="toggle '+(d.ok?'on':'off')+'" onclick="toggleTD('+i+')"></button>'+
+    '<span>'+d.n+'</span></div>'+
+    '<button class="btn xs danger" onclick="quitarTD('+i+')">✕</button></div>'
+  ).join('');
+}
+function toggleTD(i) { tDocsTemp[i].ok=!tDocsTemp[i].ok; renderTDocsM(); }
+function quitarTD(i) { tDocsTemp.splice(i,1); renderTDocsM(); }
+function agregarTDoc() {
+  const inp=g('tNuevoDoc'), n=inp.value.trim();
+  if(!n) return;
+  tDocsTemp.push({n,ok:false}); inp.value=''; renderTDocsM();
+}
+
+function switchTab(tab){g('panelVend').classList.toggle('hidden',tab!=='vend');g('panelComp').classList.toggle('hidden',tab!=='comp');g('ptabVend').classList.toggle('active',tab==='vend');g('ptabComp').classList.toggle('active',tab==='comp');}
+function toggleCon(pre){const c=gv('t'+pre+'Civil');g('t'+pre+'ConBox').classList.toggle('hidden',c!=='casado'&&c!=='union');}
+function getPersona(pre){const civil=gv('t'+pre+'Civil'),hasCon=civil==='casado'||civil==='union';return{nombre:gv('t'+pre+'Nom'),dni:gv('t'+pre+'Dni'),dir:gv('t'+pre+'Dir'),tel:gv('t'+pre+'Tel'),mail:gv('t'+pre+'Mail'),civil,ocup:gv('t'+pre+'Ocup'),conyuge:hasCon?{nombre:gv('t'+pre+'CoNom'),dni:gv('t'+pre+'CoDni'),ocup:gv('t'+pre+'CoOcup')}:null};}
+function setPersona(pre,p){if(!p)return;sv('t'+pre+'Nom',p.nombre);sv('t'+pre+'Dni',p.dni);sv('t'+pre+'Dir',p.dir);sv('t'+pre+'Tel',p.tel);sv('t'+pre+'Mail',p.mail);sv('t'+pre+'Civil',p.civil||'');sv('t'+pre+'Ocup',p.ocup);toggleCon(pre);if(p.conyuge){sv('t'+pre+'CoNom',p.conyuge.nombre);sv('t'+pre+'CoDni',p.conyuge.dni);sv('t'+pre+'CoOcup',p.conyuge.ocup);}}
+function limpiarPersona(pre){['Nom','Dni','Dir','Tel','Mail','Ocup','CoNom','CoDni','CoOcup'].forEach(s=>sv('t'+pre+s,''));sv('t'+pre+'Civil','');toggleCon(pre);}
+function abrirModalTrf(id) {
+  editTrf=id||null;switchTab('vend');
+  if(id){const t=trfs.find(x=>x.id===id);g('mTrfTit').textContent='Editar '+id;sv('tDom',t.dominio);sv('tVeh',t.vehiculo);sv('tEst',t.estado);sv('tFecha',t.fecha);sv('tPrecio',t.precio||'');sv('tHon',t.honorario||'');sv('tHonEst',t.honorarioEst||'pendiente-cobro');sv('tNotas',t.notas||'');setPersona('V',t.vendedorData||{nombre:t.vendedor});setPersona('C',t.compradorData||{nombre:t.comprador});tDocsTemp=t.docs?JSON.parse(JSON.stringify(t.docs)):DOCS_BASE.map(n=>({n,ok:false}));}
+  else{g('mTrfTit').textContent='Nueva transferencia';['tDom','tVeh','tPrecio','tHon','tNotas'].forEach(id2=>sv(id2,''));sv('tEst','prep-doc');sv('tFecha',hoy());sv('tHonEst','pendiente-cobro');limpiarPersona('V');limpiarPersona('C');tDocsTemp=DOCS_BASE.map(n=>({n,ok:false}));}
+  g('ovTrf').classList.remove('hidden');
+  setTimeout(renderTDocsM, 0);
+}
+async function guardarTrf() {
+  const vD=getPersona('V'),cD=getPersona('C'),dom=gv('tDom').toUpperCase();
+  if(!vD.nombre||!cD.nombre||!dom){alert('Nombre del vendedor, comprador y dominio son obligatorios.');return;}
+  const data={vendedor:vD.nombre,vendedorData:vD,comprador:cD.nombre,compradorData:cD,dominio:dom,vehiculo:gv('tVeh'),estado:gv('tEst'),fecha:gv('tFecha'),precio:gv('tPrecio'),honorario:gv('tHon'),honorarioEst:gv('tHonEst'),notas:gv('tNotas'),docs:JSON.parse(JSON.stringify(tDocsTemp))};
+  mostrarCargando('Guardando...');
+  if(editTrf){
+    Object.assign(trfs.find(x=>x.id===editTrf),data);
+    await saveTrf(trfs.find(x=>x.id===editTrf));
+  } else {
+    const nums=trfs.map(t=>parseInt(t.id.replace('TRF-',''))||0);
+    const nn=String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+    const ts=new Date().toISOString();
+    const nueva={id:'TRF-'+nn,...data,legajoOrigen:null,historial:[{estado:data.estado,label:ELABELS[data.estado],ts,nota:'Trámite creado manualmente.'}]};
+    trfs.unshift(nueva);
+    await saveTrf(nueva);
+  }
+  ocultarCargando();
+  cerrar('ovTrf');render();
+}
+async function avanzarTrf(id) {
+  const t=trfs.find(x=>x.id===id);
+  const idx=ESTADOS.indexOf(t.estado);
+  if(idx>=ESTADOS.length-1){alert('Este trámite ya está finalizado.');return;}
+  if(!confirm('¿Avanzar el trámite '+t.id+'?\n\nEstado actual: '+ELABELS[t.estado]+'\nNuevo estado: '+ELABELS[ESTADOS[idx+1]]+'\n\nConfirmá solo si el cambio es correcto.')) return;
+  t.estado=ESTADOS[idx+1];
+  if(!t.historial) t.historial=[];
+  t.historial.push({estado:t.estado,label:ELABELS[t.estado],ts:new Date().toISOString(),nota:''});
+  mostrarCargando('Actualizando estado...');
+  await saveTrf(t);
+  ocultarCargando();
+  render();
+}
+async function marcarCobrado(id) {
+  const t=trfs.find(x=>x.id===id);if(!t) return;
+  if(!confirm('¿Marcar el precio de transferencia de '+t.id+' ('+t.honorario+') como COBRADO?')) return;
+  t.honorarioEst='cobrado';
+  if(!t.historial) t.historial=[];
+  t.historial.push({estado:t.estado,label:'Precio de transferencia cobrado',ts:new Date().toISOString(),nota:'Monto cobrado: '+t.honorario});
+  mostrarCargando('Guardando...');
+  await saveTrf(t);
+  ocultarCargando();
+  cerrar('ovDetTrf');render();
+}
+
+// ═══ EXPORTAR PDF ═══
+function exportarPdfLeg(num) {
+  const l=legs.find(x=>x.num===num);if(!l||!l.auto) return;
+  const a=l.auto,st=docSt(l),n=String(num).padStart(2,'0');
+  const vtv=vtvEstado(a.vtv);
+  const docsHtml=(a.docs||[]).map(d=>'<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">'+(d.ok?'✅':'❌')+'</td><td style="padding:6px 10px;border-bottom:1px solid #eee">'+d.n+'</td></tr>').join('');
+  const notasHtml=(a.notas_hilo||[]).map(nt=>'<div style="margin-bottom:8px;padding:8px;background:#f8f8f8;border-radius:4px"><div style="font-size:11px;color:#888;margin-bottom:2px">'+fmtTs(nt.ts)+'</div><div>'+nt.txt+'</div></div>').join('');
+  const win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Legajo '+n+'</title><style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1917;margin:40px}h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#444;border-bottom:2px solid #1a4a8a;padding-bottom:6px;margin:20px 0 10px}table{width:100%;border-collapse:collapse}.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0efe9}.label{color:#666}.val{font-weight:600}@media print{body{margin:20px}}</style></head><body>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+      '<div><h1>Legajo '+n+' — '+a.dominio+'</h1><div style="color:#666;font-size:12px">Generado el '+fmt(hoy())+'</div></div>'+
+      '<div style="text-align:right;font-size:12px;color:#666">Gestoría — Agencia</div>'+
+    '</div>'+
+    '<h2>Datos del vehículo</h2>'+
+    '<div class="row"><span class="label">Propietario</span><span class="val">'+a.cliente+'</span></div>'+
+    '<div class="row"><span class="label">DNI / CUIT</span><span class="val">'+(a.dni||'-')+'</span></div>'+
+    '<div class="row"><span class="label">Dominio</span><span class="val">'+a.dominio+'</span></div>'+
+    '<div class="row"><span class="label">Vehículo</span><span class="val">'+(a.vehiculo||'-')+'</span></div>'+
+    '<div class="row"><span class="label">Fecha de ingreso</span><span class="val">'+fmt(a.fecha)+'</span></div>'+
+    (a.vtv?'<div class="row"><span class="label">Vencimiento VTV</span><span class="val" style="color:'+(vtv&&vtv.cls==='vtv-venc'?'#8b1c1c':vtv&&vtv.cls==='vtv-prox'?'#b84f00':'#2d6a30')+'">'+fmt(a.vtv)+(vtv?' ('+vtv.label+')':'')+'</span></div>':'')+
+    (a.precio?'<div class="row"><span class="label">Precio de referencia</span><span class="val">'+a.precio+'</span></div>':'')+
+    '<h2>Documentación ('+st.ok+'/'+st.total+')</h2>'+
+    '<table><tbody>'+docsHtml+'</tbody></table>'+
+    (a.notas?'<h2>Notas</h2><p>'+a.notas+'</p>':'')+
+    (notasHtml?'<h2>Seguimiento y notas</h2>'+notasHtml:'')+
+    '<scr'+'ipt>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+function exportarPdfTrf(id) {
+  const t=trfs.find(x=>x.id===id);if(!t) return;
+  const vD=t.vendedorData||{nombre:t.vendedor};
+  const cD=t.compradorData||{nombre:t.comprador};
+  function bloqueH(titulo,p){
+    if(!p||!p.nombre) return '';
+    const fr=(l,v)=>v?'<div class="row"><span class="label">'+l+'</span><span class="val">'+v+'</span></div>':'';
+    const con=p.conyuge&&p.conyuge.nombre?'<div style="margin-top:8px;padding:8px;background:#f8f8f8;border-radius:4px"><strong style="font-size:12px">Cónyuge</strong>'+fr('Nombre',p.conyuge.nombre)+fr('DNI',p.conyuge.dni)+fr('Actividad',p.conyuge.ocup)+'</div>':'';
+    return '<h3 style="font-size:13px;color:#1a4a8a;margin:12px 0 8px">'+titulo+'</h3>'+fr('Nombre',p.nombre)+fr('DNI',p.dni)+fr('Dirección',p.dir)+fr('Teléfono',p.tel)+fr('Mail',p.mail)+fr('Estado civil',CIVIL_LABEL[p.civil]||p.civil)+fr('Ocupación',p.ocup)+con;
+  }
+  const histHtml=(t.historial||[]).map(h=>'<div style="margin-bottom:8px;display:flex;gap:12px;align-items:flex-start"><span class="badge '+h.estado+'" style="white-space:nowrap;font-size:11px">'+h.label+'</span><span style="font-size:11px;color:#888">'+fmtTs(h.ts)+(h.nota?' — '+h.nota:'')+'</span></div>').join('');
+  const win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Transferencia '+t.id+'</title><style>body{font-family:Arial,sans-serif;font-size:13px;color:#1a1917;margin:40px}h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#444;border-bottom:2px solid #1a4a8a;padding-bottom:6px;margin:20px 0 10px}.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0efe9}.label{color:#666}.val{font-weight:600}.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}@media print{body{margin:20px}}</style></head><body>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+      '<div><h1>Transferencia '+t.id+'</h1><div style="color:#666;font-size:12px">'+t.dominio+' · '+(t.vehiculo||'')+'</div><div style="color:#666;font-size:12px">Generado el '+fmt(hoy())+'</div></div>'+
+      '<div style="text-align:right;font-size:12px;color:#666">Gestoría — Agencia</div>'+
+    '</div>'+
+    '<h2>Datos generales</h2>'+
+    '<div class="row"><span class="label">Estado</span><span class="val">'+ELABELS[t.estado]+'</span></div>'+
+    '<div class="row"><span class="label">Fecha</span><span class="val">'+fmt(t.fecha)+'</span></div>'+
+    (t.legajoOrigen?'<div class="row"><span class="label">Legajo de origen</span><span class="val">'+String(t.legajoOrigen).padStart(2,'0')+'</span></div>':'')+
+    (t.precio?'<div class="row"><span class="label">Precio de venta del auto</span><span class="val">'+t.precio+'</span></div>':'')+
+    (t.honorario?'<div class="row"><span class="label">Precio de transferencia</span><span class="val">'+t.honorario+'</span></div>':'')+
+    (t.honorario?'<div class="row"><span class="label">Estado del cobro</span><span class="val">'+(t.honorarioEst==='cobrado'?'Cobrado':'Pendiente de cobro')+'</span></div>':'')+
+    '<h2>Partes involucradas</h2>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'+bloqueH('Vendedor',vD)+bloqueH('Comprador',cD)+'</div>'+
+    (t.notas?'<h2>Notas</h2><p>'+t.notas+'</p>':'')+
+    (histHtml?'<h2>Historial de movimientos</h2>'+histHtml:'')+
+    '<scr'+'ipt>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+// ═══ ELIMINAR ═══
+function pedirElimLeg(num) {
+  elimTarget={tipo:'leg',num};
+  const l=legs.find(x=>x.num===num);
+  g('elimTit').textContent='Liberar legajo';g('elimBox').textContent='⚠️ Esta acción no se puede deshacer.';
+  g('elimTxt').textContent='Vas a liberar el legajo '+String(num).padStart(2,'0')+' — '+(l.auto&&l.auto.cliente||'')+'. Se perderá toda la información del auto.';
+  g('elimRevSection').classList.add('hidden');g('ovElim').classList.remove('hidden');
+}
+function pedirElimTrf(id) {
+  const t=trfs.find(x=>x.id===id);
+  const bloqueados=['en-escribania','retirado','en-gestoria','para-entregar','finalizada'];
+  if(bloqueados.includes(t.estado)){alert('No se puede eliminar esta transferencia.\n\nUna vez que la documentación ingresó a la escribanía, el trámite no tiene vuelta atrás.\n\nEstado actual: '+ELABELS[t.estado]);return;}
+  elimTarget={tipo:'trf',id};
+  g('elimTit').textContent='Eliminar transferencia';g('elimBox').textContent='⚠️ Esta acción no se puede deshacer.';
+  g('elimTxt').textContent='Transferencia '+id+' — '+t.vendedor+' → '+t.comprador+' — '+t.dominio+(t.vehiculo?' ('+t.vehiculo+')':'');
+  const revSec=g('elimRevSection');
+  if(t.legajoOrigen&&t.vendedorData){
+    revSec.classList.remove('hidden');
+    const legOrig=legs.find(x=>x.num===t.legajoOrigen);
+    const origLibre=legOrig&&legOrig.libre;
+    const sel=g('elimLegSel');
+    sel.innerHTML='<option value="">No restaurar (solo eliminar la transferencia)</option>';
+    if(origLibre) sel.innerHTML+='<option value="'+t.legajoOrigen+'" selected>Legajo '+String(t.legajoOrigen).padStart(2,'0')+' — original (disponible)</option>';
+    legs.filter(l=>l.libre&&l.num!==t.legajoOrigen).forEach(l=>{sel.innerHTML+='<option value="'+l.num+'">Legajo '+String(l.num).padStart(2,'0')+' — disponible</option>';});
+    g('elimAutoInfo').innerHTML=!origLibre&&t.legajoOrigen?'⚠️ El legajo original <strong>'+String(t.legajoOrigen).padStart(2,'0')+'</strong> ya está ocupado. Seleccioná un legajo disponible para restaurar el auto, o elegí "No restaurar".':'';
+    g('elimLegLabel').textContent='Legajo donde restaurar: '+t.dominio+(t.vehiculo?' – '+t.vehiculo:'')+' ('+t.vendedorData.nombre+')';
+  } else revSec.classList.add('hidden');
+  g('ovElim').classList.remove('hidden');
+}
+async function ejecutarElim() {
+  if(!elimTarget) return;
+  mostrarCargando('Eliminando...');
+  if(elimTarget.tipo==='leg'){
+    const l=legs.find(x=>x.num===elimTarget.num);l.libre=true;l.auto=null;
+    await saveLeg(l);
+    ocultarCargando();cerrar('ovElim');render();
+  } else {
+    const t=trfs.find(x=>x.id===elimTarget.id);
+    const legNumStr=gv('elimLegSel');
+    const legNum=legNumStr?parseInt(legNumStr):null;
+    if(legNum&&t&&t.vendedorData){
+      const legDest=legs.find(x=>x.num===legNum);
+      if(legDest&&legDest.libre){
+        legDest.libre=false;
+        legDest.auto={dominio:t.dominio,vehiculo:t.vehiculo||'',cliente:t.vendedorData.nombre||t.vendedor,dni:t.vendedorData.dni||'',fecha:t.fecha||hoy(),precio:t.precio||'',vtv:'',notas:'Restaurado al anular la transferencia '+t.id+'.',notas_hilo:[],docs:DOCS_BASE.map(n=>({n,ok:false}))};
+        await saveLeg(legDest);
+      }
+    }
+    await sbDelete('transferencias','id',elimTarget.id);
+    trfs=trfs.filter(x=>x.id!==elimTarget.id);
+    ocultarCargando();cerrar('ovElim');render();
+    if(legNum) setTimeout(()=>alert('Transferencia eliminada. Auto restaurado al legajo '+String(legNum).padStart(2,'0')+'.'),80);
+  }
+}
+
+// ═══ HELPERS ═══
+function cerrar(id){g(id).classList.add('hidden');}
+document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov) ov.classList.add('hidden');}));
+g('searchTrf').addEventListener('input',render);
+g('filtroTrf').addEventListener('change',render);
+
+function render(){if(pagActiva==='legajos') renderLegs(); else renderTrfs();}
+cargarDatos();
+</script>
+<!-- NOTIFICACIONES -->
+<div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
+  <div style="background:#fff;border-radius:14px;width:380px;max-height:500px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);">
+    <div style="padding:16px 20px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;align-items:center;">
+      <b>Notificaciones</b>
+      <div style="display:flex;gap:10px;">
+        <button onclick="marcarTodasLeidas()" style="font-size:0.75rem;color:#2558a3;background:none;border:none;cursor:pointer;">Marcar leidas</button>
+        <button onclick="cerrarNotifs()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;">X</button>
+      </div>
+    </div>
+    <div id="notifsLista" style="padding:8px 0;"><div style="text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;">Cargando...</div></div>
+  </div>
+</div>
+<div id="toastNotif" style="display:none;position:fixed;bottom:24px;right:24px;background:#1a1917;color:#fff;border-radius:12px;padding:14px 18px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;">
+  <div style="font-weight:600;font-size:0.88rem;margin-bottom:4px;" id="toastTitulo"></div>
+  <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
+</div>
+<script>
+var _notifs=[];
+function getRolNotif(){return(window._session&&window._session.rol)||"gestoria";}
+async function cargarNotifs(){try{var r=await sbGet("notificaciones","select=*&para=eq."+getRolNotif()+"&order=created_at.desc&limit=50");_notifs=r||[];renderNotifs();actualizarCampanita();mostrarToastsSinLeer();}catch(e){console.error(e);}}
+function actualizarCampanita(){var n=_notifs.filter(function(x){return !x.leida;}).length,el=document.getElementById("bellCount");if(el){if(n>0){el.style.display="inline-block";el.textContent=n>9?"9+":String(n);}else{el.style.display="none";}}}
+function mostrarToastsSinLeer(){var nl=_notifs.filter(function(x){return !x.leida;});if(!nl.length)return;var n=nl[0],t=document.getElementById("toastNotif");if(!t)return;document.getElementById("toastTitulo").textContent=n.titulo;document.getElementById("toastMensaje").textContent=n.mensaje;t.style.display="block";setTimeout(function(){t.style.display="none";},5000);}
+function renderNotifs(){var lista=document.getElementById("notifsLista");if(!lista)return;if(!_notifs.length){lista.innerHTML="<div style='text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;'>Sin notificaciones</div>";return;}var html="";_notifs.forEach(function(n){var bg=n.leida?"#fff":"#f0f4ff",fw=n.leida?"400":"600",ts="";if(n.created_at){var d=new Date(n.created_at);ts=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}html+="<div onclick='marcarLeida("+n.id+")' style='padding:14px 20px;border-bottom:1px solid #f8f6f0;cursor:pointer;background:"+bg+";'><div style='display:flex;justify-content:space-between;'><div style='font-weight:"+fw+";font-size:0.85rem;'>"+n.titulo+"</div><div style='font-size:0.7rem;color:#9b9890;'>"+ts+"</div></div><div style='font-size:0.8rem;color:#6b6960;margin-top:4px;'>"+n.mensaje+"</div>"+(n.leida?"":"<div style='width:8px;height:8px;background:#2558a3;border-radius:50%;margin-top:6px;'></div>")+"</div>";});lista.innerHTML=html;}
+async function marcarLeida(id){await fetch(SB_URL+"/rest/v1/notificaciones?id=eq."+id,{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});var n=_notifs.find(function(x){return x.id===id;});if(n)n.leida=true;renderNotifs();actualizarCampanita();}
+async function marcarTodasLeidas(){await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+getRolNotif()+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
+function abrirNotifs(){document.getElementById("modalNotifs").style.display="flex";cargarNotifs();}
+function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
+document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
+setInterval(cargarNotifs,30000);
+cargarDatos().then(function(){cargarNotifs();});
+</script>
+
+</body>
+</html>

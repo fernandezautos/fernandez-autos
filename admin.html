@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador — Fernandez Autos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#eeede8; --surface:#ffffff; --surface2:#f4f3ee; --border:#dedad0; --border2:#c5c1b5;
+  --text:#16150f; --muted:#6b6960; --text3:#9b9890;
+  --accent:#1a4a8a; --accent-bg:#e8eef8; --accent-dark:#0f2d5a; --accent-mid:#2558a3;
+  --green:#2d6a30; --green-bg:#e8f5e9; --green-border:#b8e0bb;
+  --red:#8b1c1c; --red-bg:#fdecea; --red-border:#f0c8c8;
+  --amber:#854f0b; --amber-bg:#fef3e2; --amber-border:#f0d090;
+  --purple:#4a2d8a; --purple-bg:#eeebf8;
+  --lime-text:#3a5c00; --lime-bg:#f0f7d4; --lime-border:#c8e080;
+  --mono:Arial, sans-serif; --sans:Arial, sans-serif; --serif:Arial, sans-serif;
+  --radius:12px; --r:7px; --rlg:12px;
+  --sh:0 1px 2px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.05);
+  --sh-md:0 4px 20px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:15px;line-height:1.55;font-weight:400;}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,#111009 0%,#1a1917 60%,#1e1c1a 100%);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px;height:58px;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.logo{font-family:var(--serif);font-size:1.18rem;color:#fff;display:flex;align-items:center;gap:12px;font-weight:400;}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent-mid),var(--accent-dark));border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;letter-spacing:-1px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,74,138,.5);}
+.logo span{color:rgba(255,255,255,.38);font-style:normal;font-size:0.75rem;font-family:var(--mono);margin-left:2px;}
+nav{display:flex;gap:0;flex-wrap:wrap;height:100%;}
+nav button{background:none;border:none;border-bottom:2.5px solid transparent;color:rgba(255,255,255,.48);font-family:var(--sans);font-size:0.86rem;font-weight:500;padding:0 16px;cursor:pointer;transition:all .18s;height:100%;letter-spacing:.01em;}
+nav button:hover{color:rgba(255,255,255,.85);}
+nav button.active{color:#fff;border-bottom-color:var(--accent-mid);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.admin-chip{font-family:var(--mono);font-size:0.72rem;font-weight:500;color:rgba(255,255,255,.5);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:4px 11px;border-radius:20px;}
+.fecha-header{font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,.3);}
+
+main{max-width:1600px;margin:0 auto;padding:28px 32px;}
+.section{display:none;} .section.active{display:block;}
+
+.page-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+.page-head h2{font-family:var(--serif);font-size:1.65rem;letter-spacing:-.02em;font-weight:400;}
+.page-head-sub{font-size:0.84rem;color:var(--muted);font-weight:400;}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:24px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-mid));opacity:0;transition:opacity .2s;}
+.card:hover::before{opacity:1;}
+.card-label{font-size:0.69rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted);margin-bottom:8px;font-family:var(--mono);font-weight:600;}
+.card-value{font-family:var(--mono);font-size:1.3rem;font-weight:600;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card-value.pos{color:var(--green);} .card-value.neg{color:var(--red);}
+.card-value.neu{color:var(--accent);} .card-value.amb{color:var(--amber);}
+.card-value.pur{color:var(--purple);} .card-value.lime{color:var(--lime-text);}
+.card-value.muted{color:var(--muted);}
+
+/* DIST BAR */
+.dist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.dist-item:last-child{border-bottom:none;}
+.dist-label{font-size:0.84rem;font-weight:500;width:110px;flex-shrink:0;}
+.dist-bar-wrap{flex:1;height:7px;background:var(--surface2);border-radius:4px;}
+.dist-bar-fill{height:7px;border-radius:4px;background:var(--accent);}
+.dist-count{font-family:var(--mono);font-size:0.82rem;font-weight:600;color:var(--accent);width:24px;text-align:right;flex-shrink:0;}
+.dist-sub{font-family:var(--mono);font-size:0.72rem;color:var(--muted);width:50px;text-align:right;flex-shrink:0;}
+.card-sub{font-size:0.75rem;color:var(--muted);margin-top:5px;font-weight:400;}
+
+.fc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:18px;box-shadow:var(--sh);}
+.fc-title{font-family:var(--serif);font-size:1.18rem;margin-bottom:18px;color:var(--text);letter-spacing:-.02em;font-weight:400;}
+.fc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.fc-header .fc-title{margin-bottom:0;}
+
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:800px){.fg2,.fg3{grid-template-columns:1fr;}}
+
+.sys-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;margin-bottom:0;}
+.sys-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--sh);overflow:hidden;transition:box-shadow .18s;}
+.sys-card:hover{box-shadow:var(--sh-md);}
+.sys-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;}
+.sys-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.75rem;font-weight:600;flex-shrink:0;}
+.sys-icon.acc{background:var(--accent-bg);color:var(--accent);border:1px solid #c0d0e8;}
+.sys-icon.lime{background:var(--lime-bg);color:var(--lime-text);border:1px solid var(--lime-border);}
+.sys-icon.amb{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.sys-name{font-family:var(--serif);font-size:1.08rem;font-weight:400;color:var(--text);margin-bottom:3px;letter-spacing:-.01em;}
+.sys-desc{font-size:0.78rem;font-weight:500;color:var(--muted);}
+.sys-status{margin-left:auto;font-family:var(--mono);font-size:0.68rem;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;align-self:flex-start;}
+.sys-status.ok{background:var(--green-bg);color:var(--green);}
+.sys-status.warn{background:var(--amber-bg);color:var(--amber);}
+.sys-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border);}
+.sys-stat{padding:14px 16px;border-right:1px solid var(--border);}
+.sys-stat:last-child{border-right:none;}
+.ss-label{font-family:var(--mono);font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:5px;}
+.ss-val{font-family:var(--mono);font-size:1.2rem;font-weight:600;}
+.sys-foot{padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sys-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.sys-tag{font-family:var(--mono);font-size:0.65rem;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:3px 8px;border-radius:4px;}
+
+.btn{padding:8px 18px;border-radius:var(--r);border:1.5px solid var(--border2);font-family:var(--sans);font-size:0.84rem;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--text);text-decoration:none;letter-spacing:.01em;}
+.btn:hover{background:var(--surface2);border-color:var(--border2);}
+.btn-a{background:linear-gradient(135deg,var(--accent-mid),var(--accent));color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(26,74,138,.25);} .btn-a:hover{background:linear-gradient(135deg,var(--accent),var(--accent-dark));box-shadow:0 4px 14px rgba(26,74,138,.35);}
+.btn-sm{padding:5px 13px;font-size:0.8rem;}
+
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 16px;text-align:left;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted);border-bottom:1.5px solid var(--border);background:var(--surface2);font-family:var(--mono);font-weight:700;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+tbody tr:hover{background:var(--surface2);}
+tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
+.empty-row td{text-align:center;padding:28px;color:var(--muted);font-size:0.85rem;}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.68rem;font-weight:600;font-family:var(--mono);}
+.b-ok{background:var(--green-bg);color:var(--green);}
+.b-warn{background:var(--amber-bg);color:var(--amber);}
+.b-err{background:var(--red-bg);color:var(--red);}
+.b-info{background:var(--accent-bg);color:var(--accent);}
+.b-neu{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.b-pur{background:var(--purple-bg);color:var(--purple);}
+
+.alert-banner{border-radius:var(--rlg);padding:13px 18px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;}
+.alert-banner.err{background:var(--red-bg);border:1px solid var(--red-border);}
+.alert-banner.warn{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.alert-banner.info{background:var(--accent-bg);border:1px solid #b8ccec;}
+.alert-icon{font-size:0.9rem;flex-shrink:0;margin-top:2px;}
+.alert-text{font-size:0.88rem;line-height:1.55;font-weight:400;}
+
+.act-item{display:flex;align-items:flex-start;gap:11px;padding:13px 20px;border-bottom:1px solid var(--border);transition:background .1s;}
+.act-item:last-child{border-bottom:none;}
+.act-item:hover{background:var(--surface2);}
+.act-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.act-dot.acc{background:var(--accent);} .act-dot.grn{background:var(--green);}
+.act-dot.amb{background:var(--amber);} .act-dot.red{background:var(--red);}
+.act-dot.pur{background:var(--purple);}
+.act-body{flex:1;}
+.act-text{font-size:0.88rem;font-weight:400;}
+.act-text strong{font-weight:600;}
+.act-meta{font-family:var(--mono);font-size:0.7rem;color:var(--text3);margin-top:3px;}
+.act-src{font-family:var(--mono);font-size:0.63rem;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;align-self:flex-start;margin-top:2px;}
+.act-src.cv{background:var(--accent-bg);color:var(--accent);}
+.act-src.cp{background:var(--lime-bg);color:var(--lime-text);}
+.act-src.gt{background:var(--amber-bg);color:var(--amber);}
+
+.qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.qa-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 13px;cursor:pointer;transition:all .15s;text-align:left;}
+.qa-btn:hover{border-color:var(--accent);background:var(--accent-bg);}
+.qa-ico{font-size:1rem;margin-bottom:5px;}
+.qa-label{font-size:0.79rem;font-weight:500;color:var(--text);}
+.qa-sys{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-top:2px;}
+
+.pipeline{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+@media(max-width:900px){.pipeline{grid-template-columns:repeat(3,1fr);}}
+.pipe-stage{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 10px;text-align:center;}
+.pipe-n{font-family:var(--mono);font-size:1.4rem;font-weight:500;margin-bottom:3px;}
+.pipe-l{font-size:0.68rem;color:var(--muted);}
+
+.meta-wrap{background:var(--surface2);border-radius:20px;height:7px;overflow:hidden;}
+.meta-fill{height:7px;border-radius:20px;background:var(--accent);}
+
+.mov{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border);}
+.mov:last-child{border-bottom:none;}
+.mov-tag{width:4px;height:28px;border-radius:2px;flex-shrink:0;}
+.mov-tag.ing{background:var(--green);} .mov-tag.eg{background:var(--red);}
+.mov-info{flex:1;}
+.mov-desc{font-size:0.83rem;}
+.mov-cat{font-family:var(--mono);font-size:0.64rem;color:var(--muted);}
+.mov-monto{font-family:var(--mono);font-size:0.87rem;font-weight:500;white-space:nowrap;}
+.mov-monto.ing{color:var(--green);} .mov-monto.eg{color:var(--red);}
+
+.vav{width:30px;height:30px;border-radius:50%;background:var(--accent-bg);border:1px solid #c0d0e8;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.64rem;font-weight:600;color:var(--accent);flex-shrink:0;}
+.prog-bar{height:4px;background:var(--surface2);border-radius:2px;width:70px;display:inline-block;vertical-align:middle;margin-left:6px;}
+.prog-fill{height:4px;border-radius:2px;display:block;}
+.mono{font-family:var(--mono);}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding:0 4px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:4px;}
+.bar-ing{border-radius:3px 3px 0 0;background:var(--green);min-width:8px;opacity:.85;transition:opacity .15s;}
+.bar-ing:hover{opacity:1;}
+.bar-eg{border-radius:3px 3px 0 0;background:var(--red);min-width:8px;opacity:.75;transition:opacity .15s;}
+.bar-eg:hover{opacity:1;}
+.bar-label{font-family:var(--mono);font-size:0.6rem;color:var(--muted);}
+.bar-legend{display:flex;gap:14px;margin-bottom:12px;}
+.bar-legend-item{display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);}
+.bar-legend-dot{width:8px;height:8px;border-radius:2px;}
+
+
+/* CUOTAS PROYECCION */
+.cuota-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.cuota-row:last-child{border-bottom:none;}
+.cuota-periodo{font-family:var(--mono);font-size:0.75rem;color:var(--muted);width:80px;flex-shrink:0;}
+.cuota-barra{flex:1;height:6px;background:var(--surface2);border-radius:3px;}
+.cuota-barra-fill{height:6px;border-radius:3px;background:var(--green);}
+.cuota-monto{font-family:var(--mono);font-size:0.82rem;font-weight:500;color:var(--green);flex-shrink:0;text-align:right;min-width:100px;}
+.cuota-n{font-size:0.68rem;color:var(--muted);flex-shrink:0;width:60px;text-align:right;}
+
+/* MODAL */
+.mv-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.mv-field{padding:10px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px;}
+.mv-field:nth-child(odd){padding-right:20px;}
+.mv-field:nth-child(even){padding-left:20px;border-left:1px solid var(--border);}
+.mv-label{font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;}
+.mv-val{font-size:0.9rem;font-weight:500;color:var(--text);}
+.mv-section{font-family:var(--serif);font-size:1rem;margin:18px 0 10px;color:var(--text);}
+.mv-obs{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.85rem;color:var(--muted);margin-top:4px;line-height:1.5;}
+
+/* TIEMPO STOCK */
+.dias-chip{display:inline-block;font-family:var(--mono);font-size:0.72rem;padding:2px 7px;border-radius:20px;font-weight:500;}
+.dias-ok{background:var(--green-bg);color:var(--green);}
+.dias-mid{background:var(--accent-bg);color:var(--accent);}
+.dias-warn{background:var(--amber-bg);color:var(--amber);}
+.dias-hot{background:var(--red-bg);color:var(--red);}
+
+@media(max-width:700px){
+  header{padding:0 16px;} nav button{font-size:0.74rem;padding:0 9px;}
+  main{padding:16px;} .cards{grid-template-columns:1fr 1fr;}
+}
+
+@media print {
+  header, nav, .page-head button, #rep-mes, #rep-anio, .btn { display: none !important; }
+  body { background: #fff !important; }
+  main { padding: 0 !important; max-width: 100% !important; }
+  .section { display: block !important; }
+  #dashboard, #vendedores, #caja, #gestoria, #stock, #sistemas { display: none !important; }
+  #reportes { display: block !important; }
+  .fc { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; }
+  .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="logo"><span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.15rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span><span style="display:none">Fernandez Autos</span></div>
+  <nav>
+    <button class="active" onclick="show('dashboard',this)">Dashboard</button>
+    <button onclick="show('vendedores',this)">Vendedores</button>
+    <button onclick="show('caja',this)">Caja</button>
+    <button onclick="show('gestoria',this)">Gestoría</button>
+    <button onclick="show('stock',this)">Stock</button>
+    <button onclick="show('reportes',this)">Reportes</button>
+    <button onclick="show('usuarios',this)">Usuarios</button>
+    <button onclick="show('sistemas',this)">Sistemas</button>
+  </nav>
+  <div class="header-right">
+    <button onclick="cerrarSesion()" style="background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-family:Arial, sans-serif;font-size:0.72rem;padding:5px 13px;border-radius:20px;cursor:pointer;" >Salir</button>
+    <div class="fecha-header" id="fechaH"></div>
+    <div class="admin-chip">Admin</div>
+  </div>
+</header>
+
+<main>
+
+<!-- ===== DASHBOARD ===== -->
+<section id="dashboard" class="section active">
+  <div class="page-head">
+    <h2>Dashboard general</h2>
+    <div class="page-head-sub" id="fechaSub"></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Ventas este mes</div><div class="card-value neu" id="d-ventas">—</div><div class="card-sub" id="d-ventas-sub"></div></div>
+    <div class="card"><div class="card-label">Facturado ARS</div><div class="card-value pos" id="d-facturado">—</div><div class="card-sub" id="d-facturado-sub"></div></div>
+    <div class="card"><div class="card-label">Egresos mes</div><div class="card-value neg" id="d-egresos">—</div><div class="card-sub">Gastos y comisiones</div></div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-label">Rentabilidad estimada</div>
+      <div class="card-value pos" id="d-rentabilidad">—</div>
+      <div class="card-sub" id="d-rent-sub">Ingresos − egresos del mes</div>
+    </div>
+    <div class="card"><div class="card-label">Stock total</div><div class="card-value neu" id="d-stock">—</div><div class="card-sub" id="d-stock-sub"></div></div>
+    <div class="card"><div class="card-label">Propios</div><div class="card-value neu" id="d-stock-propios">—</div><div class="card-sub">en stock</div></div>
+    <div class="card"><div class="card-label">Consignaciones</div><div class="card-value pur" id="d-stock-consig">—</div><div class="card-sub">en stock</div></div>
+    <div class="card"><div class="card-label">A ingresar</div><div class="card-value amb" id="d-stock-ingresar">—</div><div class="card-sub">próximos a llegar</div></div>
+    <div class="card"><div class="card-label">Transferencias abiertas</div><div class="card-value amb" id="d-transf">—</div><div class="card-sub">En curso</div></div>
+    <div class="card"><div class="card-label">VTV vencidas</div><div class="card-value neg" id="d-vtv">—</div><div class="card-sub">Requieren atención</div></div>
+  </div>
+
+  <div id="d-alertas-wrap"></div>
+
+  <div class="fc">
+    <div class="fc-title">Sistemas activos</div>
+    <div class="sys-grid">
+      <div class="sys-card">
+        <div class="sys-head">
+          <div class="sys-icon acc">CV</div>
+          <div style="flex:1"><div class="sys-name">Central de Vendedores</div><div class="sys-desc">Stock, clientes y ventas</div></div>
+          <div class="sys-status ok">● En línea</div>
+        </div>
+        <div class="sys-stats">
+          <div class="sys-stat"><div class="ss-label">Vehículos</div><div class="ss-val" id="sc-stock" style="color:var(--accent);">—</div></div>
+          <div class="sys-stat"><div class="ss-label">Clientes</div><div class="ss-val" id="sc-clientes" style="color:var(--purple);">—</div></div>
+          <div class="sys-stat"><div class="ss-label">Vendidos</div><div class="ss-val" id="sc-vendidos" style="color:var(--green);">—</div></div>
+        </div>
+        <div class="sys-foot">
+          <div class="sys-tags"><span class="sys-tag">Stock</span><span class="sys-tag">Clientes</span><span class="sys-tag">Ventas</span></div>
+          <a class="btn btn-sm" href="vendedores.html" target="_blank">Abrir →</a>
+        </div>
+      </div>
+      <div class="sys-card">
+        <div class="sys-head">
+          <div class="sys-icon lime">CP</div>
+          <div style="flex:1"><div class="sys-name">CajaPro</div><div class="sys-desc">Contabilidad, ingresos y egresos</div></div>
+          <div class="sys-status ok">● En línea</div>
+        </div>
+        <div class="sys-stats">
+          <div class="sys-stat"><div class="ss-label">Saldo ARS</div><div class="ss-val" id="sc-saldoARS" style="color:var(--lime-text);font-size:.82rem;">—</div></div>
+          <div class="sys-stat"><div class="ss-label">Saldo USD</div><div class="ss-val" id="sc-saldoUSD" style="color:var(--amber);font-size:.82rem;">—</div></div>
+          <div class="sys-stat"><div class="ss-label">Proyección</div><div class="ss-val" id="sc-proyeccion" style="color:var(--green);">—</div></div>
+        </div>
+        <div class="sys-foot">
+          <div class="sys-tags"><span class="sys-tag">Caja</span><span class="sys-tag">Cuotas</span><span class="sys-tag">Recibos</span></div>
+          <a class="btn btn-sm" href="cajapro.html" target="_blank">Abrir →</a>
+        </div>
+      </div>
+      <div class="sys-card">
+        <div class="sys-head">
+          <div class="sys-icon amb">GT</div>
+          <div style="flex:1"><div class="sys-name">Gestoría</div><div class="sys-desc">Transferencias y legajos</div></div>
+          <div class="sys-status" id="sc-gest-status">● En línea</div>
+        </div>
+        <div class="sys-stats">
+          <div class="sys-stat"><div class="ss-label">Legajos</div><div class="ss-val" style="color:var(--accent);">18</div></div>
+          <div class="sys-stat"><div class="ss-label">En curso</div><div class="ss-val" id="sc-trfs" style="color:var(--amber);">—</div></div>
+          <div class="sys-stat"><div class="ss-label">Prom. días</div><div class="ss-val" id="sc-prom-dias" style="color:var(--accent);">—</div></div>
+        </div>
+        <div class="sys-foot">
+          <div class="sys-tags"><span class="sys-tag">Legajos</span><span class="sys-tag">Transf.</span><span class="sys-tag">VTV</span></div>
+          <a class="btn btn-sm" href="gestoria.html" target="_blank">Abrir →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fg2">
+    <!-- LOG DE ACTIVIDAD REAL -->
+    <div class="fc" style="margin:0;padding:0;overflow:hidden;">
+      <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;">
+        <div class="fc-title" style="margin:0;font-size:1rem;">Actividad reciente</div>
+        <span class="badge b-neu" id="log-count">—</span>
+      </div>
+      <div id="log-lista">
+        <div class="act-item"><div class="act-dot acc"></div><div class="act-body"><div class="act-text" style="color:var(--muted);">Cargando actividad...</div></div></div>
+      </div>
+      <div style="padding:10px 20px;border-top:1px solid var(--border);background:var(--surface2);font-size:0.72rem;color:var(--muted);">
+        Datos leídos en tiempo real desde los tres sistemas
+      </div>
+    </div>
+
+    <div class="fc" style="margin:0;">
+      <div class="fc-title" style="font-size:1rem;">Accesos rápidos</div>
+      <div class="qa-grid">
+        <div class="qa-btn" onclick="window.open('vendedores.html','_blank')"><div class="qa-ico">🚗</div><div class="qa-label">Nuevo vehículo</div><div class="qa-sys">Central de Vendedores</div></div>
+        <div class="qa-btn" onclick="window.open('vendedores.html','_blank')"><div class="qa-ico">👤</div><div class="qa-label">Nuevo cliente</div><div class="qa-sys">Central de Vendedores</div></div>
+        <div class="qa-btn" onclick="window.open('cajapro.html','_blank')"><div class="qa-ico">💰</div><div class="qa-label">Registrar ingreso</div><div class="qa-sys">CajaPro</div></div>
+        <div class="qa-btn" onclick="window.open('cajapro.html','_blank')"><div class="qa-ico">📄</div><div class="qa-label">Generar recibo</div><div class="qa-sys">CajaPro</div></div>
+        <div class="qa-btn" onclick="window.open('gestoria.html','_blank')"><div class="qa-ico">📁</div><div class="qa-label">Nuevo legajo</div><div class="qa-sys">Gestoría</div></div>
+        <div class="qa-btn" onclick="window.open('gestoria.html','_blank')"><div class="qa-ico">🔄</div><div class="qa-label">Nueva transferencia</div><div class="qa-sys">Gestoría</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VENDEDORES ===== -->
+<section id="vendedores" class="section">
+  <div class="page-head">
+    <h2>Rendimiento de vendedores</h2>
+    <a class="btn btn-sm" href="vendedores.html" target="_blank">Abrir Central de Vendedores →</a>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Total ventas equipo</div><div class="card-value neu" id="v-total">—</div><div class="card-sub">Este mes</div></div>
+    <div class="card"><div class="card-label">Mejor vendedor</div><div class="card-value pos" id="v-mejor" style="font-size:1.05rem;padding-top:4px;">—</div><div class="card-sub" id="v-mejor-sub"></div></div>
+    <div class="card"><div class="card-label">Clientes activos</div><div class="card-value pur" id="v-clientes">—</div><div class="card-sub" id="v-clientes-sub"></div></div>
+    <div class="card"><div class="card-label">Reservados</div><div class="card-value amb" id="v-reservados">—</div><div class="card-sub">Pendientes de cierre</div></div>
+    <div class="card" style="border-left:3px solid var(--amber);"><div class="card-label">Tiempo prom. en stock</div><div class="card-value amb" id="v-dias-stock">—</div><div class="card-sub">días hasta venderse</div></div>
+  </div>
+
+  <div class="fc" style="padding:0;overflow:hidden;margin-bottom:18px;">
+    <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Rendimiento mensual</div>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Vendedor</th><th>Ventas</th><th>Clientes</th><th>Facturado</th><th>Meta</th></tr></thead>
+        <tbody id="v-rend-tabla">
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">LM</div><div><div style="font-weight:500;">Lucía Méndez</div><div style="font-size:0.71rem;color:var(--muted);">Senior</div></div></div></td>
+            <td><span class="mono" style="color:var(--green);">6</span></td>
+            <td><span class="mono">18</span></td>
+            <td><span class="mono" style="color:var(--green);">$22.4M</span></td>
+            <td><span class="mono" style="color:var(--green);">120%</span><span class="prog-bar"><span class="prog-fill" style="width:100%;background:var(--green);"></span></span></td>
+          </tr>
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">RG</div><div><div style="font-weight:500;">Roberto García</div><div style="font-size:0.71rem;color:var(--muted);">Senior</div></div></div></td>
+            <td><span class="mono" style="color:var(--green);">4</span></td>
+            <td><span class="mono">14</span></td>
+            <td><span class="mono" style="color:var(--green);">$15.1M</span></td>
+            <td><span class="mono" style="color:var(--accent);">80%</span><span class="prog-bar"><span class="prog-fill" style="width:67%;background:var(--accent);"></span></span></td>
+          </tr>
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">SP</div><div><div style="font-weight:500;">Sofía Paredes</div><div style="font-size:0.71rem;color:var(--muted);">Junior</div></div></div></td>
+            <td><span class="mono" style="color:var(--amber);">3</span></td>
+            <td><span class="mono">15</span></td>
+            <td><span class="mono" style="color:var(--amber);">$8.2M</span></td>
+            <td><span class="mono" style="color:var(--amber);">60%</span><span class="prog-bar"><span class="prog-fill" style="width:50%;background:var(--amber);"></span></span></td>
+          </tr>
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">MF</div><div><div style="font-weight:500;">Marcos Fernández</div><div style="font-size:0.71rem;color:var(--muted);">Junior</div></div></div></td>
+            <td><span class="mono" style="color:var(--red);">1</span></td>
+            <td><span class="mono">14</span></td>
+            <td><span class="mono" style="color:var(--red);">$2.5M</span></td>
+            <td><span class="mono" style="color:var(--red);">20%</span><span class="prog-bar"><span class="prog-fill" style="width:17%;background:var(--red);"></span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="fc" style="padding:0;overflow:hidden;margin-top:0;">
+    <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Tiempo en stock por vehículo vendido</div>
+      <span class="badge b-neu" id="v-stock-badge">—</span>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Vehículo</th><th>Tipo</th><th>Precio</th><th>Días en stock</th></tr></thead>
+        <tbody id="v-stock-tabla"><tr class="empty-row"><td colspan="4">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CAJA ===== -->
+<section id="caja" class="section">
+  <div class="page-head">
+    <h2>Estado de caja</h2>
+    <a class="btn btn-sm" href="cajapro.html" target="_blank">Abrir CajaPro →</a>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Saldo ARS</div><div class="card-value pos" id="c-saldo-ars">—</div><div class="card-sub">Actualizado hoy</div></div>
+    <div class="card"><div class="card-label">Saldo USD</div><div class="card-value amb" id="c-saldo-usd">—</div><div class="card-sub">Caja dólares</div></div>
+    <div class="card"><div class="card-label">Ingresos mes</div><div class="card-value pos" id="c-ing-mes">—</div><div class="card-sub" id="c-ing-sub"></div></div>
+    <div class="card"><div class="card-label">Egresos mes</div><div class="card-value neg" id="c-eg-mes">—</div><div class="card-sub">Gastos del mes</div></div>
+    <div class="card" style="border-left:3px solid var(--green);"><div class="card-label">Resultado del mes</div><div class="card-value pos" id="c-resultado">—</div><div class="card-sub">Ingresos − egresos</div></div>
+    <div class="card" style="border-left:3px solid var(--green);"><div class="card-label">Ingresos futuros</div><div class="card-value pos" id="c-cobros-card">—</div><div class="card-sub" id="c-cobros-card-sub">agendados</div></div>
+    <div class="card" style="border-left:3px solid var(--red);"><div class="card-label">Egresos futuros</div><div class="card-value neg" id="c-pagos-card">—</div><div class="card-sub" id="c-pagos-card-sub">agendados</div></div>
+  </div>
+
+  <div id="c-alertas-wrap"></div>
+
+  <!-- GRÁFICO INGRESOS VS EGRESOS -->
+  <div class="fc">
+    <div class="fc-header">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Ingresos vs. Egresos — últimos 6 meses</div>
+      <div class="bar-legend">
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Ingresos</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Egresos</div>
+      </div>
+    </div>
+    <div class="bar-chart" id="c-grafico"></div>
+    <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;" id="c-grafico-labels"></div>
+  </div>
+
+  <!-- PROYECCIÓN DE CUOTAS -->
+  <div class="fc">
+    <div class="fc-header">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Proyección de cuotas a cobrar</div>
+      <span class="badge b-info" id="c-proj-badge">—</span>
+    </div>
+    <div id="c-proyeccion"><div style="color:var(--muted);font-size:.83rem;text-align:center;padding:20px;">Sin financiaciones activas.</div></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--muted);">
+      Proyección basada en las cuotas pendientes registradas en CajaPro. Solo incluye cuotas no pagadas.
+    </div>
+  </div>
+
+  <div class="fg2">
+    <div class="fc" style="padding:0;overflow:hidden;margin:0;">
+      <div class="fc-header" style="padding:14px 20px;border-bottom:1px solid var(--border);margin:0;">
+        <div class="fc-title" style="margin:0;font-size:1rem;">Últimos ingresos</div>
+      </div>
+      <div id="c-ultimos-ing"><div class="mov"><div class="mov-info" style="color:var(--muted);">Sin movimientos.</div></div></div>
+    </div>
+    <div class="fc" style="padding:0;overflow:hidden;margin:0;">
+      <div class="fc-header" style="padding:14px 20px;border-bottom:1px solid var(--border);margin:0;">
+        <div class="fc-title" style="margin:0;font-size:1rem;">Últimos egresos</div>
+      </div>
+      <div id="c-ultimos-eg"><div class="mov"><div class="mov-info" style="color:var(--muted);">Sin movimientos.</div></div></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ===== GESTORIA ===== -->
+<section id="gestoria" class="section">
+  <div class="page-head">
+    <h2>Estado de gestoría</h2>
+    <a class="btn btn-sm" href="gestoria.html" target="_blank">Abrir Gestoría →</a>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Legajos activos</div><div class="card-value neu" id="g-legajos">—</div></div>
+    <div class="card"><div class="card-label">En transferencia</div><div class="card-value amb" id="g-en-trf">—</div></div>
+    <div class="card"><div class="card-label">En escribanía</div><div class="card-value pur" id="g-escribania">—</div></div>
+    <div class="card"><div class="card-label">Finalizadas</div><div class="card-value pos" id="g-finalizadas">—</div></div>
+    <div class="card"><div class="card-label">VTV vencidas</div><div class="card-value neg" id="g-vtv">—</div></div>
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <div class="card-label">Promedio de cierre</div>
+      <div class="card-value neu" id="g-promedio">—</div>
+      <div class="card-sub" id="g-promedio-sub">días por trámite</div>
+    </div>
+  </div>
+
+  <div id="g-alertas-wrap"></div>
+
+  <div class="fc">
+    <div class="fc-title" style="font-size:1rem;">Pipeline de transferencias</div>
+    <div class="pipeline" id="g-pipeline">
+      <div class="pipe-stage"><div class="pipe-n" style="color:var(--muted);">—</div><div class="pipe-l">Doc. incompleta</div></div>
+      <div class="pipe-stage"><div class="pipe-n" style="color:var(--accent);">—</div><div class="pipe-l">Preparando doc.</div></div>
+      <div class="pipe-stage"><div class="pipe-n" style="color:var(--purple);">—</div><div class="pipe-l">En escribanía</div></div>
+      <div class="pipe-stage"><div class="pipe-n" style="color:var(--amber);">—</div><div class="pipe-l">En gestoría</div></div>
+      <div class="pipe-stage"><div class="pipe-n" style="color:var(--accent);">—</div><div class="pipe-l">Para entregar</div></div>
+      <div class="pipe-stage"><div class="pipe-n" style="color:var(--green);">—</div><div class="pipe-l">Finalizadas</div></div>
+    </div>
+  </div>
+
+  <div class="fc" style="padding:0;overflow:hidden;">
+    <div class="fc-header" style="padding:14px 20px;border-bottom:1px solid var(--border);margin:0;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Tiempo promedio por etapa</div>
+      <span class="badge b-neu" id="g-muestra-label">—</span>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Etapa</th><th>Promedio</th><th>Más rápido</th><th>Más lento</th></tr></thead>
+        <tbody id="g-etapas-tbody"><tr class="empty-row"><td colspan="4">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="fc" style="padding:0;overflow:hidden;">
+    <div class="fc-header" style="padding:14px 20px;border-bottom:var(--border) 1px solid;margin:0;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Alertas VTV</div>
+    </div>
+    <div id="g-vtv-lista"><div class="act-item"><div class="act-body" style="color:var(--muted);">Sin alertas VTV.</div></div></div>
+  </div>
+</section>
+
+<!-- ===== STOCK ===== -->
+<section id="stock" class="section">
+  <div class="page-head">
+    <h2>Stock</h2>
+    <a class="btn btn-sm" href="central-vendedores-v3__8_.html" target="_blank">Abrir Central de Vendedores →</a>
+  </div>
+
+  <!-- CARDS RESUMEN -->
+  <div class="cards">
+    <div class="card"><div class="card-label">Total en stock</div><div class="card-value neu" id="st-total">—</div><div class="card-sub" id="st-total-sub"></div></div>
+    <div class="card"><div class="card-label">Disponibles</div><div class="card-value pos" id="st-disp">—</div><div class="card-sub">para la venta</div></div>
+    <div class="card"><div class="card-label">Reservados</div><div class="card-value amb" id="st-reserv">—</div><div class="card-sub">con seña</div></div>
+    <div class="card"><div class="card-label">A ingresar</div><div class="card-value amb" id="st-ingr">—</div><div class="card-sub">próximos a llegar</div></div>
+    <div class="card"><div class="card-label">Propios</div><div class="card-value neu" id="st-propios">—</div><div class="card-sub">en stock</div></div>
+    <div class="card"><div class="card-label">Consignaciones</div><div class="card-value pur" id="st-consig">—</div><div class="card-sub">en stock</div></div>
+    <div class="card"><div class="card-label">Nuevos</div><div class="card-value neu" id="st-nuevos">—</div><div class="card-sub">0km</div></div>
+    <div class="card"><div class="card-label">Usados</div><div class="card-value muted" id="st-usados">—</div><div class="card-sub">con uso</div></div>
+    <div class="card" style="border-left:3px solid var(--amber);"><div class="card-label">Días prom. en stock</div><div class="card-value amb" id="st-dias-prom">—</div><div class="card-sub">vehículos vendidos</div></div>
+    <div class="card" style="border-left:3px solid var(--accent);"><div class="card-label">Precio promedio</div><div class="card-value neu" id="st-precio-prom">—</div><div class="card-sub">stock disponible</div></div>
+  </div>
+
+  <div class="fg2">
+    <!-- DISTRIBUCIÓN POR CARROCERÍA -->
+    <div class="fc" style="margin:0;">
+      <div class="fc-title">Distribución por carrocería</div>
+      <div id="st-carroceria-lista"><div style="color:var(--muted);font-size:.85rem;">Sin datos.</div></div>
+    </div>
+
+    <!-- DÍAS PROMEDIO POR CARROCERÍA -->
+    <div class="fc" style="margin:0;">
+      <div class="fc-title">Días promedio en stock por carrocería</div>
+      <div id="st-dias-carroceria"><div style="color:var(--muted);font-size:.85rem;">Sin vehículos vendidos con fechas registradas.</div></div>
+    </div>
+  </div>
+
+  <!-- VEHÍCULOS MÁS TIEMPO EN STOCK -->
+  <div class="fc" style="padding:0;overflow:hidden;margin-top:14px;">
+    <div class="fc-header" style="padding:16px 20px;border-bottom:1px solid var(--border);margin:0;">
+      <div class="fc-title" style="margin:0;">Más tiempo en stock sin venderse</div>
+      <span class="badge b-warn" id="st-trabados-badge">—</span>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Vehículo</th><th>Carrocería</th><th>Procedencia</th><th>Precio</th><th>Días en stock</th></tr></thead>
+        <tbody id="st-trabados-tabla"><tr class="empty-row"><td colspan="5">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STOCK COMPLETO -->
+  <div class="fc" style="padding:0;overflow:hidden;margin-top:14px;">
+    <div class="fc-header" style="padding:16px 20px;border-bottom:1px solid var(--border);margin:0;">
+      <div class="fc-title" style="margin:0;">Detalle completo del stock</div>
+      <span class="badge b-neu" id="st-completo-badge">—</span>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Vehículo</th><th>Año</th><th>Tipo</th><th>Carrocería</th><th>Procedencia</th><th>Estado</th><th>Precio</th><th>Días en stock</th><th></th></tr></thead>
+        <tbody id="st-completo-tabla"><tr class="empty-row"><td colspan="9">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL VEHÍCULO -->
+<div id="modal-vehiculo" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(22,21,15,.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.2);width:100%;max-width:640px;margin:20px;max-height:90vh;overflow-y:auto;">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);z-index:1;">
+      <div>
+        <div style="font-family:var(--serif);font-size:1.2rem;" id="mv-titulo">—</div>
+        <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);margin-top:3px;" id="mv-subtitulo">—</div>
+      </div>
+      <button onclick="cerrarModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem;color:var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div style="padding:24px;" id="mv-body"></div>
+  </div>
+</div>
+
+<!-- ===== REPORTES ===== -->
+<section id="reportes" class="section">
+  <div class="page-head">
+    <h2>Reportes</h2>
+    <button class="btn btn-a" onclick="imprimirReporte()">⬇ Imprimir / Guardar PDF</button>
+  </div>
+
+  <!-- SELECTOR DE MES -->
+  <div class="fc" style="padding:16px 24px;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="font-size:0.84rem;font-weight:500;">Período:</div>
+      <select id="rep-mes" onchange="renderReportes()" style="font-family:var(--mono);font-size:0.84rem;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);cursor:pointer;"></select>
+      <select id="rep-anio" onchange="renderReportes()" style="font-family:var(--mono);font-size:0.84rem;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);cursor:pointer;"></select>
+      <div style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);" id="rep-periodo-label"></div>
+    </div>
+  </div>
+
+  <!-- CONTENIDO DEL REPORTE (imprimible) -->
+  <div id="reporte-contenido">
+
+    <!-- ENCABEZADO -->
+    <div class="fc" style="background:linear-gradient(135deg,#111009,#1a1917);border-color:#2a2a25;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-family:var(--serif);font-size:1.5rem;color:#fff;" id="rep-titulo">Reporte mensual</div>
+          <div style="font-family:var(--mono);font-size:0.75rem;color:rgba(255,255,255,.4);margin-top:4px;" id="rep-subtitulo">Fernandez Autos</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,.35);">Generado el</div>
+          <div style="font-family:var(--mono);font-size:0.82rem;color:rgba(255,255,255,.6);" id="rep-fecha-gen"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENTAS -->
+    <div class="fc" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:4px;height:24px;background:var(--accent);border-radius:2px;"></div>
+        <div style="font-family:var(--serif);font-size:1.12rem;">Ventas</div>
+      </div>
+      <div class="cards" style="margin-bottom:0;">
+        <div class="card"><div class="card-label">Operaciones</div><div class="card-value neu" id="rep-op-total">—</div><div class="card-sub">del período</div></div>
+        <div class="card"><div class="card-label">Facturado ARS</div><div class="card-value pos" id="rep-op-fact">—</div><div class="card-sub">ingresos del mes</div></div>
+        <div class="card"><div class="card-label">Mejor vendedor</div><div class="card-value pos" id="rep-op-mejor" style="font-size:1rem;">—</div><div class="card-sub" id="rep-op-mejor-sub"></div></div>
+        <div class="card"><div class="card-label">Ticket promedio</div><div class="card-value neu" id="rep-op-ticket">—</div><div class="card-sub">por operación</div></div>
+      </div>
+    </div>
+
+    <!-- CAJA -->
+    <div class="fc" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:4px;height:24px;background:var(--green);border-radius:2px;"></div>
+        <div style="font-family:var(--serif);font-size:1.12rem;">Caja</div>
+      </div>
+      <div class="cards" style="margin-bottom:0;">
+        <div class="card"><div class="card-label">Ingresos ARS</div><div class="card-value pos" id="rep-c-ing">—</div><div class="card-sub">del período</div></div>
+        <div class="card"><div class="card-label">Egresos ARS</div><div class="card-value neg" id="rep-c-eg">—</div><div class="card-sub">del período</div></div>
+        <div class="card" style="border-left:3px solid var(--green);"><div class="card-label">Resultado</div><div class="card-value pos" id="rep-c-res">—</div><div class="card-sub" id="rep-c-res-sub"></div></div>
+        <div class="card"><div class="card-label">Saldo actual ARS</div><div class="card-value pos" id="rep-c-saldo">—</div><div class="card-sub">al día de hoy</div></div>
+      </div>
+    </div>
+
+    <!-- STOCK -->
+    <div class="fc" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:4px;height:24px;background:var(--purple);border-radius:2px;"></div>
+        <div style="font-family:var(--serif);font-size:1.12rem;">Stock</div>
+      </div>
+      <div class="cards" style="margin-bottom:0;">
+        <div class="card"><div class="card-label">Total en stock</div><div class="card-value neu" id="rep-s-total">—</div><div class="card-sub">unidades</div></div>
+        <div class="card"><div class="card-label">Disponibles</div><div class="card-value pos" id="rep-s-disp">—</div><div class="card-sub">para la venta</div></div>
+        <div class="card"><div class="card-label">Propios</div><div class="card-value neu" id="rep-s-prop">—</div><div class="card-sub">en stock</div></div>
+        <div class="card"><div class="card-label">Consignaciones</div><div class="card-value pur" id="rep-s-consig">—</div><div class="card-sub">en stock</div></div>
+      </div>
+    </div>
+
+    <!-- GESTORÍA -->
+    <div class="fc" style="margin-bottom:0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:4px;height:24px;background:var(--amber);border-radius:2px;"></div>
+        <div style="font-family:var(--serif);font-size:1.12rem;">Gestoría</div>
+      </div>
+      <div class="cards" style="margin-bottom:0;">
+        <div class="card"><div class="card-label">Trámites abiertos</div><div class="card-value amb" id="rep-g-abiertos">—</div><div class="card-sub">en curso</div></div>
+        <div class="card"><div class="card-label">Finalizados</div><div class="card-value pos" id="rep-g-fin">—</div><div class="card-sub">del período</div></div>
+        <div class="card"><div class="card-label">Prom. días cierre</div><div class="card-value neu" id="rep-g-prom">—</div><div class="card-sub">por trámite</div></div>
+        <div class="card"><div class="card-label">VTV vencidas</div><div class="card-value neg" id="rep-g-vtv">—</div><div class="card-sub">requieren atención</div></div>
+      </div>
+    </div>
+
+  </div><!-- fin reporte-contenido -->
+</section>
+
+<!-- ===== SISTEMAS ===== -->
+<section id="sistemas" class="section">
+  <div class="page-head">
+    <h2>Sistemas</h2>
+    <div class="page-head-sub">Acceso directo a cada módulo</div>
+  </div>
+  <div class="sys-grid" style="margin-bottom:0;">
+    <div class="sys-card">
+      <div class="sys-head"><div class="sys-icon acc">CV</div><div><div class="sys-name">Central de Vendedores</div><div class="sys-desc">Fernandez Autos · v3</div></div><div class="sys-status ok">● En línea</div></div>
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);">
+        <div style="font-size:0.67rem;color:var(--muted);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;">Módulos</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;"><span class="badge b-info">Stock de vehículos</span><span class="badge b-info">Clientes</span><span class="badge b-info">Registro de ventas</span><span class="badge b-info">Gestión de vendedores</span><span class="badge b-info">Dashboard</span></div>
+      </div>
+      <div class="sys-foot"><div style="font-family:var(--mono);font-size:0.63rem;color:var(--text3);">Arial · Tema claro</div><a class="btn btn-sm btn-a" href="vendedores.html" target="_blank">Abrir sistema →</a></div>
+    </div>
+    <div class="sys-card">
+      <div class="sys-head"><div class="sys-icon lime">CP</div><div><div class="sys-name">CajaPro</div><div class="sys-desc">Sweet Cars · v4 Final</div></div><div class="sys-status ok">● En línea</div></div>
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);">
+        <div style="font-size:0.67rem;color:var(--muted);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;">Módulos</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;"><span class="badge b-ok">Caja ARS / USD</span><span class="badge b-ok">Ingresos y egresos</span><span class="badge b-ok">Cuotas</span><span class="badge b-ok">Categorías</span><span class="badge b-ok">Recibos imprimibles</span><span class="badge b-ok">Alertas de vencimiento</span></div>
+      </div>
+      <div class="sys-foot"><div style="font-family:var(--mono);font-size:0.63rem;color:var(--text3);">DM Sans · Tema oscuro</div><a class="btn btn-sm btn-a" href="cajapro.html" target="_blank">Abrir sistema →</a></div>
+    </div>
+    <div class="sys-card">
+      <div class="sys-head"><div class="sys-icon amb">GT</div><div><div class="sys-name">Gestoría</div><div class="sys-desc">Agencia · Final</div></div><div class="sys-status warn">⚠ Ver alertas</div></div>
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);">
+        <div style="font-size:0.67rem;color:var(--muted);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;">Módulos</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;"><span class="badge b-warn">Legajos físicos</span><span class="badge b-warn">Transferencias</span><span class="badge b-warn">Control VTV</span><span class="badge b-warn">Búsqueda global</span><span class="badge b-warn">Impresión</span></div>
+      </div>
+      <div class="sys-foot"><div style="font-family:var(--mono);font-size:0.63rem;color:var(--text3);">Arial · Tema claro</div><a class="btn btn-sm btn-a" href="gestoria.html" target="_blank">Abrir sistema →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ USUARIOS ═══════════════════════════════════════════ -->
+<section id="usuarios" class="section">
+  <div class="page-head">
+    <h2>Gestión de usuarios</h2>
+    <button onclick="abrirModalUsuario()" class="btn btn-sm" style="cursor:pointer;border:none;">+ Nuevo usuario</button>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Total usuarios</div><div class="card-value neu" id="u-total">—</div><div class="card-sub">registrados en el sistema</div></div>
+    <div class="card"><div class="card-label">Activos</div><div class="card-value pos" id="u-activos">—</div><div class="card-sub">con acceso habilitado</div></div>
+    <div class="card"><div class="card-label">Inactivos</div><div class="card-value" style="color:var(--red)" id="u-inactivos">—</div><div class="card-sub">sin acceso</div></div>
+    <div class="card"><div class="card-label">Roles activos</div><div class="card-value pur" id="u-roles">—</div><div class="card-sub">sectores cubiertos</div></div>
+  </div>
+
+  <div class="fc" style="padding:0;overflow:hidden;">
+    <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;display:flex;align-items:center;justify-content:space-between;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Usuarios del sistema</div>
+    </div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Contacto</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaUsuarios">
+          <tr class="empty-row"><td colspan="5">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL USUARIO -->
+<div id="modalUsuario" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div style="font-size:1rem;font-weight:600;color:var(--text1);" id="modalUsuarioTitulo">Nuevo usuario</div>
+      <button onclick="cerrarModalUsuario()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text3);">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div style="grid-column:1/-1;">
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px;">Nombre completo</label>
+        <input id="uNombre" type="text" placeholder="Ej: Juan Pérez" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px;">Usuario</label>
+        <input id="uUsuario" type="text" placeholder="Ej: juanp" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px;">Contraseña</label>
+        <input id="uPassword" type="text" placeholder="Contraseña" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px;">Mail</label>
+        <input id="uMail" type="email" placeholder="correo@email.com" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px;">Teléfono</label>
+        <input id="uTel" type="text" placeholder="2236 000000" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px;">Rol</label>
+        <select id="uRol" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;">
+          <option value="vendedor">Vendedor</option>
+          <option value="caja">Caja / Administrativa</option>
+          <option value="gestoria">Gestoría</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="uActivo" checked style="width:16px;height:16px;cursor:pointer;">
+        <label for="uActivo" style="font-size:0.88rem;color:var(--text2);cursor:pointer;">Usuario activo</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalUsuario()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;color:var(--text2);">Cancelar</button>
+      <button onclick="guardarUsuario()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+</main>
+
+<script>
+(function() {
+  const ROL_REQUERIDO = 'admin';
+  const session = JSON.parse(localStorage.getItem('fa_session') || 'null');
+  if (!session) { window.location.href = 'login.html'; return; }
+  if (session.rol !== 'admin') { window.location.href = 'login.html'; return; }
+  window._session = session;
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('headerUsuario');
+    if (el) el.textContent = session.nombre || session.usuario;
+  });
+})();
+function cerrarSesion() { localStorage.removeItem('fa_session'); window.location.href = 'login.html'; }
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+// ═══ SUPABASE CONFIG ══════════════════════════════════════
+const SB_URL = 'https://bjgkmrgkgjpydpanewsa.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2ttcmdrZ2pweWRwYW5ld3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODU4NjgsImV4cCI6MjA5MzA2MTg2OH0.DLfBLH9H3UGSh1ISzylt4lLc6pExr6YOyy0sb-cbZec';
+const sbH = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
+async function sbGet(t,q=''){ const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:sbH}); if(!r.ok)return[]; return r.json(); }
+function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML=`<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">${msg}</div>`;document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
+function ocultarCargando(){ const el=document.getElementById('_ld');if(el)el.remove(); }
+const LS = (k, def) => def; // ya no usamos localStorage
+const $ = id => document.getElementById(id);
+const setText = (id, val) => { const el = $(id); if(el) el.textContent = val; };
+const fmtARS = n => '$ ' + Math.round(n).toLocaleString('es-AR');
+const fmtFecha = s => { if(!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+const fmtTS = ts => { if(!ts) return '—'; const d = new Date(ts), p = n => String(n).padStart(2,'0'); return `${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+const diffDias = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+const diasColor = n => n <= 7 ? 'var(--green)' : n <= 20 ? 'var(--accent)' : n <= 40 ? 'var(--amber)' : 'var(--red)';
+const diasClase = n => n <= 15 ? 'dias-ok' : n <= 45 ? 'dias-mid' : n <= 90 ? 'dias-warn' : 'dias-hot';
+
+const MESES_CORTOS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MESES_LARGOS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const G_ETIQUETAS = {'prep-doc':'Preparando doc.','en-escribania':'En escribanía','retirado':'Retirado','en-gestoria':'En gestoría','para-entregar':'Para entregar'};
+const G_ORDEN = ['prep-doc','en-escribania','retirado','en-gestoria','para-entregar'];
+
+// ═══════════════════════════════════════════════════════════
+//  DATOS DEMO (se usan si localStorage está vacío)
+// ═══════════════════════════════════════════════════════════
+const STOCK_DEMO = [
+  {id:1,marca:'Toyota',modelo:'Corolla',tipo:'Nuevo',anio:2024,dominio:'',chasis:'9BWZZZ377VT004251',motor:'1NZ9823441',precio:28500000,precioLista:30000000,km:0,transmision:'CVT',carroceria:'Sedan',color:'Blanco perla',ubicacion:'Salón',procedencia:'Propio',estado:'Disponible',obs:'Sin extras.',clienteEntregaId:null,fechaIngreso:'2026-01-10',historialPrecios:[{precio:30000000,fecha:'2026-01-10T10:00:00',nota:'Precio inicial'},{precio:28500000,fecha:'2026-02-05T10:00:00',nota:'Ajuste de lista'}]},
+  {id:2,marca:'Volkswagen',modelo:'Amarok',tipo:'Usado',anio:2021,dominio:'AB714CD',chasis:'WV1ZZZ9PZMH012443',motor:'TDI4421889',precio:36000000,precioLista:38000000,km:62000,transmision:'Automática',carroceria:'Pick-up',color:'Gris',ubicacion:'Depósito',procedencia:'Propio',estado:'Disponible',obs:'Trendline 4x2. Service al día.',clienteEntregaId:null,fechaIngreso:'2026-02-05',historialPrecios:[{precio:38000000,fecha:'2026-02-05T10:00:00',nota:'Precio inicial'},{precio:36000000,fecha:'2026-03-01T10:00:00',nota:'Ajuste de mercado'}]},
+  {id:3,marca:'Ford',modelo:'Ranger',tipo:'Nuevo',anio:2024,dominio:'',chasis:'8YPUMAJ4XPE112233',motor:'PUMA2244XL',precio:32800000,precioLista:34000000,km:0,transmision:'Manual',carroceria:'Pick-up',color:'Negro',ubicacion:'Salón',procedencia:'Propio',estado:'Reservado',obs:'XLS 4x2. Reservado con seña.',clienteEntregaId:null,fechaIngreso:'2026-03-01',historialPrecios:[{precio:34000000,fecha:'2026-03-01T10:00:00',nota:'Precio inicial'},{precio:32800000,fecha:'2026-04-01T10:00:00',nota:'Ajuste para cerrar'}]},
+  {id:4,marca:'Chevrolet',modelo:'Onix',tipo:'Usado',anio:2022,dominio:'DC981EF',chasis:'9BGRD48P0PG145677',motor:'1.2T884512',precio:14200000,precioLista:15000000,km:42000,transmision:'Manual',carroceria:'Hatchback',color:'Rojo',ubicacion:'Salón',procedencia:'Propio',estado:'Disponible',obs:'LT manual. 42.000 km.',clienteEntregaId:null,fechaIngreso:'2026-01-20',historialPrecios:[{precio:15000000,fecha:'2026-01-20T10:00:00',nota:'Precio inicial'},{precio:14200000,fecha:'2026-02-15T10:00:00',nota:'Ajuste'}]},
+  {id:5,marca:'Toyota',modelo:'Hilux',tipo:'Nuevo',anio:2024,dominio:'',chasis:'MR0FB3JG3N0912345',motor:'2GD5551KL',precio:41000000,precioLista:43000000,km:0,transmision:'Manual',carroceria:'Pick-up',color:'Blanco',ubicacion:'Salón',procedencia:'Propio',estado:'Disponible',obs:'SR 4x4. Disponible inmediato.',clienteEntregaId:null,fechaIngreso:'2026-02-15',historialPrecios:[{precio:43000000,fecha:'2026-02-15T10:00:00',nota:'Precio inicial'},{precio:41000000,fecha:'2026-03-15T10:00:00',nota:'Ajuste de lista'}]},
+  {id:6,marca:'Peugeot',modelo:'3008',tipo:'Usado',anio:2020,dominio:'GH312IJ',chasis:'VF3MCBHZSLR123456',motor:'EP6C771234',precio:22500000,precioLista:24000000,km:58000,transmision:'Automática',carroceria:'SUV',color:'Gris',ubicacion:'En preparación',procedencia:'Consignación',estado:'Reservado',obs:'Allure Plus. 58.000 km.',clienteEntregaId:null,fechaIngreso:'2025-12-10',historialPrecios:[{precio:24000000,fecha:'2025-12-10T10:00:00',nota:'Precio inicial'},{precio:22500000,fecha:'2026-02-01T10:00:00',nota:'Ajuste'}]},
+  {id:7,marca:'Renault',modelo:'Kangoo',tipo:'Usado',anio:2019,dominio:'KL456MN',chasis:'VF1FW0AB0KW098765',motor:'K9K834556',precio:10800000,precioLista:11500000,km:90000,transmision:'Manual',carroceria:'Furgón',color:'Blanco',ubicacion:'Depósito',procedencia:'Propio',estado:'Disponible',obs:'Furgón. 90.000 km.',clienteEntregaId:null,fechaIngreso:'2026-03-20',historialPrecios:[{precio:11500000,fecha:'2026-03-20T10:00:00',nota:'Precio inicial'},{precio:10800000,fecha:'2026-04-05T10:00:00',nota:'Ajuste'}]},
+  {id:8,marca:'Honda',modelo:'HR-V',tipo:'Nuevo',anio:2023,dominio:'OP123QR',chasis:'2HKRW2H56NH501234',motor:'L15B712345',precio:26900000,precioLista:28000000,km:0,transmision:'CVT',carroceria:'SUV',color:'Azul',ubicacion:'Salón',procedencia:'Propio',estado:'Vendido',obs:'EXL CVT. Entregado.',clienteEntregaId:null,fechaIngreso:'2025-10-05',fechaVenta:'2025-11-18',historialPrecios:[{precio:28000000,fecha:'2025-10-05T10:00:00',nota:'Precio inicial'},{precio:26900000,fecha:'2025-11-01T10:00:00',nota:'Precio de cierre'}]},
+  {id:9,marca:'Nissan',modelo:'Frontier',tipo:'Usado',anio:2022,dominio:'ST456UV',chasis:'3N6AD33A5MK012345',motor:'YD25DDTi991',precio:29500000,precioLista:31000000,km:35000,transmision:'Manual',carroceria:'Pick-up',color:'Gris',ubicacion:'Salón',procedencia:'Propio',estado:'Disponible',obs:'X-Gear 4x2. 35.000 km.',clienteEntregaId:null,fechaIngreso:'2026-01-30',historialPrecios:[{precio:31000000,fecha:'2026-01-30T10:00:00',nota:'Precio inicial'},{precio:29500000,fecha:'2026-03-10T10:00:00',nota:'Ajuste'}]},
+  {id:10,marca:'Ford',modelo:'Focus',tipo:'Usado',anio:2018,dominio:'WX789YZ',chasis:'WF0FXXGCHFJR12345',motor:'Duratec2.0',precio:11200000,precioLista:12000000,km:85000,transmision:'Manual',carroceria:'Hatchback',color:'Plata',ubicacion:'Depósito',procedencia:'Propio',estado:'Vendido',obs:'Se 2.0. 85.000 km.',clienteEntregaId:null,fechaIngreso:'2025-09-01',fechaVenta:'2025-12-15',historialPrecios:[{precio:12000000,fecha:'2025-09-01T10:00:00',nota:'Precio inicial'},{precio:11200000,fecha:'2025-11-10T10:00:00',nota:'Ajuste para vender'}]},
+  {id:11,marca:'Renault',modelo:'Duster',tipo:'Usado',anio:2021,dominio:'AB012CD',chasis:'VF1HJDBD2H0901234',motor:'H4M1.6T4422',precio:18900000,precioLista:20000000,km:51000,transmision:'Manual',carroceria:'SUV',color:'Naranja',ubicacion:'Salón',procedencia:'Consignación',estado:'Disponible',obs:'Intens 4x4. 51.000 km.',clienteEntregaId:null,fechaIngreso:'2026-02-28',historialPrecios:[{precio:20000000,fecha:'2026-02-28T10:00:00',nota:'Precio inicial'},{precio:18900000,fecha:'2026-04-05T10:00:00',nota:'Ajuste'}]},
+];
+const CLIENTES_DEMO = [
+  {id:1,nombre:'Martín García',estado:'Prospecto'},{id:2,nombre:'Laura Fernández',estado:'Activo'},
+  {id:3,nombre:'Carlos Roldán',estado:'Activo'},{id:4,nombre:'Sofía Torres',estado:'Prospecto'},
+  {id:5,nombre:'Diego Morales',estado:'Activo'},{id:6,nombre:'Ana Ruiz',estado:'Inactivo'},
+  {id:7,nombre:'Roberto Silva',estado:'Activo'},{id:8,nombre:'Valeria López',estado:'Prospecto'},
+];
+const OPS_DEMO = [
+  {id:1,fecha:'2026-03-15',vehiculo:'Honda HR-V 2023',cliente:'Carlos Roldán',moneda:'ARS',precio:26900000,estado:'Entregado',vendedor:'Juan Pérez'},
+  {id:2,fecha:'2026-04-08',vehiculo:'Ford Focus 2018',cliente:'Roberto Silva',moneda:'ARS',precio:11200000,estado:'En trámite',vendedor:'Juan Pérez'},
+  {id:3,fecha:'2026-04-12',vehiculo:'Toyota Corolla 2024',cliente:'Laura Fernández',moneda:'ARS',precio:28500000,estado:'Entregado',vendedor:'Lucía Méndez'},
+  {id:4,fecha:'2026-04-20',vehiculo:'Volkswagen Amarok 2021',cliente:'Diego Morales',moneda:'ARS',precio:36000000,estado:'En trámite',vendedor:'Roberto García'},
+];
+const MOVS_DEMO = [
+  {id:'m1',tipo:'ingreso',concepto:'Venta Toyota Corolla',monto:28500000,moneda:'ARS',fecha:'2026-04-20',cat:'Ventas'},
+  {id:'m2',tipo:'ingreso',concepto:'Cuota 3/6 — Rodríguez',monto:850000,moneda:'ARS',fecha:'2026-04-20',cat:'Cuotas'},
+  {id:'m3',tipo:'ingreso',concepto:'Seña VW Polo',monto:2000000,moneda:'ARS',fecha:'2026-04-19',cat:'Ventas'},
+  {id:'m4',tipo:'egreso',concepto:'Comisión vendedores',monto:580000,moneda:'ARS',fecha:'2026-04-20',cat:'Gastos'},
+  {id:'m5',tipo:'egreso',concepto:'Patente Ford Focus',monto:120000,moneda:'ARS',fecha:'2026-04-20',cat:'Impuestos'},
+  {id:'m6',tipo:'egreso',concepto:'Seguro flota',monto:340000,moneda:'ARS',fecha:'2026-04-19',cat:'Gastos fijos'},
+  {id:'m7',tipo:'ingreso',concepto:'Cuota 1/3 — López',monto:650000,moneda:'ARS',fecha:'2026-04-19',cat:'Cuotas'},
+  {id:'m8',tipo:'egreso',concepto:'Honorarios gestoría',monto:90000,moneda:'ARS',fecha:'2026-04-18',cat:'Servicios'},
+  {id:'m9',tipo:'ingreso',concepto:'Venta Ford Focus 2018',monto:11200000,moneda:'ARS',fecha:'2026-03-18',cat:'Ventas'},
+  {id:'m10',tipo:'egreso',concepto:'Alistamiento HR-V',monto:210000,moneda:'ARS',fecha:'2026-03-10',cat:'Gastos'},
+  {id:'m11',tipo:'ingreso',concepto:'Ingreso USD — cliente',monto:3200,moneda:'USD',fecha:'2026-04-15',cat:'Ventas'},
+  {id:'m12',tipo:'ingreso',concepto:'Ingreso USD — reserva',monto:1000,moneda:'USD',fecha:'2026-04-10',cat:'Ventas'},
+];
+const FINS_DEMO = [
+  {id:'f1',auto:'Honda HR-V 2023',cliente:'Carlos Roldán',cuotas:[
+    {n:1,monto:420000,fecha:'2026-03-01',pagada:true},
+    {n:2,monto:420000,fecha:'2026-04-01',pagada:true},
+    {n:3,monto:420000,fecha:'2026-05-01',pagada:false},
+    {n:4,monto:420000,fecha:'2026-06-01',pagada:false},
+  ]},
+  {id:'f2',auto:'Ford Focus 2018',cliente:'Roberto Silva',cuotas:[
+    {n:1,monto:310000,fecha:'2026-04-08',pagada:false},
+    {n:2,monto:310000,fecha:'2026-05-08',pagada:false},
+    {n:3,monto:310000,fecha:'2026-06-08',pagada:false},
+  ]},
+];
+const TRFS_DEMO = [
+  {id:'TRF-001',vehiculo:'Renault Sandero 2020',dominio:'PQR 567',estado:'finalizada',
+   historial:[{estado:'prep-doc',ts:'2026-03-28T09:00:00Z'},{estado:'en-escribania',ts:'2026-03-30T10:30:00Z'},{estado:'retirado',ts:'2026-04-05T11:00:00Z'},{estado:'en-gestoria',ts:'2026-04-08T09:00:00Z'},{estado:'para-entregar',ts:'2026-04-12T15:00:00Z'},{estado:'finalizada',ts:'2026-04-15T14:00:00Z'}]},
+  {id:'TRF-002',vehiculo:'Honda Civic 2017',dominio:'VWX 123',estado:'en-escribania',
+   historial:[{estado:'prep-doc',ts:'2026-04-14T08:00:00Z'},{estado:'en-escribania',ts:'2026-04-16T10:00:00Z'}]},
+];
+const AGENDA_DEMO = [
+  {id:'a1',tipo:'cobro', cliente:'Rodríguez, Pablo',  fecha:'2026-05-02',monto:850000, moneda:'ARS',concepto:'Cuota 4/6 — Ford Ranger',estado:'pendiente'},
+  {id:'a2',tipo:'cobro', cliente:'Gómez, Laura',       fecha:'2026-05-05',monto:620000, moneda:'ARS',concepto:'Cuota 2/3 — VW Polo',   estado:'pendiente'},
+  {id:'a3',tipo:'cobro', cliente:'Torres, Sebastián',  fecha:'2026-05-10',monto:1200000,moneda:'ARS',concepto:'Saldo final — Toyota Hilux',estado:'pendiente'},
+  {id:'a4',tipo:'pago',  cliente:'Seguros Federación', fecha:'2026-05-03',monto:340000, moneda:'ARS',concepto:'Renovación seguro flota',estado:'pendiente'},
+  {id:'a5',tipo:'pago',  cliente:'Municipalidad MdP',  fecha:'2026-05-07',monto:95000,  moneda:'ARS',concepto:'Patente Renault Kangoo', estado:'pendiente'},
+  {id:'a6',tipo:'pago',  cliente:'Escribanía Pérez',   fecha:'2026-05-12',monto:180000, moneda:'ARS',concepto:'Honorarios TRF-002',    estado:'pendiente'},
+];
+
+// ═══════════════════════════════════════════════════════════
+//  CARGA DE DATOS REALES
+// ═══════════════════════════════════════════════════════════
+async function cargarDatos() {
+  mostrarCargando('Cargando datos...');
+  // Cargar todo desde Supabase
+  const [aRaw, cRaw, oRaw, mRaw, fRaw, agRaw, cuotasRaw, legsRaw, trfsRaw] = await Promise.all([
+    sbGet('vehiculos','select=*&order=created_at.desc'),
+    sbGet('clientes','select=*&order=created_at.desc'),
+    sbGet('operaciones','select=*&order=created_at.desc'),
+    sbGet('movimientos','select=*&order=created_at.desc'),
+    sbGet('financiaciones','select=*&order=created_at.desc'),
+    sbGet('agenda','select=*&order=created_at.desc'),
+    sbGet('cuotas','select=*&order=financiacion_id,numero'),
+    sbGet('legajos','select=numero,libre&order=numero.asc'),
+    sbGet('transferencias','select=*&order=created_at.desc'),
+  ]);
+
+  const stock = aRaw.map(v=>({
+    id:v.id, marca:v.marca, modelo:v.modelo, tipo:v.tipo||'Usado',
+    anio:v.anio, dominio:v.dominio||'', precio:parseFloat(v.precio||0),
+    precioLista:parseFloat(v.precio_lista||0), km:v.km||0,
+    transmision:v.transmision||'', carroceria:v.carroceria||'',
+    color:v.color||'', ubicacion:v.ubicacion||'', procedencia:v.procedencia||'Propio',
+    estado:v.estado||'Disponible', obs:v.obs||'',
+    fechaIngreso:v.created_at?.split('T')[0],
+    vtv:v.vtv_vencimiento||null,
+    historialPrecios:[]
+  }));
+
+  const clientes = cRaw.map(c=>({id:c.id,nombre:c.nombre,estado:c.estado||'Prospecto'}));
+
+  const ops = oRaw.map(o=>({
+    id:o.id, fecha:o.fecha, vehiculo:o.vehiculo_texto||'',
+    cliente:o.cliente_nombre||'', moneda:o.moneda||'ARS',
+    precio:parseFloat(o.precio||0), estado:o.estado||'Pendiente',
+    vendedor:o.vendedor_id?'Vendedor':''
+  }));
+
+  const movs = mRaw.map(m=>({
+    id:m.id, tipo:m.tipo, concepto:m.obs||'', monto:parseFloat(m.monto||0),
+    moneda:m.moneda||'ARS', fecha:m.fecha, cat:m.categoria||'',
+    autoId:m.vehiculo_id
+  }));
+
+  // Financiaciones con sus cuotas
+  const fins = fRaw.map(f=>({
+    id:f.id, auto:'', cliente:f.cliente||'', moneda:f.moneda||'ARS',
+    cuotas: cuotasRaw.filter(c=>c.financiacion_id===f.id).map(c=>({
+      n:c.numero, monto:parseFloat(c.monto||0),
+      fecha:c.fecha, pagada:c.pagada
+    }))
+  }));
+
+  const agenda = agRaw.map(a=>({
+    id:a.id, tipo:a.tipo, cliente:a.cliente||a.proveedor||'',
+    fecha:a.fecha, monto:parseFloat(a.monto||0),
+    moneda:a.moneda||'ARS', concepto:a.obs||'', estado:a.estado||'pendiente'
+  }));
+
+  // Gestoría — desde Supabase
+  const trfs = trfsRaw.map(t=>({
+    id:t.id, estado:t.estado||'prep-doc',
+    vendedor:t.vendedor||'', comprador:t.comprador||'',
+    dominio:t.dominio||'', honorario:t.honorario||'',
+    honorarioEst:t.honorario_est||'pendiente-cobro',
+    fecha:t.fecha||''
+  }));
+
+  const legajosActivos = legsRaw.filter(l=>!l.libre).length;
+
+  const hoyD = new Date();
+  const mesActual = hoyD.getFullYear() + '-' + String(hoyD.getMonth()+1).padStart(2,'0');
+
+  // ── Cálculos comunes ──────────────────────────────────
+  const saldoARS = movs.filter(m=>m.moneda==='ARS').reduce((a,m)=>a+(m.tipo==='ingreso'?m.monto:-m.monto),0);
+  const saldoUSD = movs.filter(m=>m.moneda==='USD').reduce((a,m)=>a+(m.tipo==='ingreso'?m.monto:-m.monto),0);
+  console.log('Admin - movs cargados:', movs.length, 'saldoARS:', saldoARS, 'mesActual:', mesActual);
+
+  const movsMes = movs.filter(m => m.fecha && m.fecha.startsWith(mesActual));
+  const ingMes = movsMes.filter(m=>m.tipo==='ingreso'&&m.moneda==='ARS').reduce((a,m)=>a+m.monto,0);
+  const egMes  = movsMes.filter(m=>m.tipo==='egreso' &&m.moneda==='ARS').reduce((a,m)=>a+m.monto,0);
+
+  const disponibles = stock.filter(v=>v.estado==='Disponible').length;
+  const reservados  = stock.filter(v=>v.estado==='Reservado').length;
+  const vendidos    = stock.filter(v=>v.estado==='Vendido').length;
+  const totalStock  = stock.length;
+
+  // VTV vencidas — ahora desde la tabla vehiculos
+  const hoyStr = hoyD.toISOString().split('T')[0];
+  let vtvVenc = [], vtvProx = [];
+  stock.forEach(v => {
+    if (v.vtv) {
+      const dias = Math.round((new Date(v.vtv) - hoyD) / 86400000);
+      if (dias < 0)  vtvVenc.push({...v, diasVenc:-dias});
+      else if (dias <= 30) vtvProx.push({...v, diasFalta:dias});
+    }
+  });
+
+  // Cuotas que vencen hoy
+  const cuotasHoy = [];
+  fins.forEach(f => {
+    (f.cuotas||[]).forEach(c => {
+      if (!c.pagada && c.fecha === hoyStr) cuotasHoy.push({...c, fin: f});
+    });
+  });
+
+  // Guardar en cache para reportes
+  _datos.stock = stock;
+  _datos.ops   = ops;
+  _datos.movs  = movs;
+
+  // ── DASHBOARD ──────────────────────────────────────────
+  renderDashboard({stock, clientes, ops, movs, fins, agenda, trfs, ingMes, egMes, saldoARS, saldoUSD, disponibles, reservados, vendidos, vtvVenc, vtvProx, cuotasHoy, mesActual});
+
+  // ── LOG DE ACTIVIDAD ──────────────────────────────────
+  renderLog({stock, ops, movs, trfs});
+
+  // ── VENDEDORES ────────────────────────────────────────
+  renderVendedores({stock, clientes, ops, reservados});
+
+  // ── CAJA ──────────────────────────────────────────────
+  renderCaja({movs, fins, agenda, saldoARS, saldoUSD, ingMes, egMes, cuotasHoy, mesActual});
+
+  // ── GESTORIA ──────────────────────────────────────────
+  renderGestoria({trfs, vtvVenc, vtvProx, legajosActivos});
+
+  // ── STOCK ─────────────────────────────────────────────
+  renderStock({stock});
+  ocultarCargando();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDashboard({stock, clientes, ops, movs, fins, agenda, trfs, ingMes, egMes, saldoARS, saldoUSD, disponibles, reservados, vendidos, vtvVenc, vtvProx, cuotasHoy, mesActual}) {
+  const opsActivas = ops ? ops.filter(o => o.fecha && o.fecha.startsWith(mesActual)) : [];
+  setText('d-ventas', opsActivas.length || '—');
+  setText('d-ventas-sub', '+' + opsActivas.length + ' operaciones este mes');
+  setText('d-facturado', ingMes > 0 ? fmtARS(ingMes) : '$ 0');
+  setText('d-facturado-sub', 'Ingresos ARS del mes');
+  setText('d-egresos', egMes > 0 ? fmtARS(egMes) : '$ 0');
+  const rent = ingMes - egMes;
+  setText('d-rentabilidad', fmtARS(rent));
+  setText('d-rent-sub', rent >= 0 ? 'Resultado positivo ✓' : '⚠ Resultado negativo');
+  const rentEl = $('d-rentabilidad');
+  if(rentEl) rentEl.className = 'card-value ' + (rent >= 0 ? 'pos' : 'neg');
+  setText('d-stock', stock.filter(v => v.estado !== 'Vendido').length);
+  setText('d-stock-sub', disponibles + ' disponibles · ' + reservados + ' reservados');
+  setText('d-stock-propios', stock.filter(v => v.estado !== 'Vendido' && v.procedencia === 'Propio').length);
+  setText('d-stock-consig', stock.filter(v => v.estado !== 'Vendido' && v.procedencia === 'Consignación').length);
+  setText('d-stock-ingresar', stock.filter(v => v.estado === 'A ingresar').length);
+  const trfsAbiertas = trfs ? trfs.filter(t => t.estado !== 'finalizada').length : 0;
+  setText('d-transf', trfsAbiertas);
+  setText('d-vtv', vtvVenc.length || '0');
+  // sistema cards
+  setText('sc-stock', stock.length);
+  setText('sc-clientes', clientes.length);
+  setText('sc-vendidos', vendidos);
+  setText('sc-saldoARS', saldoARS !== 0 ? fmtARS(saldoARS) : '$ 0');
+  setText('sc-saldoUSD', saldoUSD !== 0 ? 'U$D ' + Math.round(saldoUSD).toLocaleString('es-AR') : 'U$D 0');
+  // Proyección al cierre en card de CajaPro
+  const hoyStrSC = new Date().toISOString().split('T')[0];
+  const cobrosSC = (agenda||[]).filter(a => a.tipo==='cobro' && a.estado==='pendiente' && a.fecha >= hoyStrSC && a.moneda==='ARS').reduce((s,a)=>s+a.monto, 0);
+  const pagosSC  = (agenda||[]).filter(a => a.tipo==='pago'  && a.estado==='pendiente' && a.fecha >= hoyStrSC && a.moneda==='ARS').reduce((s,a)=>s+a.monto, 0);
+  const proySC = saldoARS + cobrosSC - pagosSC;
+  const scProy = $('sc-proyeccion');
+  if(scProy) {
+    scProy.textContent = fmtARS(proySC);
+    scProy.style.color = proySC >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+  setText('sc-trfs', trfsAbiertas);
+  // Promedio de días de trámites finalizados
+  const trfsFinalizadas = trfs.filter(t => t.estado === 'finalizada' && t.historial && t.historial.length >= 2);
+  if (trfsFinalizadas.length > 0) {
+    const promDias = Math.round(trfsFinalizadas.reduce((a, t) => {
+      const ini = t.historial[0].ts;
+      const fin = (t.historial.find(h => h.estado === 'finalizada') || t.historial[t.historial.length-1]).ts;
+      return a + diffDias(ini, fin);
+    }, 0) / trfsFinalizadas.length);
+    const el = $('sc-prom-dias');
+    if (el) { el.textContent = promDias + 'd'; el.style.color = diasColor(promDias); }
+  } else {
+    setText('sc-prom-dias', '—');
+  }
+  const gestStatus = $('sc-gest-status');
+  if(gestStatus) { gestStatus.className = 'sys-status ' + (vtvVenc.length > 0 ? 'warn' : 'ok'); gestStatus.textContent = vtvVenc.length > 0 ? ('⚠ ' + vtvVenc.length + ' alerta' + (vtvVenc.length>1?'s':'')) : '● En línea'; }
+
+  // Alertas
+  const alertasWrap = $('d-alertas-wrap');
+  if(alertasWrap) {
+    let html = '';
+    if (vtvVenc.length > 0) html += `<div class="alert-banner err"><div class="alert-icon">⚠</div><div class="alert-text"><strong style="color:var(--red);">${vtvVenc.length} VTV vencida${vtvVenc.length>1?'s':''}</strong> — ${vtvVenc.map(v=>(v.vehiculo||'Vehículo')+' ('+v.diasVenc+' día'+  (v.diasVenc>1?'s':'')+')').join(', ')}. Gestionar en Gestoría.</div></div>`;
+    if (cuotasHoy.length > 0) html += `<div class="alert-banner warn"><div class="alert-icon">⚠</div><div class="alert-text"><strong style="color:var(--amber);">${cuotasHoy.length} cuota${cuotasHoy.length>1?'s':''} vence${cuotasHoy.length===1?'':'n'} hoy</strong> — Gestionar cobro en CajaPro.</div></div>`;
+    if (vtvProx.length > 0) html += `<div class="alert-banner info"><div class="alert-icon">ℹ</div><div class="alert-text"><strong style="color:var(--accent);">${vtvProx.length} VTV próxima${vtvProx.length>1?'s':''} a vencer</strong> — Revisar en Gestoría.</div></div>`;
+    alertasWrap.innerHTML = html;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOG DE ACTIVIDAD REAL
+// ═══════════════════════════════════════════════════════════
+function renderLog({stock, ops, movs, trfs}) {
+  const eventos = [];
+  const hoyD = new Date();
+
+  // Movimientos de caja
+  movs.slice(0, 20).forEach(m => {
+    if (!m.fecha) return;
+    eventos.push({
+      ts: new Date(m.fecha + 'T12:00:00').getTime(),
+      dot: m.tipo === 'ingreso' ? 'grn' : 'red',
+      texto: (m.tipo === 'ingreso' ? 'Ingreso: ' : 'Egreso: ') + '<strong>' + fmtARS(m.monto) + '</strong>' + (m.concepto ? ' — ' + m.concepto : ''),
+      meta: fmtFecha(m.fecha),
+      src: 'cp'
+    });
+  });
+
+  // Operaciones de venta
+  (ops || []).forEach(o => {
+    if (!o.fecha) return;
+    eventos.push({
+      ts: new Date(o.fecha + 'T10:00:00').getTime(),
+      dot: 'acc',
+      texto: 'Operación: <strong>' + (o.vehiculo||'Vehículo') + '</strong> — ' + (o.cliente||''),
+      meta: fmtFecha(o.fecha) + ' · ' + (o.estado||''),
+      src: 'cv'
+    });
+  });
+
+  // Historial de transferencias
+  (trfs || []).forEach(t => {
+    (t.historial || []).slice(-2).forEach(h => {
+      eventos.push({
+        ts: new Date(h.ts).getTime(),
+        dot: 'amb',
+        texto: '<strong>' + t.id + '</strong> — ' + (h.label || h.estado),
+        meta: fmtTS(h.ts),
+        src: 'gt'
+      });
+    });
+  });
+
+  eventos.sort((a,b) => b.ts - a.ts);
+  const top = eventos.slice(0, 10);
+
+  const lista = $('log-lista');
+  const count = $('log-count');
+  if(count) count.textContent = top.length + ' eventos';
+  if(!lista) return;
+
+  if(top.length === 0) {
+    lista.innerHTML = '<div class="act-item"><div class="act-body"><div class="act-text" style="color:var(--muted);">No hay actividad registrada aún.</div></div></div>';
+    return;
+  }
+
+  lista.innerHTML = top.map(e => {
+    const ahora = hoyD.getTime();
+    const minutos = Math.round((ahora - e.ts) / 60000);
+    let hace = '';
+    if (minutos < 60) hace = 'Hace ' + minutos + ' min';
+    else if (minutos < 1440) hace = 'Hace ' + Math.round(minutos/60) + 'h';
+    else hace = e.meta;
+    return `<div class="act-item">
+      <div class="act-dot ${e.dot}"></div>
+      <div class="act-body">
+        <div class="act-text">${e.texto}</div>
+        <div class="act-meta">${hace}</div>
+      </div>
+      <span class="act-src ${e.src}">${e.src.toUpperCase()}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VENDEDORES
+// ═══════════════════════════════════════════════════════════
+function renderVendedores({stock, clientes, ops, reservados}) {
+  const vendidos = stock.filter(v => v.estado === 'Vendido');
+  const activos  = clientes.filter(c => c.estado === 'Activo').length;
+  const prospectos = clientes.filter(c => c.estado === 'Prospecto').length;
+
+  setText('v-total', ops ? ops.length : vendidos.length);
+  setText('v-clientes', activos);
+  setText('v-clientes-sub', prospectos + ' prospectos');
+  setText('v-reservados', reservados);
+
+  // Tiempo promedio en stock (vendidos)
+  const vendidosConFechas = vendidos.filter(v => v.fechaIngreso && v.fechaVenta);
+  if(vendidosConFechas.length > 0) {
+    const prom = Math.round(vendidosConFechas.reduce((a,v) => a + diffDias(v.fechaIngreso, v.fechaVenta), 0) / vendidosConFechas.length);
+    setText('v-dias-stock', prom);
+    const el = $('v-dias-stock');
+    if(el) el.style.color = diasColor(prom);
+  }
+
+  // Mejor vendedor (desde ops)
+  const porVend = {};
+  (ops||[]).forEach(o => { if(o.vendedor) porVend[o.vendedor] = (porVend[o.vendedor]||0)+1; });
+  const mejorVend = Object.entries(porVend).sort((a,b)=>b[1]-a[1])[0];
+  if(mejorVend) { setText('v-mejor', mejorVend[0].split(',')[0]); setText('v-mejor-sub', mejorVend[1] + ' operaciones'); }
+
+  // Tabla tiempo en stock
+  const badge = $('v-stock-badge');
+  const tabla = $('v-stock-tabla');
+  if(badge) badge.textContent = vendidosConFechas.length + ' vehículo' + (vendidosConFechas.length!==1?'s':'') + ' vendido' + (vendidosConFechas.length!==1?'s':'');
+  if(tabla) {
+    if(vendidosConFechas.length === 0) {
+      tabla.innerHTML = '<tr class="empty-row"><td colspan="4">No hay vehículos vendidos con fechas de ingreso registradas.</td></tr>';
+    } else {
+      tabla.innerHTML = [...vendidosConFechas].sort((a,b)=>{
+        const da = diffDias(a.fechaIngreso,a.fechaVenta);
+        const db = diffDias(b.fechaIngreso,b.fechaVenta);
+        return da - db;
+      }).map(v => {
+        const dias = diffDias(v.fechaIngreso, v.fechaVenta);
+        return `<tr>
+          <td><strong>${v.marca} ${v.modelo}</strong> ${v.anio}</td>
+          <td><span class="badge ${v.tipo==='Nuevo'?'b-info':'b-neu'}">${v.tipo}</span></td>
+          <td class="mono">${fmtARS(v.precio)}</td>
+          <td><span class="dias-chip ${diasClase(dias)}">${dias} días</span></td>
+        </tr>`;
+      }).join('');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CAJA
+// ═══════════════════════════════════════════════════════════
+function renderCaja({movs, fins, agenda, saldoARS, saldoUSD, ingMes, egMes, cuotasHoy, mesActual}) {
+  // Cards principales
+  setText('c-saldo-ars', fmtARS(saldoARS));
+  setText('c-saldo-usd', 'U$D ' + Math.round(saldoUSD).toLocaleString('es-AR'));
+  setText('c-ing-mes', fmtARS(ingMes));
+  setText('c-eg-mes', fmtARS(egMes));
+  const resMes = ingMes - egMes;
+  setText('c-resultado', fmtARS(resMes));
+  const resEl = $('c-resultado');
+  if(resEl) resEl.className = 'card-value ' + (resMes >= 0 ? 'pos' : 'neg');
+
+  // Agenda futura
+  const hoyStrC = new Date().toISOString().split('T')[0];
+  const cobros = agenda.filter(a => a.tipo==='cobro' && a.estado==='pendiente' && a.fecha >= hoyStrC).sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,5);
+  const pagos  = agenda.filter(a => a.tipo==='pago'  && a.estado==='pendiente' && a.fecha >= hoyStrC).sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,5);
+  const totalCobros = cobros.filter(a=>a.moneda==='ARS').reduce((s,a)=>s+a.monto,0);
+  const totalPagos  = pagos.filter(a=>a.moneda==='ARS').reduce((s,a)=>s+a.monto,0);
+
+  // Cards ingresos/egresos futuros
+  setText('c-cobros-card', totalCobros > 0 ? fmtARS(totalCobros) : '—');
+  setText('c-cobros-card-sub', cobros.length + ' cobro' + (cobros.length!==1?'s':'') + ' agendado' + (cobros.length!==1?'s':''));
+  setText('c-pagos-card', totalPagos > 0 ? fmtARS(totalPagos) : '—');
+  setText('c-pagos-card-sub', pagos.length + ' pago' + (pagos.length!==1?'s':'') + ' agendado' + (pagos.length!==1?'s':''));
+
+  // Alertas
+  const alertasEl = $('c-alertas-wrap');
+  if(alertasEl) {
+    let html = '';
+    if(cuotasHoy.length > 0) html += `<div class="alert-banner warn"><div class="alert-icon">⚠</div><div class="alert-text"><strong style="color:var(--amber);">${cuotasHoy.length} cuota${cuotasHoy.length>1?'s':''} vence${cuotasHoy.length===1?'':'n'} hoy.</strong> Gestionar cobro en CajaPro.</div></div>`;
+    if(resMes < 0) html += `<div class="alert-banner err"><div class="alert-icon">⚠</div><div class="alert-text"><strong style="color:var(--red);">Resultado negativo este mes.</strong> Los egresos superan los ingresos en ${fmtARS(Math.abs(resMes))}.</div></div>`;
+    alertasEl.innerHTML = html;
+  }
+
+  // Gráfico últimos 6 meses
+  const hoyGraf = new Date();
+  const meses6 = [];
+  for(let i = 5; i >= 0; i--) {
+    const d = new Date(hoyGraf.getFullYear(), hoyGraf.getMonth() - i, 1);
+    meses6.push({ key: d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'), label: MESES_CORTOS[d.getMonth()] });
+  }
+  const datosGrafico = meses6.map(m => {
+    const mMovs = movs.filter(mv => mv.fecha && mv.fecha.startsWith(m.key) && mv.moneda === 'ARS');
+    return { label: m.label, ing: mMovs.filter(mv=>mv.tipo==='ingreso').reduce((a,mv)=>a+mv.monto,0), eg: mMovs.filter(mv=>mv.tipo==='egreso').reduce((a,mv)=>a+mv.monto,0) };
+  });
+  const maxVal = Math.max(...datosGrafico.map(d => Math.max(d.ing, d.eg)), 1);
+  const graf = $('c-grafico');
+  const grafLabels = $('c-grafico-labels');
+  if(graf) graf.innerHTML = datosGrafico.map(d => `<div class="bar-col"><div class="bar-ing" style="height:${Math.round(d.ing/maxVal*90)}px;" title="Ing: ${fmtARS(d.ing)}"></div><div class="bar-eg" style="height:${Math.round(d.eg/maxVal*90)}px;" title="Eg: ${fmtARS(d.eg)}"></div></div>`).join('');
+  if(grafLabels) grafLabels.innerHTML = datosGrafico.map(d => `<span class="bar-label" style="flex:1;text-align:center;">${d.label}</span>`).join('');
+
+  // Proyección cuotas próximos meses
+  const hoyProj = hoyGraf.toISOString().split('T')[0];
+  const proj = {};
+  fins.forEach(f => {
+    (f.cuotas||[]).filter(c => !c.pagada && c.fecha >= hoyProj).forEach(c => {
+      const mes = c.fecha.substring(0,7);
+      if(!proj[mes]) proj[mes] = {monto:0, n:0};
+      proj[mes].monto += c.monto;
+      proj[mes].n++;
+    });
+  });
+  const mesesProj = Object.entries(proj).sort((a,b)=>a[0].localeCompare(b[0])).slice(0,4);
+  const projCuotasEl = $('c-proyeccion');
+  const projBadge = $('c-proj-badge');
+  const totalProj = mesesProj.reduce((a,[,v])=>a+v.monto,0);
+  if(projBadge) projBadge.textContent = 'Total: ' + fmtARS(totalProj);
+  if(projCuotasEl) {
+    if(mesesProj.length === 0) {
+      projCuotasEl.innerHTML = '<div style="color:var(--muted);font-size:.83rem;text-align:center;padding:16px;">Sin cuotas pendientes.</div>';
+    } else {
+      const maxProj = Math.max(...mesesProj.map(([,v])=>v.monto),1);
+      projCuotasEl.innerHTML = mesesProj.map(([mes, v]) => {
+        const [y,m] = mes.split('-');
+        return `<div class="cuota-row"><div class="cuota-periodo">${MESES_CORTOS[parseInt(m)-1]} ${y}</div><div class="cuota-barra"><div class="cuota-barra-fill" style="width:${Math.round(v.monto/maxProj*100)}%;"></div></div><div class="cuota-monto">${fmtARS(v.monto)}</div><div class="cuota-n">${v.n} cuota${v.n!==1?'s':''}</div></div>`;
+      }).join('');
+    }
+  }
+
+  // Últimos movimientos
+  const ings = movs.filter(m=>m.tipo==='ingreso'&&m.moneda==='ARS').slice(0,4);
+  const egs  = movs.filter(m=>m.tipo==='egreso' &&m.moneda==='ARS').slice(0,4);
+  const ingEl = $('c-ultimos-ing');
+  const egEl  = $('c-ultimos-eg');
+  if(ingEl) ingEl.innerHTML = ings.map(m=>`<div class="mov"><div class="mov-tag ing"></div><div class="mov-info"><div class="mov-desc">${m.concepto||'Sin concepto'}</div><div class="mov-cat">${m.cat||''} · ${fmtFecha(m.fecha)}</div></div><div class="mov-monto ing">+${fmtARS(m.monto)}</div></div>`).join('') || '<div class="mov"><div class="mov-info" style="color:var(--muted);">Sin ingresos.</div></div>';
+  if(egEl)  egEl.innerHTML  = egs.map(m=>`<div class="mov"><div class="mov-tag eg"></div><div class="mov-info"><div class="mov-desc">${m.concepto||'Sin concepto'}</div><div class="mov-cat">${m.cat||''} · ${fmtFecha(m.fecha)}</div></div><div class="mov-monto eg">−${fmtARS(m.monto)}</div></div>`).join('') || '<div class="mov"><div class="mov-info" style="color:var(--muted);">Sin egresos.</div></div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GESTORIA
+// ═══════════════════════════════════════════════════════════
+function renderGestoria({trfs, vtvVenc, vtvProx, legajosActivos}) {
+  setText('g-legajos', legajosActivos ?? 0);
+  const estados = {'prep-doc':0,'en-escribania':0,'retirado':0,'en-gestoria':0,'para-entregar':0,'finalizada':0};
+  trfs.forEach(t => { if(estados[t.estado]!==undefined) estados[t.estado]++; });
+  const enTransf = trfs.filter(t=>t.estado!=='finalizada').length;
+  const enEsc = (estados['en-escribania']||0) + (estados['retirado']||0);
+
+  setText('g-en-trf', enTransf);
+  setText('g-escribania', enEsc);
+  setText('g-finalizadas', estados['finalizada']||0);
+  setText('g-vtv', vtvVenc.length || '0');
+
+  // Pipeline
+  const pipe = $('g-pipeline');
+  if(pipe) {
+    const stages = [
+      {key:'doc-inc',  val: estados['prep-doc']||0,      color:'var(--muted)',   label:'Doc. incompleta'},
+      {key:'prep-doc', val: estados['prep-doc']||0,      color:'var(--accent)',  label:'Preparando doc.'},
+      {key:'escrib',   val: enEsc,                       color:'var(--purple)',  label:'En escribanía'},
+      {key:'gest',     val: estados['en-gestoria']||0,   color:'var(--amber)',   label:'En gestoría'},
+      {key:'entr',     val: estados['para-entregar']||0, color:'var(--accent)',  label:'Para entregar'},
+      {key:'fin',      val: estados['finalizada']||0,    color:'var(--green)',   label:'Finalizadas'},
+    ];
+    pipe.innerHTML = stages.map(s=>`<div class="pipe-stage"><div class="pipe-n" style="color:${s.color};">${s.val}</div><div class="pipe-l">${s.label}</div></div>`).join('');
+  }
+
+  // Alertas VTV
+  const alertasEl = $('g-alertas-wrap');
+  if(alertasEl) {
+    let html = '';
+    if(vtvVenc.length>0) html += `<div class="alert-banner err"><div class="alert-icon">⚠</div><div class="alert-text"><strong style="color:var(--red);">${vtvVenc.length} VTV vencida${vtvVenc.length>1?'s':''}</strong> — ${vtvVenc.map(v=>(v.vehiculo||'Vehículo')+' ('+v.diasVenc+' día'+(v.diasVenc>1?'s':'')+')').join(', ')}.</div></div>`;
+    if(vtvProx.length>0) html += `<div class="alert-banner info"><div class="alert-icon">ℹ</div><div class="alert-text"><strong style="color:var(--accent);">${vtvProx.length} VTV próxima${vtvProx.length>1?'s':''} a vencer</strong> — ${vtvProx.map(v=>(v.vehiculo||'Vehículo')+' en '+v.diasFalta+' día'+(v.diasFalta>1?'s':'')).join(', ')}.</div></div>`;
+    alertasEl.innerHTML = html;
+  }
+
+  // Lista VTV en card
+  const vtvLista = $('g-vtv-lista');
+  if(vtvLista) {
+    const todas = [...vtvVenc.map(v=>({...v,tipo:'venc'})), ...vtvProx.map(v=>({...v,tipo:'prox'}))];
+    if(todas.length===0) { vtvLista.innerHTML = '<div class="act-item"><div class="act-body"><div class="act-text" style="color:var(--muted);">Sin alertas VTV activas.</div></div></div>'; }
+    else { vtvLista.innerHTML = todas.map(v=>`<div class="act-item"><div class="act-dot ${v.tipo==='venc'?'red':'amb'}"></div><div class="act-body"><div class="act-text"><strong>${v.vehiculo||'Vehículo'}</strong>${v.dominio?' — '+v.dominio:''}</div><div class="act-meta">${v.tipo==='venc'?'Vencida hace '+v.diasVenc+' día'+(v.diasVenc>1?'s':''):'Vence en '+v.diasFalta+' día'+(v.diasFalta>1?'s':'')}</div></div><span class="badge ${v.tipo==='venc'?'b-err':'b-warn'}">${v.tipo==='venc'?'VENCIDA':'PRÓXIMA'}</span></div>`).join(''); }
+  }
+
+  // Promedio y etapas
+  const finalizados = trfs.filter(t => t.estado==='finalizada' && t.historial && t.historial.length>=2);
+  const detalles = finalizados.map(t => {
+    const hist = t.historial;
+    const tsIni = hist[0].ts;
+    const tsFin = (hist.find(h=>h.estado==='finalizada')||hist[hist.length-1]).ts;
+    const dias = diffDias(tsIni, tsFin);
+    const porEtapa = {};
+    for(let i=0;i<hist.length-1;i++) { const e=hist[i].estado; const d=diffDias(hist[i].ts,hist[i+1].ts); porEtapa[e]=(porEtapa[e]||0)+d; }
+    return {dias, porEtapa};
+  });
+
+  if(detalles.length>0) {
+    const prom = Math.round(detalles.reduce((a,d)=>a+d.dias,0)/detalles.length);
+    setText('g-promedio', prom);
+    const el = $('g-promedio'); if(el) el.style.color = diasColor(prom);
+    setText('g-promedio-sub', 'días por trámite ('+detalles.length+' finalizado'+(detalles.length!==1?'s':'')+')');
+  }
+
+  const ml = $('g-muestra-label'); if(ml) ml.textContent = detalles.length+' finalizado'+(detalles.length!==1?'s':'');
+  const tbody = $('g-etapas-tbody');
+  if(tbody) {
+    if(detalles.length===0) { tbody.innerHTML='<tr class="empty-row"><td colspan="4">No hay trámites finalizados.</td></tr>'; }
+    else {
+      const stats = {};
+      G_ORDEN.forEach(e => {
+        const vals = detalles.map(d=>d.porEtapa[e]).filter(v=>v!==undefined&&v>=0);
+        if(vals.length>0) stats[e]={prom:Math.round(vals.reduce((a,v)=>a+v,0)/vals.length),min:Math.min(...vals),max:Math.max(...vals)};
+      });
+      tbody.innerHTML = Object.entries(stats).map(([e,s])=>`<tr><td>${G_ETIQUETAS[e]||e}</td><td><span class="mono" style="color:${diasColor(s.prom)};font-weight:500;">${s.prom} días</span></td><td><span class="mono" style="color:var(--green);">${s.min} d.</span></td><td><span class="mono" style="color:var(--red);">${s.max} d.</span></td></tr>`).join('') || '<tr class="empty-row"><td colspan="4">Sin datos.</td></tr>';
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════════════════
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  $(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id === 'reportes') { initReportes(); renderReportes(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+const hoyInit = new Date();
+const diasS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+setText('fechaSub', diasS[hoyInit.getDay()] + ' ' + hoyInit.getDate() + ' de ' + MESES_LARGOS[hoyInit.getMonth()] + ' ' + hoyInit.getFullYear());
+setText('fechaH', hoyInit.getDate() + ' ' + MESES_CORTOS[hoyInit.getMonth()].toUpperCase() + ' ' + hoyInit.getFullYear());
+
+// ═══════════════════════════════════════════════════════════
+//  STOCK
+// ═══════════════════════════════════════════════════════════
+function renderStock({stock}) {
+  const hoyStock = new Date();
+  const hoyStr = hoyStock.toISOString().split('T')[0];
+
+  // Vehículos activos (no vendidos)
+  const activos = stock.filter(v => v.estado !== 'Vendido');
+  const disponibles = activos.filter(v => v.estado === 'Disponible');
+  const reservados  = activos.filter(v => v.estado === 'Reservado');
+  const aIngresar   = stock.filter(v => v.estado === 'A ingresar');
+  const propios     = activos.filter(v => v.procedencia === 'Propio');
+  const consig      = activos.filter(v => v.procedencia === 'Consignación');
+  const nuevos      = activos.filter(v => v.tipo === 'Nuevo');
+  const usados      = activos.filter(v => v.tipo === 'Usado');
+
+  setText('st-total', activos.length);
+  setText('st-total-sub', activos.length + ' unidades en stock');
+  setText('st-disp', disponibles.length);
+  setText('st-reserv', reservados.length);
+  setText('st-ingr', aIngresar.length);
+  setText('st-propios', propios.length);
+  setText('st-consig', consig.length);
+  setText('st-nuevos', nuevos.length);
+  setText('st-usados', usados.length);
+
+  // Precio promedio (disponibles con precio > 0)
+  const conPrecio = disponibles.filter(v => v.precio > 0);
+  if (conPrecio.length > 0) {
+    const prom = Math.round(conPrecio.reduce((a,v) => a + v.precio, 0) / conPrecio.length);
+    setText('st-precio-prom', fmtARS(prom));
+  }
+
+  // Días promedio en stock (vendidos con ambas fechas)
+  const vendidos = stock.filter(v => v.estado === 'Vendido' && v.fechaIngreso && v.fechaVenta);
+  if (vendidos.length > 0) {
+    const promDias = Math.round(vendidos.reduce((a,v) => a + diffDias(v.fechaIngreso, v.fechaVenta), 0) / vendidos.length);
+    const el = $('st-dias-prom');
+    if (el) { el.textContent = promDias; el.style.color = diasColor(promDias); }
+  } else {
+    setText('st-dias-prom', '—');
+  }
+
+  // ── Distribución por carrocería (stock activo) ──
+  const CARROCERIAS = ['Sedan','Hatchback','SUV','Pick-up','Furgón','Coupé','Crossover','Minivan','Camión','Otro'];
+  const porCarr = {};
+  activos.forEach(v => {
+    const c = v.carroceria || 'Sin definir';
+    porCarr[c] = (porCarr[c] || 0) + 1;
+  });
+  const carrOrdenadas = Object.entries(porCarr).sort((a,b) => b[1] - a[1]);
+  const maxCarr = carrOrdenadas[0]?.[1] || 1;
+  const carrEl = $('st-carroceria-lista');
+  if (carrEl) {
+    if (carrOrdenadas.length === 0) {
+      carrEl.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">Sin datos.</div>';
+    } else {
+      carrEl.innerHTML = carrOrdenadas.map(([nombre, n]) => `
+        <div class="dist-item">
+          <div class="dist-label">${nombre}</div>
+          <div class="dist-bar-wrap"><div class="dist-bar-fill" style="width:${Math.round(n/maxCarr*100)}%;"></div></div>
+          <div class="dist-count">${n}</div>
+          <div class="dist-sub">${Math.round(n/activos.length*100)}%</div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Días promedio por carrocería (vendidos) ──
+  const diasPorCarr = {};
+  vendidos.forEach(v => {
+    const c = v.carroceria || 'Sin definir';
+    if (!diasPorCarr[c]) diasPorCarr[c] = [];
+    diasPorCarr[c].push(diffDias(v.fechaIngreso, v.fechaVenta));
+  });
+  const diasCarrOrdenadas = Object.entries(diasPorCarr)
+    .map(([c, vals]) => [c, Math.round(vals.reduce((a,v)=>a+v,0)/vals.length), vals.length])
+    .sort((a,b) => a[1] - b[1]);
+  const maxDias = diasCarrOrdenadas[0] ? Math.max(...diasCarrOrdenadas.map(d=>d[1])) : 1;
+  const diasCarrEl = $('st-dias-carroceria');
+  if (diasCarrEl) {
+    if (diasCarrOrdenadas.length === 0) {
+      diasCarrEl.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">Sin vehículos vendidos con fechas registradas.</div>';
+    } else {
+      diasCarrEl.innerHTML = diasCarrOrdenadas.map(([nombre, prom, n]) => `
+        <div class="dist-item">
+          <div class="dist-label">${nombre}</div>
+          <div class="dist-bar-wrap"><div class="dist-bar-fill" style="width:${Math.round(prom/maxDias*100)}%;background:${diasColor(prom)};"></div></div>
+          <div class="dist-count" style="color:${diasColor(prom)};">${prom}d</div>
+          <div class="dist-sub">${n} vta${n!==1?'s':''}</div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Más tiempo en stock sin venderse ──
+  const diasEnStock = v => v.fechaIngreso ? diffDias(v.fechaIngreso, hoyStr) : 0;
+  const trabados = [...disponibles, ...reservados]
+    .filter(v => v.fechaIngreso)
+    .sort((a,b) => diasEnStock(b) - diasEnStock(a))
+    .slice(0, 10);
+
+  const trabBadge = $('st-trabados-badge');
+  if (trabBadge) trabBadge.textContent = trabados.length + ' vehículos';
+  const trabTabla = $('st-trabados-tabla');
+  if (trabTabla) {
+    if (trabados.length === 0) {
+      trabTabla.innerHTML = '<tr class="empty-row"><td colspan="5">Sin vehículos con fecha de ingreso registrada.</td></tr>';
+    } else {
+      trabTabla.innerHTML = trabados.map(v => {
+        const dias = diasEnStock(v);
+        const estadoBadge = v.estado === 'Disponible' ? 'b-info' : 'b-warn';
+        return `<tr>
+          <td><strong>${v.marca} ${v.modelo}</strong> ${v.anio}</td>
+          <td>${v.carroceria || '—'}</td>
+          <td>${v.procedencia || '—'}</td>
+          <td class="mono">${v.precio > 0 ? fmtARS(v.precio) : '—'}</td>
+          <td><span class="dias-chip ${diasClase(dias)}">${dias} días</span></td>
+          <td><button class="btn btn-sm" onclick='verVehiculo(${JSON.stringify(v).replace(/'/g,"&#39;")})'>Ver</button></td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // ── Detalle completo ──
+  const complBadge = $('st-completo-badge');
+  if (complBadge) complBadge.textContent = activos.length + ' vehículo' + (activos.length!==1?'s':'');
+  const complTabla = $('st-completo-tabla');
+  if (complTabla) {
+    if (activos.length === 0) {
+      complTabla.innerHTML = '<tr class="empty-row"><td colspan="8">No hay vehículos en stock.</td></tr>';
+    } else {
+      const estadoClase = e => e==='Disponible'?'b-info':e==='Reservado'?'b-warn':e==='A ingresar'?'b-neu':'b-neu';
+      complTabla.innerHTML = [...activos].sort((a,b) => {
+        const da = a.fechaIngreso ? diffDias(a.fechaIngreso, hoyStr) : 0;
+        const db = b.fechaIngreso ? diffDias(b.fechaIngreso, hoyStr) : 0;
+        return db - da;
+      }).map(v => {
+        const dias = v.fechaIngreso ? diffDias(v.fechaIngreso, hoyStr) : null;
+        return `<tr>
+          <td><strong>${v.marca} ${v.modelo}</strong></td>
+          <td class="mono">${v.anio}</td>
+          <td><span class="badge ${v.tipo==='Nuevo'?'b-info':'b-neu'}">${v.tipo||'—'}</span></td>
+          <td>${v.carroceria||'—'}</td>
+          <td>${v.procedencia||'—'}</td>
+          <td><span class="badge ${estadoClase(v.estado)}">${v.estado}</span></td>
+          <td class="mono">${v.precio > 0 ? fmtARS(v.precio) : '—'}</td>
+          <td>${dias !== null ? `<span class="dias-chip ${diasClase(dias)}">${dias}d</span>` : '—'}</td>
+          <td><button class="btn btn-sm" onclick='verVehiculo(${JSON.stringify(v).replace(/'/g,"&#39;")})'>Ver</button></td>
+        </tr>`;
+      }).join('');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODAL VEHÍCULO
+// ═══════════════════════════════════════════════════════════
+function verVehiculo(v) {
+  const hoyM = new Date().toISOString().split('T')[0];
+  const diasStock = v.fechaIngreso ? diffDias(v.fechaIngreso, v.estado === 'Vendido' && v.fechaVenta ? v.fechaVenta : hoyM) : null;
+
+  $('mv-titulo').textContent = `${v.marca} ${v.modelo} ${v.anio}`;
+  $('mv-subtitulo').textContent = [v.tipo, v.carroceria, v.dominio].filter(Boolean).join(' · ');
+
+  const campo = (label, val) => `
+    <div class="mv-field">
+      <div class="mv-label">${label}</div>
+      <div class="mv-val">${val || '—'}</div>
+    </div>`;
+
+  const badgeEstado = e => {
+    const cls = e==='Disponible'?'b-info':e==='Reservado'?'b-warn':e==='Vendido'?'b-ok':e==='A ingresar'?'b-neu':'b-neu';
+    return `<span class="badge ${cls}">${e}</span>`;
+  };
+
+  $('mv-body').innerHTML = `
+    <div class="mv-grid">
+      ${campo('Marca', v.marca)}
+      ${campo('Modelo', v.modelo)}
+      ${campo('Año', v.anio)}
+      ${campo('Tipo', v.tipo)}
+      ${campo('Carrocería', v.carroceria)}
+      ${campo('Transmisión', v.transmision)}
+      ${campo('Color', v.color)}
+      ${campo('Kilometraje', v.km > 0 ? v.km.toLocaleString('es-AR') + ' km' : '0 km')}
+      ${campo('Dominio', v.dominio)}
+      ${campo('Ubicación', v.ubicacion)}
+      ${campo('Procedencia', v.procedencia)}
+      ${campo('Estado', badgeEstado(v.estado))}
+    </div>
+
+    <div class="mv-section">Identificación</div>
+    <div class="mv-grid">
+      ${campo('Chasis', v.chasis)}
+      ${campo('Motor', v.motor)}
+    </div>
+
+    <div class="mv-section">Precio</div>
+    <div class="mv-grid">
+      ${campo('Precio de lista', v.precioLista > 0 ? fmtARS(v.precioLista) : '—')}
+      ${campo('Precio de venta', v.precio > 0 ? fmtARS(v.precio) : '—')}
+    </div>
+
+    <div class="mv-section">Tiempos</div>
+    <div class="mv-grid">
+      ${campo('Fecha de ingreso', v.fechaIngreso ? fmtFecha(v.fechaIngreso) : '—')}
+      ${campo('Fecha de venta', v.fechaVenta ? fmtFecha(v.fechaVenta) : '—')}
+      ${campo('Días en stock', diasStock !== null ? `<span class="dias-chip ${diasClase(diasStock)}">${diasStock} días</span>` : '—')}
+      ${campo('', '')}
+    </div>
+
+    ${v.obs ? `<div class="mv-section">Observaciones</div><div class="mv-obs">${v.obs}</div>` : ''}
+
+    ${v.historialPrecios && v.historialPrecios.length > 0 ? `
+    <div class="mv-section">Historial de precios</div>
+    <div style="display:flex;flex-direction:column;gap:0;">
+      ${[...v.historialPrecios].reverse().map((h, i) => `
+        <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);${i===0?'font-weight:600;':' opacity:.75;'}">
+          <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);flex-shrink:0;width:80px;">${h.fecha ? h.fecha.split('T')[0].split('-').reverse().join('/') : '—'}</div>
+          <div style="font-family:var(--mono);font-size:0.88rem;color:${i===0?'var(--accent)':'var(--text)'};">${fmtARS(h.precio)}</div>
+          <div style="font-size:0.78rem;color:var(--muted);flex:1;">${h.nota || ''}</div>
+          ${i===0 ? '<span class="badge b-info">Actual</span>' : ''}
+        </div>`).join('')}
+    </div>` : ''}
+  `;
+
+  const modal = $('modal-vehiculo');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+  $('modal-vehiculo').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Cerrar con Escape o click fuera
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); });
+document.getElementById('modal-vehiculo').addEventListener('click', function(e) { if(e.target === this) cerrarModal(); });
+
+// ═══════════════════════════════════════════════════════════
+//  REPORTES
+// ═══════════════════════════════════════════════════════════
+function initReportes() {
+  const mesSelect  = $('rep-mes');
+  const anioSelect = $('rep-anio');
+  if (!mesSelect || !anioSelect) return;
+
+  MESES_LARGOS.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i + 1).padStart(2, '0');
+    opt.textContent = m;
+    mesSelect.appendChild(opt);
+  });
+  const hoyR = new Date();
+  mesSelect.value = String(hoyR.getMonth() + 1).padStart(2, '0');
+
+  for (let y = hoyR.getFullYear(); y >= hoyR.getFullYear() - 3; y--) {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    anioSelect.appendChild(opt);
+  }
+  anioSelect.value = hoyR.getFullYear();
+}
+
+function renderReportes() {
+  const mes  = $('rep-mes')?.value;
+  const anio = $('rep-anio')?.value;
+  if (!mes || !anio) return;
+
+  const periodo = `${anio}-${mes}`;
+  const mesNombre = MESES_LARGOS[parseInt(mes) - 1];
+
+  setText('rep-titulo', `Reporte mensual — ${mesNombre} ${anio}`);
+  setText('rep-subtitulo', 'Fernandez Autos · Panel Administrador');
+  setText('rep-periodo-label', `Mostrando datos de ${mesNombre} ${anio}`);
+  const hoyR = new Date();
+  setText('rep-fecha-gen', `${hoyR.getDate()}/${String(hoyR.getMonth()+1).padStart(2,'0')}/${hoyR.getFullYear()}`);
+
+  // Usar datos ya cargados en memoria
+  const stock = _datos.stock || [];
+  const ops   = _datos.ops   || [];
+  const movs  = _datos.movs  || [];
+  const trfs  = [];
+
+  // ── Ventas ──
+  const opsPer = ops.filter(o => o.fecha && o.fecha.startsWith(periodo));
+  const facturado = movs.filter(m => m.tipo==='ingreso' && m.moneda==='ARS' && m.fecha && m.fecha.startsWith(periodo)).reduce((a,m)=>a+m.monto,0);
+  const porVend = {};
+  opsPer.forEach(o => { if(o.vendedor) porVend[o.vendedor] = (porVend[o.vendedor]||0)+1; });
+  const mejorV = Object.entries(porVend).sort((a,b)=>b[1]-a[1])[0];
+  const ticket = opsPer.length > 0 && facturado > 0 ? Math.round(facturado / opsPer.length) : 0;
+
+  setText('rep-op-total', opsPer.length);
+  setText('rep-op-fact', facturado > 0 ? fmtARS(facturado) : '—');
+  setText('rep-op-mejor', mejorV ? mejorV[0].split(',')[0] : '—');
+  setText('rep-op-mejor-sub', mejorV ? mejorV[1] + ' operaciones' : '');
+  setText('rep-op-ticket', ticket > 0 ? fmtARS(ticket) : '—');
+
+  // ── Caja ──
+  const movsPer = movs.filter(m => m.moneda==='ARS' && m.fecha && m.fecha.startsWith(periodo));
+  const ingPer = movsPer.filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+m.monto,0);
+  const egPer  = movsPer.filter(m=>m.tipo==='egreso').reduce((a,m)=>a+m.monto,0);
+  const resPer = ingPer - egPer;
+  const saldoARS = movs.filter(m=>m.moneda==='ARS').reduce((a,m)=>a+(m.tipo==='ingreso'?m.monto:-m.monto),0);
+
+  setText('rep-c-ing', ingPer > 0 ? fmtARS(ingPer) : '—');
+  setText('rep-c-eg', egPer > 0 ? fmtARS(egPer) : '—');
+  setText('rep-c-saldo', fmtARS(saldoARS));
+  const resEl = $('rep-c-res');
+  if(resEl) { resEl.textContent = fmtARS(resPer); resEl.className = 'card-value ' + (resPer >= 0 ? 'pos' : 'neg'); }
+  setText('rep-c-res-sub', resPer >= 0 ? '▲ superávit' : '▼ déficit');
+
+  // ── Stock ──
+  const activos = stock.filter(v => v.estado !== 'Vendido');
+  setText('rep-s-total', activos.length);
+  setText('rep-s-disp', activos.filter(v=>v.estado==='Disponible').length);
+  setText('rep-s-prop', activos.filter(v=>v.procedencia==='Propio').length);
+  setText('rep-s-consig', activos.filter(v=>v.procedencia==='Consignación').length);
+
+  // ── Gestoría ──
+  const vtvVenc = stock.filter(v => v.vtv && new Date(v.vtv) < new Date()).length;
+  setText('rep-g-abiertos', '0');
+  setText('rep-g-fin', '0');
+  setText('rep-g-prom', '—');
+  setText('rep-g-vtv', vtvVenc || '0');
+}
+
+function imprimirReporte() {
+  window.print();
+}
+
+// Cache global de datos para reportes
+const _datos = {};
+
+// Guardar referencia a cargarDatos original y wrappear
+const _cargarDatosOrig = cargarDatos;
+cargarDatos = async function() {
+  await _cargarDatosOrig();
+};
+
+// ═══ GESTIÓN DE USUARIOS ══════════════════════════════════
+let _usuarios = [];
+let _editUsuarioId = null;
+
+const ROL_LABEL = { admin:'Administrador', vendedor:'Vendedor', caja:'Caja / Administrativa', gestoria:'Gestoría' };
+const ROL_COLOR = { admin:'#2558a3', vendedor:'#1a7a4a', caja:'#b45309', gestoria:'#7c3aed' };
+
+async function cargarUsuarios() {
+  const raw = await sbGet('usuarios','select=*&order=created_at.asc');
+  _usuarios = raw;
+  renderUsuarios();
+}
+
+function renderUsuarios() {
+  const tbody = document.getElementById('tablaUsuarios');
+  if(!tbody) return;
+
+  // Stat cards
+  const activos   = _usuarios.filter(u=>u.activo).length;
+  const inactivos = _usuarios.filter(u=>!u.activo).length;
+  const roles     = [...new Set(_usuarios.filter(u=>u.activo).map(u=>u.rol))].length;
+  const setText2  = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  setText2('u-total',    _usuarios.length);
+  setText2('u-activos',  activos);
+  setText2('u-inactivos',inactivos);
+  setText2('u-roles',    roles);
+
+  if(!_usuarios.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="5">No hay usuarios cargados.</td></tr>'; return; }
+
+  tbody.innerHTML = _usuarios.map(u => {
+    const iniciales = (u.nombre||u.usuario).split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+    const rolColor  = ROL_COLOR[u.rol]||'#555';
+    const rolLabel  = ROL_LABEL[u.rol]||u.rol;
+    return `<tr style="${!u.activo?'opacity:.5':''}">
+      <td>
+        <div style="display:flex;align-items:center;gap:9px;">
+          <div class="vav" style="background:${rolColor}22;color:${rolColor};">${iniciales}</div>
+          <div>
+            <div style="font-weight:500;">${u.nombre||'—'}</div>
+            <div style="font-size:0.71rem;color:var(--muted);font-family:monospace;">${u.usuario}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="font-size:0.83rem;">${u.mail||'—'}</div>
+        <div style="font-size:0.75rem;color:var(--muted);">${u.tel||''}</div>
+      </td>
+      <td><span class="badge" style="background:${rolColor}18;color:${rolColor};border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600;">${rolLabel}</span></td>
+      <td><span class="badge ${u.activo?'b-pos':'b-neg'}">${u.activo?'Activo':'Inactivo'}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button onclick="abrirModalUsuario(${u.id})" class="btn btn-sm">Editar</button>
+          <button onclick="toggleUsuario(${u.id},${u.activo})" class="btn btn-sm" style="background:${u.activo?'#fef2f2':'#f0fdf4'};color:${u.activo?'#991b1b':'#065f46'};">${u.activo?'Desactivar':'Activar'}</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirModalUsuario(id=null) {
+  _editUsuarioId = id;
+  const modal = document.getElementById('modalUsuario');
+  modal.style.display = 'flex';
+  document.getElementById('modalUsuarioTitulo').textContent = id ? 'Editar usuario' : 'Nuevo usuario';
+
+  if(id) {
+    const u = _usuarios.find(x=>x.id===id);
+    document.getElementById('uNombre').value   = u.nombre||'';
+    document.getElementById('uUsuario').value  = u.usuario||'';
+    document.getElementById('uPassword').value = u.password||'';
+    document.getElementById('uMail').value     = u.mail||'';
+    document.getElementById('uTel').value      = u.tel||'';
+    document.getElementById('uRol').value      = u.rol||'vendedor';
+    document.getElementById('uActivo').checked = u.activo;
+  } else {
+    ['uNombre','uUsuario','uPassword','uMail','uTel'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('uRol').value = 'vendedor';
+    document.getElementById('uActivo').checked = true;
+  }
+}
+
+function cerrarModalUsuario() {
+  document.getElementById('modalUsuario').style.display = 'none';
+  _editUsuarioId = null;
+}
+
+async function guardarUsuario() {
+  const nombre   = document.getElementById('uNombre').value.trim();
+  const usuario  = document.getElementById('uUsuario').value.trim();
+  const password = document.getElementById('uPassword').value.trim();
+  const mail     = document.getElementById('uMail').value.trim();
+  const tel      = document.getElementById('uTel').value.trim();
+  const rol      = document.getElementById('uRol').value;
+  const activo   = document.getElementById('uActivo').checked;
+
+  if(!nombre||!usuario||!password){ alert('Nombre, usuario y contraseña son obligatorios.'); return; }
+
+  const data = { nombre, usuario, password, mail, tel, rol, activo };
+
+  if(_editUsuarioId) {
+    await fetch(`${SB_URL}/rest/v1/usuarios?id=eq.${_editUsuarioId}`, {
+      method:'PATCH', headers:{...sbH,'Prefer':'return=representation'}, body:JSON.stringify(data)
+    });
+    const idx = _usuarios.findIndex(x=>x.id===_editUsuarioId);
+    if(idx>-1) _usuarios[idx] = {..._usuarios[idx], ...data};
+  } else {
+    const r = await fetch(`${SB_URL}/rest/v1/usuarios`, {
+      method:'POST', headers:{...sbH,'Prefer':'return=representation'}, body:JSON.stringify(data)
+    });
+    const res = await r.json();
+    _usuarios.push(Array.isArray(res)?res[0]:res);
+  }
+
+  cerrarModalUsuario();
+  renderUsuarios();
+}
+
+async function toggleUsuario(id, activo) {
+  const accion = activo ? 'desactivar' : 'activar';
+  if(!confirm(`¿Querés ${accion} este usuario?`)) return;
+  await fetch(`${SB_URL}/rest/v1/usuarios?id=eq.${id}`, {
+    method:'PATCH', headers:sbH, body:JSON.stringify({activo:!activo})
+  });
+  const u = _usuarios.find(x=>x.id===id);
+  if(u) u.activo = !activo;
+  renderUsuarios();
+}
+
+// Cargar usuarios cuando se abre esa sección
+const _showOrig = show;
+show = function(sec, btn) {
+  _showOrig(sec, btn);
+  if(sec === 'usuarios') cargarUsuarios();
+};
+
+cargarDatos();
+</script>
+</body>
+</html>

@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central de Vendedores — Fernández Autos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#eeede8; --surface:#ffffff; --surface2:#f4f3ee; --surface3:#ebebе4;
+  --border:#dedad0; --border2:#c5c1b5;
+  --text:#16150f; --muted:#6b6960; --text3:#9b9890;
+  --accent:#1a4a8a; --accent-bg:#e8eef8; --accent-dark:#0f2d5a; --accent-mid:#2558a3;
+  --green:#2d6a30; --green-bg:#e8f5e9; --green-border:#b8e0bb;
+  --red:#8b1c1c; --red-bg:#fdecea; --red-border:#f0c8c8;
+  --amber:#854f0b; --amber-bg:#fef3e2; --amber-border:#f0d090;
+  --purple:#4a2d8a; --purple-bg:#eeebf8;
+  --mono:Arial,sans-serif; --sans:Arial,sans-serif;
+  --radius:12px; --r:7px; --rlg:12px;
+  --sh:0 1px 2px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.05);
+  --sh-md:0 4px 20px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.06);
+  --sh-lg:0 8px 32px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;line-height:1.55;}
+
+/* HEADER — más alto, con gradiente sutil */
+header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,#111009 0%,#1a1917 60%,#1e1c1a 100%);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px;height:56px;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.logo{font-family:'IBM Plex Serif',serif;font-size:1.12rem;color:#fff;display:flex;align-items:center;gap:12px;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent-mid),var(--accent-dark));border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;letter-spacing:-1px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,74,138,.5);}
+.logo-name{font-weight:400;letter-spacing:-.01em;}
+.logo span{color:rgba(255,255,255,.38);font-style:normal;font-size:0.75rem;font-family:var(--mono);margin-left:2px;}
+.header-right{display:flex;align-items:center;gap:20px;}
+.vendedor-badge{display:flex;align-items:center;gap:9px;font-size:0.8rem;color:rgba(255,255,255,.55);}
+.vendedor-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent-mid),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+nav{display:flex;gap:0;flex-wrap:wrap;height:100%;}
+nav button{background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.42);font-family:var(--sans);font-size:0.82rem;padding:0 15px;cursor:pointer;transition:all .18s;height:100%;letter-spacing:.01em;}
+nav button:hover{color:rgba(255,255,255,.8);}
+nav button.active{color:#fff;border-bottom-color:var(--accent-mid);font-weight:500;}
+
+main{max-width:1300px;margin:0 auto;padding:28px 24px;}
+.section{display:none;} .section.active{display:block;}
+
+/* CARDS — más peso, sombra más definida */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-mid));opacity:0;transition:opacity .2s;}
+.card:hover::before{opacity:1;}
+.card-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;font-family:var(--mono);}
+.card-value{font-family:var(--mono);font-size:1.7rem;font-weight:500;line-height:1.1;}
+.card-value.pos{color:var(--green);} .card-value.neg{color:var(--red);}
+.card-value.neu{color:var(--accent);} .card-value.amb{color:var(--amber);}
+.card-sub{font-size:0.74rem;color:var(--muted);margin-top:5px;}
+
+/* PANELS — sombra más pronunciada, borde más sutil */
+.fc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:18px;box-shadow:var(--sh);}
+.fc-title{font-family:'IBM Plex Serif',serif;font-size:1.12rem;margin-bottom:18px;color:var(--text);letter-spacing:-.01em;}
+.fc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.fc-header .fc-title{margin-bottom:0;}
+
+/* FORMS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg.t3{grid-template-columns:1fr 1fr 1fr;}
+.fgi{display:flex;flex-direction:column;gap:5px;}
+.fgi.full{grid-column:1/-1;}
+label{font-size:0.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:500;}
+input,select,textarea{background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:var(--sans);font-size:0.88rem;padding:8px 12px;border-radius:var(--r);outline:none;transition:border-color .18s,box-shadow .18s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,74,138,.12);background:var(--surface);}
+select option{background:var(--surface);}
+textarea{resize:vertical;min-height:70px;}
+
+/* BOTONES — más peso y carácter */
+.btn{padding:8px 18px;border-radius:var(--r);border:1.5px solid var(--border2);font-family:var(--sans);font-size:0.84rem;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--text);letter-spacing:.01em;}
+.btn:hover{background:var(--surface2);border-color:var(--border2);}
+.btn-a{background:linear-gradient(135deg,var(--accent-mid),var(--accent));color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(26,74,138,.25);}
+.btn-a:hover{background:linear-gradient(135deg,var(--accent),var(--accent-dark));box-shadow:0 4px 14px rgba(26,74,138,.35);}
+.btn-g{background:none;border:1.5px solid var(--border);color:var(--text);} .btn-g:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{padding:5px 12px;font-size:0.77rem;}
+.btn-xs{padding:3px 9px;font-size:0.72rem;}
+.row-btns{display:flex;gap:8px;margin-top:16px;align-items:center;flex-wrap:wrap;}
+
+/* TABS */
+.stabs{display:flex;gap:0;margin-bottom:22px;border-bottom:1.5px solid var(--border);}
+.stab{padding:9px 22px;border:none;background:none;color:var(--muted);font-family:var(--sans);font-size:0.84rem;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .18s;}
+.stab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+
+/* TABLA — más legible */
+.tw{overflow-x:auto;border-radius:0 0 var(--radius) var(--radius);}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 16px;text-align:left;font-size:0.67rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);border-bottom:1.5px solid var(--border);background:var(--surface2);font-family:var(--mono);font-weight:600;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#fafaf7;}
+tbody td{padding:12px 16px;font-size:0.85rem;}
+.empty{text-align:center;padding:48px;color:var(--muted);font-size:0.88rem;}
+
+/* BADGES — más definidos */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.69rem;font-weight:600;letter-spacing:.02em;}
+.b-disponible{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.b-reservado{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.b-vendido{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.b-nuevo{background:var(--accent-bg);color:var(--accent);border:1px solid #c0d0ec;}
+.b-usado{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.b-activo{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.b-prospecto{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.b-inactivo{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.b-entregado{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.b-tramite{background:var(--accent-bg);color:var(--accent);border:1px solid #c0d0ec;}
+.b-pendiente{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.b-ars{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.b-usd{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.mono{font-family:var(--mono);font-weight:500;}
+
+/* MODALES — más sombra, más presencia */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(16,15,12,.6);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px);}
+.moverlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:660px;max-height:92vh;overflow-y:auto;padding:30px;box-shadow:var(--sh-lg);}
+.modal-title{font-family:'IBM Plex Serif',serif;font-size:1.2rem;margin-bottom:20px;color:var(--text);letter-spacing:-.01em;}
+.modal-actions{display:flex;gap:8px;margin-top:22px;justify-content:flex-end;padding-top:18px;border-top:1px solid var(--border);}
+
+/* ALERTAS */
+.alert-banner{border-radius:var(--rlg);padding:13px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;}
+.alert-banner.info{background:var(--accent-bg);border:1.5px solid #c0d0ec;}
+.alert-banner.warn{background:var(--amber-bg);border:1.5px solid var(--amber-border);}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.alert-text{font-size:0.84rem;line-height:1.55;}
+.alert-text strong{font-weight:600;}
+
+/* CLIENTE */
+.cli-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent-bg),#d8e4f5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0;font-family:var(--mono);border:1.5px solid #c0d0ec;}
+.cli-cell{display:flex;align-items:center;gap:10px;}
+.cli-name{font-weight:600;font-size:0.88rem;}
+.cli-sub{font-size:0.76rem;color:var(--muted);}
+
+/* SEPARADORES DE FORMULARIO */
+.form-sep{font-size:0.67rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:var(--mono);font-weight:600;padding:16px 0 8px;border-top:1px solid var(--border);margin-top:8px;grid-column:1/-1;}
+.form-sep:first-child{border-top:none;padding-top:0;}
+
+/* MONEDA */
+.moneda-toggle{display:flex;gap:6px;}
+.mtoggle-btn{padding:5px 16px;border-radius:20px;border:1.5px solid var(--border);background:none;color:var(--muted);font-size:0.8rem;font-family:var(--sans);cursor:pointer;transition:all .18s;font-weight:500;}
+.mtoggle-btn.active-ars{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.mtoggle-btn.active-usd{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);}
+
+/* FORMAS DE PAGO */
+.pago-opciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pago-opcion{position:relative;}
+.pago-opcion input[type=checkbox]{position:absolute;opacity:0;width:0;height:0;}
+.pago-opcion label{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-size:0.86rem;color:var(--text);text-transform:none;letter-spacing:0;transition:all .18s;user-select:none;font-weight:400;}
+.pago-opcion label:hover{border-color:var(--border2);background:#f0efe9;}
+.pago-opcion input[type=checkbox]:checked + label{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);font-weight:500;box-shadow:0 0 0 1px var(--accent);}
+.pago-icon{font-size:1.1rem;width:20px;text-align:center;flex-shrink:0;}
+.pago-check{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-left:auto;transition:all .18s;}
+.pago-opcion input[type=checkbox]:checked + label .pago-check{background:var(--accent);border-color:var(--accent);}
+.pago-opcion input[type=checkbox]:checked + label .pago-check::after{content:'';display:block;width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);}
+
+/* PANELES DESPLEGABLES */
+.pago-panel{display:none;background:var(--surface2);border:1.5px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r);padding:16px;margin-top:4px;grid-column:1/-1;}
+.pago-panel.visible{display:block;}
+.pago-panel-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:var(--mono);font-weight:700;margin-bottom:12px;}
+
+/* CAJA TRANSFERENCIA */
+.transf-box{background:linear-gradient(135deg,#f0f4fb,#e8eef8);border:1.5px solid #c0d0ec;border-radius:var(--r);padding:16px 18px;grid-column:1/-1;}
+.transf-box-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:var(--mono);font-weight:700;margin-bottom:10px;}
+
+/* KANBAN */
+.kb-col{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;min-height:160px;}
+.kb-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid;}
+.kb-col[data-col="nueva"]  .kb-col-header{border-bottom-color:#1a4a8a;}
+.kb-col[data-col="espera"] .kb-col-header{border-bottom-color:#854f0b;}
+.kb-col[data-col="segundo"].kb-col-header{border-bottom-color:#4a2d8a;}
+.kb-col[data-col="vencido"].kb-col-header{border-bottom-color:#8b1c1c;}
+.kb-col[data-col="revision"].kb-col-header{border-bottom-color:#2d6a30;}
+.kb-col-title{font-size:0.82rem;font-family:var(--sans);font-weight:700;letter-spacing:.01em;}
+.kb-col[data-col="nueva"]  .kb-col-title{color:var(--accent);}
+.kb-col[data-col="espera"] .kb-col-title{color:var(--amber);}
+.kb-col[data-col="segundo"].kb-col-title{color:var(--purple);}
+.kb-col[data-col="vencido"].kb-col-title{color:var(--red);}
+.kb-col[data-col="revision"].kb-col-title{color:var(--green);}
+.kb-count{font-size:0.72rem;font-family:var(--mono);font-weight:700;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:2px 8px;color:var(--muted);}
+.kb-col.drag-over{background:var(--accent-bg);border-color:var(--accent);}
+.kb-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid;border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:grab;box-shadow:var(--sh);transition:box-shadow .18s,transform .18s;}
+.kb-card:hover{box-shadow:var(--sh-md);transform:translateY(-1px);}
+.kb-col[data-col="nueva"]  .kb-card{border-left-color:#1a4a8a;}
+.kb-col[data-col="espera"] .kb-card{border-left-color:#854f0b;}
+.kb-col[data-col="segundo"].kb-card{border-left-color:#4a2d8a;}
+.kb-col[data-col="vencido"].kb-card{border-left-color:#8b1c1c;}
+.kb-col[data-col="revision"].kb-card{border-left-color:#2d6a30;}
+.kb-card:active{cursor:grabbing;box-shadow:var(--sh-lg);}
+.kb-card.dragging{opacity:.4;transform:rotate(1deg);}
+.kb-card-name{font-weight:700;font-size:0.88rem;margin-bottom:4px;color:var(--text);}
+.kb-card-interes{font-size:0.77rem;color:var(--accent);font-weight:600;margin-bottom:5px;}
+.kb-card-nota{font-size:0.75rem;color:var(--muted);border-top:1px solid var(--border);padding-top:6px;margin-top:6px;line-height:1.45;}
+.kb-card-actions{display:flex;justify-content:flex-end;gap:4px;margin-top:9px;padding-top:8px;border-top:1px solid var(--border);}
+
+/* BUSCADOR GLOBAL */
+#globalSearch::placeholder{color:rgba(255,255,255,.35);}
+#globalSearch:focus{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45);}
+.gs-section{padding:7px 14px 4px;font-size:0.67rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-family:var(--mono);background:var(--surface2);border-bottom:1px solid var(--border);font-weight:600;}
+.gs-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+.gs-item:last-child{border-bottom:none;}
+.gs-item:hover{background:#fafaf7;}
+.gs-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.gs-main{font-size:0.86rem;font-weight:600;color:var(--text);}
+.gs-sub{font-size:0.76rem;color:var(--muted);margin-top:1px;}
+.gs-empty{padding:24px;text-align:center;color:var(--muted);font-size:0.84rem;}
+@media(max-width:700px){
+  .cards{grid-template-columns:1fr 1fr;}
+  .fg{grid-template-columns:1fr!important;}
+  .pago-opciones{grid-template-columns:1fr!important;}
+  header{padding:12px 16px;}
+  nav button{font-size:0.75rem;padding:6px 10px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">CV</div>
+    Central de Vendedores
+    <span>Fernández Autos</span>
+  </div>
+  <nav id="mainNav">
+    <button class="active" onclick="show('dashboard')">Dashboard</button>
+    <button onclick="show('stock')">Stock</button>
+    <button onclick="show('clientes')">Clientes</button>
+    <button onclick="show('operacion')">Nueva Operación</button>
+    <button onclick="show('misventas')">Mis Ventas</button>
+  </nav>
+  <div class="header-right">
+    <button onclick="cerrarSesion()" style="background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-family:Arial,sans-serif;font-size:0.72rem;padding:5px 13px;border-radius:20px;cursor:pointer;">Salir</button>
+    <div style="position:relative;">
+      <input type="text" id="globalSearch" placeholder="Buscar cliente, auto, operación..."
+        oninput="busquedaGlobal(this.value)" onblur="setTimeout(()=>cerrarBusqueda(),150)"
+        style="width:280px;padding:6px 12px 6px 32px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--r);color:#fff;font-family:var(--sans);font-size:0.82rem;outline:none;">
+      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(255,255,255,.4);pointer-events:none;">🔍</span>
+      <div id="globalSearchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh-md);z-index:300;max-height:380px;overflow-y:auto;min-width:360px;"></div>
+    </div>
+    <div class="vendedor-badge">
+      <div class="vendedor-avatar" id="headerAvatar">JP</div>
+      <span id="headerNombre">Juan Pérez</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="section active">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <h2 style="font-family:'IBM Plex Serif',serif;font-size:1.5rem;">Dashboard</h2>
+    <div style="font-size:0.82rem;color:var(--muted)" id="dashFecha"></div>
+  </div>
+  <div class="cards" id="dashCards"></div>
+
+  <!-- META MENSUAL -->
+  <div class="fc" style="margin-bottom:18px;padding:18px 22px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:1rem;font-family:'IBM Plex Serif',serif;">Meta del mes</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:0.82rem;color:var(--muted);">Meta:</span>
+        <input type="number" id="metaMensual" value="8" min="1" max="99" onchange="renderDashboard()"
+          style="width:60px;padding:4px 8px;font-size:0.88rem;font-family:var(--mono);text-align:center;">
+        <span style="font-size:0.82rem;color:var(--muted);">autos</span>
+      </div>
+    </div>
+    <div id="metaBarWrap"></div>
+  </div>
+  <!-- KANBAN -->
+  <div class="fc" style="padding:18px 22px;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Pipeline de prospectos</div>
+      <button class="btn btn-sm btn-a" onclick="abrirModalAgregarProspecto()">+ Agregar prospecto</button>
+    </div>
+    <div id="kanbanBoard" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:start;overflow-x:auto;"></div>
+    <!-- RESUMEN PIPELINE -->
+    <div id="kanbanResumen" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+  </div>
+  <div class="fg" style="margin-bottom:18px;">
+    <div class="fc" style="margin:0"><div class="fc-title" style="font-size:1rem;margin-bottom:12px;">🚗 Últimos ingresos al stock</div><div id="dashDisponibles"></div></div>
+    <div class="fc" style="margin:0"><div class="fc-title" style="font-size:1rem;margin-bottom:12px;">📋 Operaciones en curso</div><div id="dashOps"></div></div>
+  </div>
+</section>
+
+<!-- STOCK -->
+<section id="stock" class="section">
+  <div class="stabs">
+    <button class="stab active" onclick="showStab('stock','stockLista',this)">Ver Stock</button>
+    <button class="stab" onclick="showStab('stock','stockNuevo',this)">Cargar Vehículo</button>
+  </div>
+  <div id="stockLista">
+    <div class="fc-header" style="margin-bottom:16px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-sm" id="btnStockTodos" onclick="filtrarStock('todos')">Todos</button>
+        <button class="btn btn-sm" id="btnStockDisp" onclick="filtrarStock('Disponible')" style="border-color:var(--accent);color:var(--accent);">Disponibles</button>
+        <button class="btn btn-sm" id="btnStockRes" onclick="filtrarStock('Reservado')">Reservados</button>
+        <button class="btn btn-sm" id="btnStockVend" onclick="filtrarStock('Vendido')">Vendidos</button>
+        <button class="btn btn-sm" onclick="filtrarTipo('Nuevo')">0 km</button>
+        <button class="btn btn-sm" onclick="filtrarTipo('Usado')">Usados</button>
+      </div>
+      <input type="text" id="stockBuscar" placeholder="Buscar marca, modelo, patente..." onkeyup="renderStock()" style="max-width:300px;">
+    </div>
+    <div class="cards" id="stockStats"></div>
+    <div class="fc" style="padding:0;overflow:hidden;">
+      <div class="tw"><table>
+        <thead><tr><th>Vehículo</th><th>Tipo</th><th>Año</th><th>Dominio</th><th>Kilometraje</th><th>Transmisión</th><th>Precio</th><th>Ubicación</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tbStock"></tbody>
+      </table></div>
+      <div id="tbStockEmpty" class="empty">Sin vehículos</div>
+    </div>
+  </div>
+  <div id="stockNuevo" style="display:none">
+    <div class="fc">
+      <div class="fc-title">Cargar Vehículo</div>
+      <div class="fg t3">
+        <div class="fgi"><label>Marca</label><input type="text" id="vMarca" placeholder="Toyota"></div>
+        <div class="fgi"><label>Modelo</label><input type="text" id="vModelo" placeholder="Corolla"></div>
+        <div class="fgi"><label>Año</label><input type="number" id="vAnio" placeholder="2024"></div>
+        <div class="fgi"><label>Tipo</label><select id="vTipo"><option value="Nuevo">0 km / Nuevo</option><option value="Usado">Usado</option></select></div>
+        <div class="fgi"><label>Dominio / Patente</label><input type="text" id="vDominio" placeholder="AB123CD"></div>
+        <div class="fgi"><label>Color</label><input type="text" id="vColor" placeholder="Blanco, Negro, Gris..."></div>
+        <div class="fgi"><label>Precio de lista</label><input type="number" id="vPrecioLista" placeholder="0"></div>
+        <div class="fgi"><label>Precio de venta</label><input type="number" id="vPrecio" placeholder="0"></div>
+        <div class="fgi"><label>Kilometraje</label><input type="number" id="vKm" placeholder="0"></div>
+        <div class="fgi"><label>Transmisión</label>
+          <select id="vTransmision">
+            <option value="">— Seleccionar —</option>
+            <option value="Manual">Manual</option>
+            <option value="Automática">Automática</option>
+            <option value="CVT">CVT</option>
+            <option value="Secuencial">Secuencial</option>
+          </select>
+        </div>
+        <div class="fgi"><label>Ubicación</label>
+          <select id="vUbicacion">
+            <option value="">— Seleccionar —</option>
+            <option value="Salón">Salón</option>
+            <option value="Depósito">Depósito</option>
+            <option value="En preparación">En preparación</option>
+            <option value="En mecánica">En mecánica</option>
+            <option value="En exhibición exterior">En exhibición exterior</option>
+          </select>
+        </div>
+        <div class="fgi full"><label>Cliente que lo entregó</label><select id="vClienteEntrega"><option value="">— Sin cliente asociado —</option></select></div>
+        <div class="fgi"><label>N° Chasis</label><input type="text" id="vChasis"></div>
+        <div class="fgi"><label>N° Motor</label><input type="text" id="vMotor"></div>
+        <div class="fgi"><label>Tipo de carrocería</label>
+          <select id="vCarroceria">
+            <option value="">— Seleccionar —</option>
+            <option value="Sedan">Sedan</option>
+            <option value="Hatchback">Hatchback</option>
+            <option value="SUV">SUV</option>
+            <option value="Pick-up">Pick-up</option>
+            <option value="Furgón">Furgón</option>
+            <option value="Coupé">Coupé</option>
+            <option value="Crossover">Crossover</option>
+            <option value="Minivan">Minivan</option>
+            <option value="Camión">Camión</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="fgi"><label>Procedencia</label>
+          <select id="vProcedencia">
+            <option value="">— Seleccionar —</option>
+            <option value="Propio">Propio</option>
+            <option value="Consignación">Consignación</option>
+          </select>
+        </div>
+        <div class="fgi"><label>Estado inicial</label><select id="vEstado"><option value="Disponible">Disponible</option><option value="Reservado">Reservado</option></select></div>
+        <div class="fgi full"><label>Observaciones</label><textarea id="vObs"></textarea></div>
+      </div>
+      <div class="row-btns">
+        <button class="btn btn-a" onclick="guardarVehiculo()">Guardar vehículo</button>
+        <span id="vMsg" style="font-size:0.83rem;color:var(--green);display:none">✓ Guardado</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTES -->
+<section id="clientes" class="section">
+  <div class="stabs">
+    <button class="stab active" onclick="showStab('clientes','clientesLista',this)">Clientes</button>
+    <button class="stab" onclick="showStab('clientes','clientesNuevo',this)">Nuevo Cliente</button>
+  </div>
+  <div id="clientesLista">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="clientesBuscar" placeholder="Buscar por nombre o DNI/CUIT..." onkeyup="renderClientes()" style="max-width:340px;">
+      <select id="filtroEstadoCliente" onchange="renderClientes()" style="width:auto;padding:8px 12px;font-size:0.84rem;">
+        <option value="">Todos los estados</option><option value="Activo">Activos</option>
+        <option value="Prospecto">Prospectos</option><option value="Inactivo">Inactivos</option>
+      </select>
+    </div>
+    <div class="fc" style="padding:0;overflow:hidden;">
+      <div class="tw"><table>
+        <thead><tr><th>Cliente</th><th>DNI / CUIT</th><th>Teléfono</th><th>Email</th><th>Interés</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tbClientes"></tbody>
+      </table></div>
+      <div id="tbClientesEmpty" class="empty">Sin clientes registrados</div>
+    </div>
+  </div>
+  <div id="clientesNuevo" style="display:none">
+    <div class="fc">
+      <div class="fc-title">Nuevo Cliente</div>
+      <div class="fg">
+
+        <div class="form-sep">Datos personales</div>
+        <div class="fgi"><label>Nombre y apellido *</label><input type="text" id="cNombre" placeholder="García, Juan"></div>
+        <div class="fgi"><label>DNI / CUIT</label><input type="text" id="cDni" placeholder="XX-XXXXXXXX-X"></div>
+        <div class="fgi"><label>Teléfono / WhatsApp</label><input type="text" id="cTel" placeholder="+54 223 000-0000"></div>
+        <div class="fgi"><label>Email</label><input type="email" id="cEmail" placeholder="cliente@email.com"></div>
+        <div class="fgi full"><label>Dirección completa</label><input type="text" id="cDir" placeholder="Calle 123, piso 2, Mar del Plata"></div>
+        <div class="fgi"><label>Ocupación / Actividad</label><input type="text" id="cOcup" placeholder="Empleado, comerciante, monotributista..."></div>
+        <div class="fgi"><label>Estado civil</label>
+          <select id="cCivil" onchange="toggleConyuge()">
+            <option value="">— Seleccionar —</option>
+            <option value="Soltero/a">Soltero/a</option>
+            <option value="Casado/a">Casado/a</option>
+            <option value="Divorciado/a">Divorciado/a</option>
+            <option value="Viudo/a">Viudo/a</option>
+            <option value="Unión convivencial">Unión convivencial</option>
+          </select>
+        </div>
+
+        <!-- CÓNYUGE — aparece solo si es casado/a o unión convivencial -->
+        <div class="fgi full" id="conyugeBox" style="display:none;">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;">
+            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-bottom:12px;">Datos del cónyuge / conviviente</div>
+            <div class="fg" style="gap:10px;">
+              <div class="fgi"><label>Nombre y apellido</label><input type="text" id="cCoNombre" placeholder="García, María"></div>
+              <div class="fgi"><label>DNI</label><input type="text" id="cCoDni" placeholder="XX.XXX.XXX"></div>
+              <div class="fgi full"><label>Ocupación / Actividad</label><input type="text" id="cCoOcup" placeholder="Empleada, comerciante..."></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-sep">Comercial</div>
+        <div class="fgi"><label>Interés declarado</label><input type="text" id="cInteres" placeholder="SUV nueva, pickup usada..."></div>
+        <div class="fgi"><label>Estado</label>
+          <select id="cEstado"><option value="Prospecto">Prospecto</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select>
+        </div>
+        <div class="fgi full"><label>Notas</label><textarea id="cNotas" placeholder="Observaciones, preferencias, seguimiento..."></textarea></div>
+
+      </div>
+      <div class="row-btns">
+        <button class="btn btn-a" onclick="guardarCliente()">Guardar cliente</button>
+        <span id="cMsg" style="font-size:0.83rem;color:var(--green);display:none">✓ Guardado</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NUEVA OPERACIÓN -->
+<section id="operacion" class="section">
+  <div style="max-width:860px;">
+    <div class="alert-banner info">
+      <span class="alert-icon">ℹ️</span>
+      <div class="alert-text">Al confirmar la operación, <strong>Caja</strong> y <strong>Gestoría</strong> recibirán la notificación automáticamente (disponible cuando los sistemas estén conectados).</div>
+    </div>
+    <div class="fc">
+      <div class="fc-title">Nueva Operación de Venta</div>
+      <div class="fg">
+
+        <!-- VEHÍCULO -->
+        <div class="form-sep">Vehículo</div>
+        <div class="fgi">
+          <label>Vehículo *</label>
+          <select id="opVehiculo" onchange="autocompletarPrecio()"><option value="">Seleccionar vehículo disponible...</option></select>
+        </div>
+        <div class="fgi" style="align-self:end;">
+          <label>Moneda de venta *</label>
+          <div class="moneda-toggle" style="padding-top:2px;">
+            <button type="button" class="mtoggle-btn active-ars" id="btnOpARS" onclick="setMonedaOp('ARS')">$ ARS</button>
+            <button type="button" class="mtoggle-btn" id="btnOpUSD" onclick="setMonedaOp('USD')">U$D USD</button>
+          </div>
+        </div>
+        <div class="fgi">
+          <label id="opPrecioLabel">Precio de venta * (ARS)</label>
+          <input type="number" id="opPrecio" placeholder="0" min="0" oninput="calcularDescuentoComision()">
+        </div>
+        <div class="fgi">
+          <label>Fecha estimada de entrega</label>
+          <input type="date" id="opFecha">
+        </div>
+        <!-- descuento y comisión — se calculan solos -->
+        <div class="fgi" id="opDescuentoWrap" style="display:none;">
+          <label>Descuento aplicado</label>
+          <div id="opDescuentoVal" style="font-family:var(--mono);font-size:0.9rem;padding:8px 11px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r);color:var(--red);"></div>
+        </div>
+        <div class="fgi" id="opComisionWrap" style="display:none;">
+          <label>Comisión del vendedor (1%)</label>
+          <div id="opComisionVal" style="font-family:var(--mono);font-size:0.9rem;padding:8px 11px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);color:var(--green);"></div>
+        </div>
+
+        <!-- CLIENTE -->
+        <div class="form-sep">Cliente</div>
+        <div class="fgi">
+          <label>Cliente *</label>
+          <select id="opCliente"><option value="">Seleccionar cliente...</option></select>
+        </div>
+        <div class="fgi" style="align-self:end;">
+          <button type="button" class="btn btn-g" style="width:100%;justify-content:center;" onclick="abrirModalNuevoCliente()">+ Crear nuevo cliente</button>
+        </div>
+
+        <!-- VALOR DE TRANSFERENCIA -->
+        <div class="transf-box">
+          <div class="transf-box-label">💳 Valor de transferencia pactado con el cliente</div>
+          <div class="fg" style="gap:10px;">
+            <div class="fgi">
+              <label>Monto pactado</label>
+              <input type="number" id="opValorTransf" placeholder="0" min="0">
+            </div>
+            <div class="fgi">
+              <label>Moneda</label>
+              <select id="opMonedaTransf"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+            </div>
+            <div class="fgi full">
+              <label>Observaciones para gestoría</label>
+              <input type="text" id="opTransfObs" placeholder="Ej: el cliente abona en 2 cuotas, la 1ra al inicio del trámite...">
+            </div>
+          </div>
+        </div>
+
+        <!-- SEÑA -->
+        <div class="form-sep">Seña / Entrega inicial</div>
+        <div class="fgi">
+          <label>Monto de seña</label>
+          <input type="number" id="opSenia" placeholder="0" min="0">
+        </div>
+        <div class="fgi">
+          <label>Moneda de la seña</label>
+          <select id="opMonedaSenia"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        </div>
+
+        <!-- FORMAS DE PAGO -->
+        <div class="form-sep">Formas de pago del saldo</div>
+        <div class="fgi full">
+          <label style="margin-bottom:10px;">Seleccioná todas las que apliquen — se pueden combinar</label>
+          <div class="pago-opciones">
+            <div class="pago-opcion">
+              <input type="checkbox" id="pagoEfectivo" onchange="togglePanel('panelEfectivo',this)">
+              <label for="pagoEfectivo"><span class="pago-icon">💵</span>Efectivo<span class="pago-check"></span></label>
+            </div>
+            <div class="pago-opcion">
+              <input type="checkbox" id="pagoTransferencia" onchange="togglePanel('panelTransferencia',this)">
+              <label for="pagoTransferencia"><span class="pago-icon">🏦</span>Transferencia bancaria<span class="pago-check"></span></label>
+            </div>
+            <div class="pago-opcion">
+              <input type="checkbox" id="pagoCheque" onchange="togglePanel('panelCheque',this)">
+              <label for="pagoCheque"><span class="pago-icon">📄</span>Cheque<span class="pago-check"></span></label>
+            </div>
+            <div class="pago-opcion">
+              <input type="checkbox" id="pagoCredito" onchange="togglePanel('panelCredito',this)">
+              <label for="pagoCredito"><span class="pago-icon">🏛</span>Crédito bancario<span class="pago-check"></span></label>
+            </div>
+            <div class="pago-opcion">
+              <input type="checkbox" id="pagoPermuta" onchange="togglePanel('panelPermuta',this)">
+              <label for="pagoPermuta"><span class="pago-icon">🔄</span>Permuta de vehículo<span class="pago-check"></span></label>
+            </div>
+          </div>
+
+          <!-- PANEL EFECTIVO -->
+          <div class="pago-panel" id="panelEfectivo">
+            <div class="pago-panel-title">💵 Efectivo</div>
+            <div class="fg"><div class="fgi"><label>Monto en efectivo</label><input type="number" id="efMonto" placeholder="0"></div>
+            <div class="fgi"><label>Moneda</label><select id="efMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div></div>
+          </div>
+
+          <!-- PANEL TRANSFERENCIA -->
+          <div class="pago-panel" id="panelTransferencia">
+            <div class="pago-panel-title">🏦 Transferencia bancaria</div>
+            <div class="fg">
+              <div class="fgi"><label>Monto a transferir</label><input type="number" id="trfMonto" placeholder="0"></div>
+              <div class="fgi"><label>Moneda</label><select id="trfMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
+              <div class="fgi full"><label>Observaciones</label><input type="text" id="trfObs" placeholder="Fecha estimada, banco origen, etc."></div>
+            </div>
+          </div>
+
+          <!-- PANEL CHEQUE -->
+          <div class="pago-panel" id="panelCheque">
+            <div class="pago-panel-title">📄 Cheque</div>
+            <div class="fg t3">
+              <div class="fgi"><label>Monto</label><input type="number" id="chqMonto" placeholder="0"></div>
+              <div class="fgi"><label>Moneda</label><select id="chqMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
+              <div class="fgi"><label>Fecha del cheque</label><input type="date" id="chqFecha"></div>
+              <div class="fgi"><label>Banco emisor</label><input type="text" id="chqBanco" placeholder="Ej: Banco Galicia"></div>
+              <div class="fgi"><label>N° de cheque</label><input type="text" id="chqNumero"></div>
+              <div class="fgi"><label>Tipo</label><select id="chqTipo"><option value="Común">Común</option><option value="Diferido">Diferido</option></select></div>
+            </div>
+          </div>
+
+          <!-- PANEL CRÉDITO -->
+          <div class="pago-panel" id="panelCredito">
+            <div class="pago-panel-title">🏛 Crédito bancario</div>
+            <div class="fg">
+              <div class="fgi"><label>Entidad bancaria</label><input type="text" id="credBanco" placeholder="Ej: Banco Nación, BBVA..."></div>
+              <div class="fgi"><label>Moneda del crédito</label><select id="credMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
+              <div class="fgi"><label>Monto aprobado</label><input type="number" id="credMonto" placeholder="0"></div>
+              <div class="fgi"><label>Tasa de interés (%)</label><input type="number" id="credTasa" placeholder="Ej: 55" step="0.01"></div>
+              <div class="fgi"><label>Cantidad de cuotas</label><input type="number" id="credCuotas" placeholder="Ej: 48" min="1"></div>
+              <div class="fgi"><label>Valor de cuota (según el banco)</label><input type="number" id="credValorCuota" placeholder="0"></div>
+              <div class="fgi full"><label>Observaciones del crédito</label><input type="text" id="credObs" placeholder="Estado de aprobación, condiciones especiales..."></div>
+            </div>
+          </div>
+
+          <!-- PANEL PERMUTA -->
+          <div class="pago-panel" id="panelPermuta">
+            <div class="pago-panel-title">🔄 Vehículo en permuta — datos del auto a ingresar</div>
+            <div class="fg t3">
+              <div class="fgi"><label>Marca</label><input type="text" id="prmMarca" placeholder="Toyota"></div>
+              <div class="fgi"><label>Modelo</label><input type="text" id="prmModelo" placeholder="Corolla"></div>
+              <div class="fgi"><label>Año</label><input type="number" id="prmAnio" placeholder="2019"></div>
+              <div class="fgi"><label>Dominio / Patente</label><input type="text" id="prmDominio" placeholder="AB123CD"></div>
+              <div class="fgi"><label>Kilometraje</label><input type="number" id="prmKm" placeholder="80000"></div>
+              <div class="fgi"><label>Valor pactado de la permuta</label><input type="number" id="prmValor" placeholder="0"></div>
+              <div class="fgi"><label>Moneda</label><select id="prmMoneda"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
+              <div class="fgi"><label>N° de Chasis</label><input type="text" id="prmChasis"></div>
+              <div class="fgi"><label>N° de Motor</label><input type="text" id="prmMotor"></div>
+              <div class="fgi full"><label>Estado general / observaciones</label><textarea id="prmObs" style="min-height:50px;" placeholder="Color, condición, equipamiento, detalles a revisar... El análisis completo lo hace gestoría."></textarea></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTAS -->
+        <div class="form-sep">Observaciones generales</div>
+        <div class="fgi full">
+          <label>Notas internas</label>
+          <textarea id="opNotas" placeholder="Acuerdos adicionales, condiciones especiales, seguimiento..."></textarea>
+        </div>
+
+      </div>
+      <div class="row-btns">
+        <button class="btn btn-a" onclick="guardarOperacion()">Registrar operación</button>
+        <button class="btn btn-g" onclick="limpiarOperacion()">Limpiar</button>
+        <span id="opMsg" style="font-size:0.83rem;color:var(--green);display:none">✓ Operación registrada correctamente</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MIS VENTAS -->
+<section id="misventas" class="section">
+  <div class="cards" id="misVentasStats"></div>
+  <div class="fc" style="padding:0;overflow:hidden;">
+    <div style="padding:16px 22px 12px;border-bottom:1px solid var(--border);"><div class="fc-title" style="margin:0;">Mis operaciones</div></div>
+    <div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Cliente</th><th>Formas de pago</th><th>Seña</th><th style="text-align:right">Precio</th><th>Mon.</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="tbMisVentas"></tbody>
+    </table></div>
+    <div id="tbMisVentasEmpty" class="empty">Aún no tenés operaciones registradas este mes</div>
+  </div>
+</section>
+
+</main>
+
+<!-- MODAL AGREGAR PROSPECTO AL KANBAN -->
+<div class="moverlay" id="modalAgregarProspecto">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-title">Agregar prospecto al pipeline</div>
+
+    <!-- TOGGLE cliente existente / nuevo -->
+    <div style="display:flex;gap:0;margin-bottom:18px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;">
+      <button type="button" id="kpTabExistente" onclick="kpSetTab('existente')"
+        style="flex:1;padding:8px;border:none;font-family:var(--sans);font-size:0.84rem;cursor:pointer;background:var(--accent);color:#fff;font-weight:500;">
+        Cliente existente
+      </button>
+      <button type="button" id="kpTabNuevo" onclick="kpSetTab('nuevo')"
+        style="flex:1;padding:8px;border:none;font-family:var(--sans);font-size:0.84rem;cursor:pointer;background:var(--surface2);color:var(--muted);">
+        + Crear nuevo cliente
+      </button>
+    </div>
+
+    <!-- Panel cliente existente -->
+    <div id="kpPanelExistente">
+      <div class="fg" style="margin-bottom:14px;">
+        <div class="fgi full">
+          <label>Cliente *</label>
+          <select id="kpCliente"><option value="">Seleccionar cliente...</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel nuevo cliente -->
+    <div id="kpPanelNuevo" style="display:none;">
+      <div class="fg" style="margin-bottom:14px;">
+        <div class="fgi"><label>Nombre y apellido *</label><input type="text" id="kpNcNombre" placeholder="Juan García"></div>
+        <div class="fgi"><label>Teléfono / WhatsApp *</label><input type="text" id="kpNcTel" placeholder="+54 223 000-0000"></div>
+        <div class="fgi full"><label>Email</label><input type="email" id="kpNcEmail" placeholder="cliente@email.com"></div>
+      </div>
+    </div>
+
+    <!-- Interés en vehículo -->
+    <div class="fg" style="margin-bottom:14px;">
+      <div class="fgi full">
+        <label>¿Le interesa un auto del stock?</label>
+        <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px;">
+          <button type="button" id="kpTabStock" onclick="kpSetInteres('stock')"
+            style="flex:1;padding:7px;border:none;font-family:var(--sans);font-size:0.82rem;cursor:pointer;background:var(--accent);color:#fff;font-weight:500;">
+            Auto del stock
+          </button>
+          <button type="button" id="kpTabBusca" onclick="kpSetInteres('busca')"
+            style="flex:1;padding:7px;border:none;font-family:var(--sans);font-size:0.82rem;cursor:pointer;background:var(--surface2);color:var(--muted);">
+            Busca algo que no tenemos
+          </button>
+        </div>
+        <div id="kpInteresStock">
+          <select id="kpVehiculo"><option value="">Seleccionar vehículo del stock...</option></select>
+        </div>
+        <div id="kpInteresBusca" style="display:none;">
+          <input type="text" id="kpBuscaTexto" placeholder="Ej: SUV usada hasta $20M, pickup 4x4 diesel...">
+        </div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <div class="fgi">
+        <label>Columna inicial</label>
+        <select id="kpColumna">
+          <option value="nueva">Nueva consulta</option>
+          <option value="espera">Esperando respuesta</option>
+          <option value="segundo">Hacer segundo contacto</option>
+          <option value="vencido">Vencido</option>
+          <option value="revision">En revisión</option>
+        </select>
+      </div>
+      <div class="fgi full" style="grid-column:1/-1;">
+        <label>Nota</label>
+        <textarea id="kpNota" style="min-height:50px;" placeholder="Contexto de la consulta, próximo paso..."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalAgregarProspecto')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarProspecto()">Agregar al pipeline</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE PROSPECTO + TIMELINE -->
+<div class="moverlay" id="modalDetalleProspecto">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-title">Ficha del prospecto</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+
+      <!-- COLUMNA IZQUIERDA: datos editables -->
+      <div>
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-bottom:12px;">Datos del prospecto</div>
+        <div class="fg" style="gap:10px;">
+          <div class="fgi full"><label>Nombre</label><input type="text" id="dpNombre"></div>
+          <div class="fgi"><label>Teléfono</label><input type="text" id="dpTel" placeholder="+54 223..."></div>
+          <div class="fgi"><label>Email</label><input type="email" id="dpEmail" placeholder="cliente@..."></div>
+          <div class="fgi full"><label>Interés / Lo que busca</label><input type="text" id="dpInteres" placeholder="SUV, pickup..."></div>
+          <div class="fgi full">
+            <label>Vehículo del stock (si aplica)</label>
+            <select id="dpVehiculo"><option value="">Sin vehículo específico</option></select>
+          </div>
+          <div class="fgi full"><label>Nota de la tarjeta</label><textarea id="dpNota" style="min-height:50px;"></textarea></div>
+          <div class="fgi full">
+            <label>Columna del pipeline</label>
+            <select id="dpColumna">
+              <option value="nueva">Nueva consulta</option>
+              <option value="espera">Esperando respuesta</option>
+              <option value="segundo">Segundo contacto</option>
+              <option value="vencido">Vencido</option>
+              <option value="revision">En revisión</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn btn-a btn-sm" onclick="guardarDetalleProspecto()">Guardar cambios</button>
+          <button class="btn btn-sm btn-g" onclick="irAOperarDesdeKanban(prospectoDetalleId);cerrarModal('modalDetalleProspecto')">Venta</button>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: timeline -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;">Historial de actividad</div>
+        <!-- nueva nota -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <textarea id="dpNuevaNota" placeholder="Registrá una nota: llamada, visita, mensaje enviado..." style="min-height:60px;font-size:0.84rem;"></textarea>
+          <button class="btn btn-sm btn-a" onclick="agregarNotaProspecto()" style="align-self:flex-end;">+ Agregar nota</button>
+        </div>
+        <!-- timeline -->
+        <div id="dpTimeline" style="overflow-y:auto;max-height:340px;padding-right:4px;border-top:1px solid var(--border);padding-top:12px;"></div>
+      </div>
+
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-g" onclick="cerrarModal('modalDetalleProspecto')">Cerrar</button>
+      <button class="btn btn-xs" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);padding:4px 11px;font-size:0.76rem;" onclick="cerrarModal('modalDetalleProspecto');abrirCierreOportunidad(prospectoDetalleId)">Cerrar oportunidad</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CIERRE DE OPORTUNIDAD -->
+<div class="moverlay" id="modalCerrarOportunidad">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title">Cerrar oportunidad</div>
+    <div style="font-size:0.88rem;color:var(--muted);margin-bottom:18px;">Esta tarjeta se archivará y no aparecerá más en el pipeline.</div>
+    <div class="fgi" style="margin-bottom:14px;">
+      <label>Motivo del cierre</label>
+      <select id="cierreMotivo">
+        <option value="Desistió">El cliente desistió</option>
+        <option value="Compró en otro lado">Compró en otro concesionario</option>
+        <option value="Sin presupuesto">Sin presupuesto / no califica</option>
+        <option value="No responde">No responde más</option>
+        <option value="Otro">Otro motivo</option>
+      </select>
+    </div>
+    <div class="fgi">
+      <label>Observaciones (opcional)</label>
+      <textarea id="cierreObs" style="min-height:50px;" placeholder="Detalle adicional..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalCerrarOportunidad')">Cancelar</button>
+      <button class="btn btn-danger" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);" onclick="confirmarCierreOportunidad()">Cerrar oportunidad</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHA INCOMPLETA -->
+<div class="moverlay" id="modalFichaIncompleta">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-title">Faltan datos del cliente</div>
+    <div class="alert-banner warn" style="margin-bottom:16px;">
+      <span class="alert-icon">⚠️</span>
+      <div class="alert-text">Para registrar esta operación hay que completar la ficha del cliente. Gestoría necesita estos datos para tramitar la transferencia.</div>
+    </div>
+    <div id="fichaIncompletaFaltantes" style="margin-bottom:18px;"></div>
+    <div class="fg" id="fichaIncompletaForm"></div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalFichaIncompleta')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarFichaYOperar()">Guardar y registrar operación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VEHÍCULO -->
+<div class="moverlay" id="modalVehiculo">
+  <div class="modal" style="max-width:780px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
+      <div class="modal-title" style="margin:0;" id="mvTitle"></div>
+      <span id="mvEstadoBadge"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+
+      <!-- IZQUIERDA: datos del vehículo -->
+      <div>
+        <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-bottom:12px;">Ficha del vehículo</div>
+        <div id="mvContent" style="font-size:0.86rem;"></div>
+      </div>
+
+      <!-- DERECHA: historial de precios -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);font-family:var(--mono);font-weight:600;">Historial de precios</div>
+
+        <!-- Cambiar precio -->
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;">
+          <div style="font-size:0.76rem;font-weight:600;color:var(--text);margin-bottom:10px;">Actualizar precio</div>
+          <div class="fg" style="gap:8px;">
+            <div class="fgi">
+              <label>Nuevo precio</label>
+              <input type="number" id="mvNuevoPrecio" placeholder="0" min="0">
+            </div>
+            <div class="fgi">
+              <label>Motivo</label>
+              <input type="text" id="mvMotivoPrecio" placeholder="Ajuste de mercado, oferta...">
+            </div>
+          </div>
+          <button class="btn btn-sm btn-a" style="margin-top:10px;" onclick="actualizarPrecioVehiculo()">Actualizar precio</button>
+        </div>
+
+        <!-- Timeline de precios -->
+        <div id="mvHistorialPrecios" style="overflow-y:auto;max-height:280px;"></div>
+      </div>
+
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalVehiculo')">Cerrar</button>
+      <button class="btn btn-g" onclick="generarFichaPublica(vehiculoModalId)">📄 Ficha para compartir</button>
+      <button class="btn btn-a" id="btnVenderModal" onclick="venderDesdeModal()">Cargar operación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="moverlay" id="modalCliente">
+  <div class="modal">
+    <div class="modal-title" id="mcTitle"></div>
+    <div id="mcContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalCliente')">Cerrar</button>
+      <button class="btn btn-a" onclick="opDesdeCliente()">Nueva operación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OPERACIÓN -->
+<div class="moverlay" id="modalOp">
+  <div class="modal" style="max-width:820px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
+      <div class="modal-title" style="margin:0;" id="moTitle">Detalle de operación</div>
+      <span id="moEstadoBadge"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+
+      <!-- COLUMNA IZQUIERDA: datos -->
+      <div>
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-bottom:12px;">Datos de la operación</div>
+        <div id="moContent" style="font-size:0.86rem;"></div>
+      </div>
+
+      <!-- COLUMNA DERECHA: timeline -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;">Historial de la operación</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <textarea id="moNuevaNota" placeholder="Agregá una nota: consulta del cliente, novedad, seguimiento..." style="min-height:55px;font-size:0.84rem;resize:none;"></textarea>
+          <button class="btn btn-sm btn-a" onclick="agregarNotaOperacion()" style="align-self:flex-end;">+ Agregar nota</button>
+        </div>
+        <div id="moTimeline" style="overflow-y:auto;max-height:380px;padding-right:4px;border-top:1px solid var(--border);padding-top:12px;"></div>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn btn-g" onclick="cerrarModal('modalOp')">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO CLIENTE RÁPIDO -->
+<div class="moverlay" id="modalNuevoCliente">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-title">Nuevo cliente</div>
+    <div class="fg">
+      <div class="fgi"><label>Nombre completo *</label><input type="text" id="ncNombre" placeholder="Juan García"></div>
+      <div class="fgi"><label>DNI / CUIT</label><input type="text" id="ncDni" placeholder="XX-XXXXXXXX-X"></div>
+      <div class="fgi"><label>Teléfono</label><input type="text" id="ncTel" placeholder="+54 223 000-0000"></div>
+      <div class="fgi"><label>Email</label><input type="email" id="ncEmail" placeholder="cliente@email.com"></div>
+      <div class="fgi"><label>Interés declarado</label><input type="text" id="ncInteres" placeholder="SUV nueva, pickup usada..."></div>
+      <div class="fgi"><label>Estado</label><select id="ncEstado"><option value="Activo">Activo</option><option value="Prospecto">Prospecto</option></select></div>
+      <div class="fgi full"><label>Notas</label><textarea id="ncNotas" placeholder="Observaciones..." style="min-height:50px;"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalNuevoCliente')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarClienteRapido()">Guardar y seleccionar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var ROL_REQUERIDO = 'vendedor';
+  var session = JSON.parse(localStorage.getItem('fa_session') || 'null');
+  if (!session) { window.location.href = 'login.html'; return; }
+  if (session.rol !== ROL_REQUERIDO && session.rol !== 'admin') { window.location.href = 'login.html'; return; }
+  window._session = session;
+  document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('headerUsuario');
+    if (el) el.textContent = session.nombre || session.usuario;
+  });
+})();
+function cerrarSesion() { localStorage.removeItem('fa_session'); window.location.href = 'login.html'; }
+</script>
+<script>
+// ═══ SUPABASE CONFIG ══════════════════════════════════════
+const SB_URL = 'https://bjgkmrgkgjpydpanewsa.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2ttcmdrZ2pweWRwYW5ld3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODU4NjgsImV4cCI6MjA5MzA2MTg2OH0.DLfBLH9H3UGSh1ISzylt4lLc6pExr6YOyy0sb-cbZec';
+const sbH = { 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Prefer':'return=representation' };
+
+async function sbGet(table,query=''){ const r=await fetch(`${SB_URL}/rest/v1/${table}?${query}&order=created_at.desc`,{headers:sbH}); if(!r.ok)return[]; return r.json(); }
+async function sbInsert(table,data){ const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:sbH,body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} const res=await r.json(); return Array.isArray(res)?res[0]:res; }
+async function sbUpdate(table,id,data){ const r=await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:'PATCH',headers:sbH,body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} return r.json(); }
+async function sbDelete(table,id){ await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:sbH}); }
+
+function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld'); if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML=`<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:var(--sans);font-size:0.9rem;">${msg}</div>`;document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;} }
+function ocultarCargando(){ const el=document.getElementById('_ld');if(el)el.remove(); }
+
+// ═══ VENDEDOR (se carga desde Supabase) ═══════════════════
+let VENDEDOR = { nombre:'Cargando...', iniciales:'...' };
+
+// ═══ STATE ════════════════════════════════════════════════
+let opMoneda='ARS';
+let stockFiltroEstado='Disponible', stockFiltroTipo='', vehiculoModalId=null, clienteModalId=null;
+let stock=[], clientes=[], operaciones=[], prospectos=[], prospectosCerrados=[];
+let dragId=null, cierreProspectoId=null, prospectoDetalleId=null;
+
+async function cargarTodo(){
+  mostrarCargando('Conectando con la base de datos...');
+  try {
+    // Vendedores — usar el primero por ahora
+    const vends = await sbGet('vendedores','select=*&limit=1');
+    if(vends.length){ VENDEDOR={nombre:vends[0].nombre, iniciales:vends[0].iniciales}; }
+
+    // Vehículos
+    const aRaw = await sbGet('vehiculos','select=*,vehiculo_precios(*)');
+    stock = aRaw.map(v=>({
+      id:v.id, marca:v.marca, modelo:v.modelo, tipo:v.tipo||'Usado',
+      anio:v.anio, dominio:v.dominio||'', chasis:v.chasis||'', motor:v.motor||'',
+      precio:parseFloat(v.precio||0), precioLista:parseFloat(v.precio_lista||0),
+      km:v.km||0, transmision:v.transmision||'', carroceria:v.carroceria||'',
+      color:v.color||'', ubicacion:v.ubicacion||'', procedencia:v.procedencia||'Propio',
+      estado:v.estado||'Disponible', obs:v.obs||'', clienteEntregaId:v.cliente_entrega_id,
+      historialPrecios:(v.vehiculo_precios||[]).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(p=>({precio:parseFloat(p.precio),fecha:p.fecha,nota:p.nota||''}))
+    }));
+
+    // Clientes
+    const cRaw = await sbGet('clientes','select=*');
+    clientes = cRaw.map(c=>({
+      id:c.id, nombre:c.nombre, dni:c.dni||'', tel:c.tel||'', email:c.email||'',
+      dir:c.dir||'', ocup:c.ocup||'', civil:c.civil||'', conyuge:{nombre:c.conyuge||'',dni:'',ocup:''},
+      interes:c.interes||'', estado:c.estado||'Prospecto', notas:c.notas||''
+    }));
+
+    // Operaciones + historial
+    const oRaw = await sbGet('operaciones','select=*,operacion_historial(*)');
+    operaciones = oRaw.map(o=>({
+      id:o.id, fecha:o.fecha, vehiculoId:o.vehiculo_id, vehiculo:o.vehiculo_texto||'',
+      clienteId:o.cliente_id, cliente:o.cliente_nombre||'',
+      moneda:o.moneda||'ARS', precio:parseFloat(o.precio||0),
+      precioLista:parseFloat(o.precio_lista||0), descuento:parseFloat(o.descuento||0),
+      comision:parseFloat(o.comision||0),
+      senia:parseFloat(o.senia||0), monedaSenia:o.moneda_senia||'ARS',
+      formasPago:o.formas_pago||[],
+      valorTransf:parseFloat(o.valor_transf||0), monedaTransf:o.moneda_transf||'ARS', transfObs:o.transf_obs||'',
+      credito:o.credito_banco?{banco:o.credito_banco,monto:o.credito_monto,cuotas:o.credito_cuotas,valorCuota:o.credito_cuota_valor,tasa:o.credito_tasa,obs:o.credito_obs}:null,
+      permuta:o.permuta_marca?{marca:o.permuta_marca,modelo:o.permuta_modelo,anio:o.permuta_anio,km:o.permuta_km,valor:o.permuta_valor,moneda:o.permuta_moneda}:null,
+      cheque:o.cheque_monto?{monto:o.cheque_monto,moneda:o.cheque_moneda,fecha:o.cheque_fecha,tipo:o.cheque_tipo}:null,
+      fechaEntrega:o.fecha_entrega, notas:o.notas||'', estado:o.estado||'Pendiente', vendedor:o.vendedor_id?VENDEDOR.nombre:'',
+      historial:(o.operacion_historial||[]).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(h=>({tipo:h.tipo,sector:h.sector,texto:h.texto,fecha:h.fecha}))
+    }));
+
+    // Prospectos + historial
+    const pRaw = await sbGet('prospectos','select=*,prospecto_historial(*)');
+    prospectos = pRaw.filter(p=>!p.cerrado).map(p=>({
+      id:p.id, clienteId:p.cliente_id, nombre:p.nombre, interes:p.interes||'',
+      nota:p.nota||'', col:p.col||'nueva', tel:p.tel||'', email:p.email||'',
+      historial:(p.prospecto_historial||[]).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(h=>({tipo:h.tipo,texto:h.texto,fecha:h.fecha}))
+    }));
+    prospectosCerrados = pRaw.filter(p=>p.cerrado).map(p=>({...p,motivo:p.motivo_cierre,fechaCierre:p.fecha_cierre}));
+
+  } catch(err){ console.error('Error cargando datos:',err); alert('Error al conectar con la base de datos.'); }
+  ocultarCargando();
+}
+
+// ═══ UTILS ════════════════════════════════════════════════
+function fmt(n,mon){const v=Number(n).toLocaleString('es-AR');return mon==='USD'?'U$D '+v:'$ '+v;}
+function fmtFecha(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
+function iniciales(n){return n.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();}
+function hoy(){return new Date().toISOString().split('T')[0];}
+function fila(l,v){return`<div><span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);display:block;margin-bottom:2px;">${l}</span>${v}</div>`;}
+
+// ═══ BUSCADOR GLOBAL ══════════════════════════════════════
+function busquedaGlobal(q){
+  const res=document.getElementById('globalSearchResults');
+  if(!q||q.length<2){res.style.display='none';return;}
+  const ql=q.toLowerCase();
+  let html='';
+
+  const rCli=clientes.filter(c=>(c.nombre+' '+c.dni+' '+c.tel+' '+c.email).toLowerCase().includes(ql)).slice(0,4);
+  if(rCli.length){
+    html+=`<div class="gs-section">Clientes</div>`;
+    html+=rCli.map(c=>`<div class="gs-item" onclick="cerrarBusqueda();abrirModalCliente(${c.id})">
+      <span class="gs-icon">👤</span>
+      <div><div class="gs-main">${c.nombre}</div>
+      <div class="gs-sub">${[c.dni,c.tel,c.email].filter(Boolean).join(' · ')}</div></div>
+    </div>`).join('');
+  }
+
+  const rStock=stock.filter(v=>(v.marca+' '+v.modelo+' '+v.dominio+' '+v.anio).toLowerCase().includes(ql)).slice(0,4);
+  if(rStock.length){
+    html+=`<div class="gs-section">Vehículos en stock</div>`;
+    html+=rStock.map(v=>`<div class="gs-item" onclick="cerrarBusqueda();abrirModalVehiculo(${v.id})">
+      <span class="gs-icon">🚗</span>
+      <div><div class="gs-main">${v.marca} ${v.modelo} ${v.anio}</div>
+      <div class="gs-sub">${v.tipo==='Nuevo'?'0km':'Usado'}${v.dominio?' · '+v.dominio:''} · <span style="color:${v.estado==='Disponible'?'var(--green)':v.estado==='Reservado'?'var(--amber)':'var(--red)'}">${v.estado}</span> · ${fmt(v.precio)}</div></div>
+    </div>`).join('');
+  }
+
+  const rOps=operaciones.filter(o=>(o.vehiculo+' '+o.cliente).toLowerCase().includes(ql)).slice(0,3);
+  if(rOps.length){
+    html+=`<div class="gs-section">Operaciones</div>`;
+    html+=rOps.map(o=>`<div class="gs-item" onclick="cerrarBusqueda();abrirModalOp(${o.id})">
+      <span class="gs-icon">📋</span>
+      <div><div class="gs-main">${o.vehiculo}</div>
+      <div class="gs-sub">${o.cliente} · ${fmtFecha(o.fecha)} · ${o.estado}</div></div>
+    </div>`).join('');
+  }
+
+  const rProsp=prospectos.filter(p=>(p.nombre+' '+p.interes).toLowerCase().includes(ql)).slice(0,3);
+  if(rProsp.length){
+    html+=`<div class="gs-section">Pipeline</div>`;
+    html+=rProsp.map(p=>`<div class="gs-item" onclick="cerrarBusqueda();show('dashboard');setTimeout(()=>abrirDetalleProspecto(${p.id}),300)">
+      <span class="gs-icon">📌</span>
+      <div><div class="gs-main">${p.nombre}</div>
+      <div class="gs-sub">${p.interes} · ${KB_COLS.find(c=>c.id===p.col)?.label||p.col}</div></div>
+    </div>`).join('');
+  }
+
+  if(!html) html=`<div class="gs-empty">Sin resultados para "${q}"</div>`;
+  res.innerHTML=html;
+  res.style.display='block';
+}
+
+function cerrarBusqueda(){
+  document.getElementById('globalSearchResults').style.display='none';
+  document.getElementById('globalSearch').value='';
+}
+// NAV
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#mainNav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx=['dashboard','stock','clientes','operacion','misventas'].indexOf(id);
+  document.querySelectorAll('#mainNav button')[idx].classList.add('active');
+  if(id==='dashboard')renderDashboard();
+  if(id==='stock')renderStock();
+  if(id==='clientes')renderClientes();
+  if(id==='operacion')poblarFormOp();
+  if(id==='misventas')renderMisVentas();
+}
+function showStab(sec,id,btn){
+  const m={stock:['stockLista','stockNuevo'],clientes:['clientesLista','clientesNuevo']};
+  m[sec].forEach(s=>{const e=document.getElementById(s);if(e)e.style.display='none';});
+  document.getElementById(id).style.display='block';
+  document.querySelectorAll(`#${sec} .stab`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // poblar selector de clientes en el form de stock
+  if(id==='stockNuevo'){
+    const sel=document.getElementById('vClienteEntrega');
+    sel.innerHTML='<option value="">— Sin cliente asociado —</option>';
+    clientes.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre+(c.dni?' · '+c.dni:'');sel.appendChild(o);});
+  }
+}
+function cerrarModal(id){document.getElementById(id).classList.remove('open');}
+
+// MONEDA
+function setMonedaOp(m){
+  opMoneda=m;
+  document.getElementById('btnOpARS').className='mtoggle-btn'+(m==='ARS'?' active-ars':'');
+  document.getElementById('btnOpUSD').className='mtoggle-btn'+(m==='USD'?' active-usd':'');
+  document.getElementById('opPrecioLabel').textContent=`Precio de venta * (${m})`;
+}
+
+// PANELES PAGO
+function togglePanel(pid,cb){document.getElementById(pid).classList.toggle('visible',cb.checked);}
+
+// ===================== KANBAN =====================
+const KB_COLS=[
+  {id:'nueva',  label:'Nueva consulta'},
+  {id:'espera', label:'Esperando respuesta'},
+  {id:'segundo',label:'Segundo contacto'},
+  {id:'vencido',label:'Vencido'},
+  {id:'revision',label:'En revisión'},
+];
+
+
+function fmtDatetime(s){
+  const d=new Date(s);
+  return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderKanban(){
+  const board=document.getElementById('kanbanBoard');
+  board.innerHTML='';
+  KB_COLS.forEach(col=>{
+    const cards=prospectos.filter(p=>p.col===col.id);
+    const div=document.createElement('div');
+    div.className='kb-col';div.dataset.col=col.id;
+    div.innerHTML=`<div class="kb-col-header">
+      <span class="kb-col-title">${col.label}</span>
+      <span class="kb-count">${cards.length}</span>
+    </div>
+    ${cards.map(p=>{
+      const ultimaNota=p.historial.filter(h=>h.tipo==='nota').slice(-1)[0];
+      return`<div class="kb-card" draggable="true" data-id="${p.id}">
+        <div class="kb-card-name" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>${p.nombre}</span>
+        </div>
+        <div class="kb-card-interes">${p.interes||'Sin interés definido'}</div>
+        ${ultimaNota?`<div class="kb-card-nota">${ultimaNota.texto}</div>`:''}
+        <div class="kb-card-actions" style="margin-top:8px;">
+          <button class="btn btn-xs btn-a" onclick="abrirDetalleProspecto(${p.id});event.stopPropagation();">Ver / Editar</button>
+          <button class="btn btn-xs btn-g" onclick="irAOperarDesdeKanban(${p.clienteId});event.stopPropagation();">Venta</button>
+          <button class="btn btn-xs" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);padding:3px 8px;font-size:0.72rem;" onclick="abrirCierreOportunidad(${p.id});event.stopPropagation();">✕</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+
+    div.querySelectorAll('.kb-card').forEach(card=>{
+      card.addEventListener('dragstart',e=>{
+        dragId=parseInt(card.dataset.id);
+        setTimeout(()=>card.classList.add('dragging'),0);
+      });
+      card.addEventListener('dragend',()=>card.classList.remove('dragging'));
+    });
+
+    div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('drag-over');});
+    div.addEventListener('dragleave',()=>div.classList.remove('drag-over'));
+    div.addEventListener('drop',e=>{
+      e.preventDefault();div.classList.remove('drag-over');
+      if(dragId===null)return;
+      const p=prospectos.find(x=>x.id===dragId);
+      if(p&&p.col!==col.id){
+        const colAnterior=KB_COLS.find(c=>c.id===p.col);
+        p.col=col.id;
+        const h={tipo:'sistema',texto:`Movido a "${col.label}"${colAnterior?' desde "'+colAnterior.label+'"':''}`,fecha:new Date().toISOString()};
+        p.historial.push(h);
+        sbUpdate('prospectos',p.id,{col:col.id});
+        sbInsert('prospecto_historial',{prospecto_id:p.id,tipo:'sistema',texto:h.texto});
+        renderKanban();
+      }
+      dragId=null;
+    });
+
+    board.appendChild(div);
+  });
+}
+
+function abrirDetalleProspecto(id){
+  prospectoDetalleId=id;
+  const p=prospectos.find(x=>x.id===id);
+  const c=clientes.find(x=>x.id===p.clienteId);
+
+  // poblar datos editables
+  document.getElementById('dpNombre').value=p.nombre;
+  document.getElementById('dpTel').value=p.tel||c?.tel||'';
+  document.getElementById('dpEmail').value=p.email||c?.email||'';
+  document.getElementById('dpInteres').value=p.interes||'';
+  document.getElementById('dpNota').value=p.nota||'';
+  document.getElementById('dpColumna').value=p.col;
+
+  // poblar selector stock
+  const vSel=document.getElementById('dpVehiculo');
+  vSel.innerHTML='<option value="">Sin vehículo específico del stock</option>';
+  stock.filter(v=>v.estado==='Disponible').forEach(v=>{
+    const o=document.createElement('option');o.value=v.id;
+    o.textContent=`${v.marca} ${v.modelo} ${v.anio} · ${v.tipo==='Nuevo'?'0km':'Usado'}${v.dominio?' · '+v.dominio:''}`;
+    vSel.appendChild(o);
+  });
+
+  renderTimeline(p);
+  document.getElementById('dpNuevaNota').value='';
+  document.getElementById('modalDetalleProspecto').classList.add('open');
+}
+
+function renderTimeline(p){
+  const tl=document.getElementById('dpTimeline');
+  const sorted=[...p.historial].reverse();
+  tl.innerHTML=sorted.map(h=>{
+    const esSistema=h.tipo==='sistema';
+    return`<div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;">
+      <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;
+        background:${esSistema?'var(--surface2)':'var(--accent-bg)'};border:1px solid ${esSistema?'var(--border)':'#b8ccec'};">
+        ${esSistema?'⚙':'💬'}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.84rem;color:${esSistema?'var(--muted)':'var(--text)'};${esSistema?'font-style:italic;':''}">${h.texto}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${fmtDatetime(h.fecha)}</div>
+      </div>
+    </div>`;
+  }).join('')||'<div style="color:var(--muted);font-size:0.84rem;">Sin actividad registrada.</div>';
+}
+
+async function agregarNotaProspecto(){
+  const texto=document.getElementById('dpNuevaNota').value.trim();
+  if(!texto)return;
+  const p=prospectos.find(x=>x.id===prospectoDetalleId);
+  const h={tipo:'nota',texto,fecha:new Date().toISOString()};
+  p.historial.push(h);
+  await sbInsert('prospecto_historial',{prospecto_id:p.id,tipo:'nota',texto});
+  document.getElementById('dpNuevaNota').value='';
+  renderTimeline(p);
+  renderKanban();
+}
+
+async function guardarDetalleProspecto(){
+  const p=prospectos.find(x=>x.id===prospectoDetalleId);
+  const colAnterior=p.col;
+  const colNueva=document.getElementById('dpColumna').value;
+  p.nombre=document.getElementById('dpNombre').value.trim()||p.nombre;
+  p.tel=document.getElementById('dpTel').value.trim();
+  p.email=document.getElementById('dpEmail').value.trim();
+  p.nota=document.getElementById('dpNota').value.trim();
+  const vidVal=document.getElementById('dpVehiculo').value;
+  if(vidVal){const v=stock.find(x=>x.id===parseInt(vidVal));if(v) p.interes=`${v.marca} ${v.modelo} ${v.anio} · ${v.tipo==='Nuevo'?'0km':'Usado'}${v.dominio?' · '+v.dominio:''}`;}
+  else{p.interes=document.getElementById('dpInteres').value.trim()||p.interes;}
+  mostrarCargando('Guardando...');
+  const upd={nombre:p.nombre,tel:p.tel,email:p.email,nota:p.nota,interes:p.interes,col:colNueva};
+  if(colNueva!==colAnterior){
+    p.col=colNueva;
+    const colLabel=KB_COLS.find(c=>c.id===colNueva)?.label;
+    const h={tipo:'sistema',texto:`Movido a "${colLabel}"`,fecha:new Date().toISOString()};
+    p.historial.push(h);
+    await sbInsert('prospecto_historial',{prospecto_id:p.id,tipo:'sistema',texto:h.texto});
+  }
+  await sbUpdate('prospectos',p.id,upd);
+  ocultarCargando();
+  cerrarModal('modalDetalleProspecto');
+  renderKanban();
+}
+
+let kpTabActivo='existente', kpInteresActivo='stock';
+
+function kpSetTab(tab){
+  kpTabActivo=tab;
+  document.getElementById('kpPanelExistente').style.display=tab==='existente'?'block':'none';
+  document.getElementById('kpPanelNuevo').style.display=tab==='nuevo'?'block':'none';
+  document.getElementById('kpTabExistente').style.background=tab==='existente'?'var(--accent)':'var(--surface2)';
+  document.getElementById('kpTabExistente').style.color=tab==='existente'?'#fff':'var(--muted)';
+  document.getElementById('kpTabNuevo').style.background=tab==='nuevo'?'var(--accent)':'var(--surface2)';
+  document.getElementById('kpTabNuevo').style.color=tab==='nuevo'?'#fff':'var(--muted)';
+}
+
+function kpSetInteres(modo){
+  kpInteresActivo=modo;
+  document.getElementById('kpInteresStock').style.display=modo==='stock'?'block':'none';
+  document.getElementById('kpInteresBusca').style.display=modo==='busca'?'block':'none';
+  document.getElementById('kpTabStock').style.background=modo==='stock'?'var(--accent)':'var(--surface2)';
+  document.getElementById('kpTabStock').style.color=modo==='stock'?'#fff':'var(--muted)';
+  document.getElementById('kpTabBusca').style.background=modo==='busca'?'var(--accent)':'var(--surface2)';
+  document.getElementById('kpTabBusca').style.color=modo==='busca'?'#fff':'var(--muted)';
+}
+
+function abrirModalAgregarProspecto(){
+  // poblar selector clientes
+  const sel=document.getElementById('kpCliente');
+  sel.innerHTML='<option value="">Seleccionar cliente...</option>';
+  clientes.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre+(c.tel?' · '+c.tel:'');sel.appendChild(o);});
+  // poblar selector stock
+  const vSel=document.getElementById('kpVehiculo');
+  vSel.innerHTML='<option value="">Seleccionar vehículo del stock...</option>';
+  stock.filter(v=>v.estado==='Disponible').forEach(v=>{
+    const o=document.createElement('option');o.value=v.id;
+    o.textContent=`${v.marca} ${v.modelo} ${v.anio} · ${v.tipo==='Nuevo'?'0km':'Usado'}${v.dominio?' · '+v.dominio:''}`;
+    vSel.appendChild(o);
+  });
+  // reset campos
+  ['kpNcNombre','kpNcTel','kpNcEmail','kpBuscaTexto','kpNota'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('kpColumna').value='nueva';
+  kpSetTab('existente');
+  kpSetInteres('stock');
+  document.getElementById('modalAgregarProspecto').classList.add('open');
+}
+
+async function guardarProspecto(){
+  let clienteId=null, nombre='', interes='';
+  if(kpTabActivo==='existente'){
+    const cidVal=document.getElementById('kpCliente').value;
+    if(!cidVal){alert('Seleccioná un cliente');return;}
+    const c=clientes.find(x=>x.id===parseInt(cidVal));
+    clienteId=c.id; nombre=c.nombre;
+  } else {
+    const ncNombre=document.getElementById('kpNcNombre').value.trim();
+    const ncTel=document.getElementById('kpNcTel').value.trim();
+    if(!ncNombre||!ncTel){alert('Ingresá nombre y teléfono del cliente');return;}
+    mostrarCargando('Guardando cliente...');
+    const nc = await sbInsert('clientes',{nombre:ncNombre,tel:ncTel,email:document.getElementById('kpNcEmail').value.trim(),estado:'Prospecto'});
+    ocultarCargando();
+    if(!nc) return;
+    const nuevo={id:nc.id,nombre:ncNombre,dni:'',tel:ncTel,email:nc.email||'',dir:'',ocup:'',civil:'',conyuge:{nombre:'',dni:'',ocup:''},interes:'',estado:'Prospecto',notas:''};
+    clientes.push(nuevo);
+    clienteId=nc.id; nombre=ncNombre;
+  }
+  if(kpInteresActivo==='stock'){
+    const vid=document.getElementById('kpVehiculo').value;
+    if(vid){const v=stock.find(x=>x.id===parseInt(vid));interes=`${v.marca} ${v.modelo} ${v.anio} · ${v.tipo==='Nuevo'?'0km':'Usado'}`;}
+    else interes='Sin vehículo específico';
+  } else {
+    interes=document.getElementById('kpBuscaTexto').value.trim()||'Busca algo que no tenemos en stock';
+  }
+  mostrarCargando('Guardando prospecto...');
+  const c=clientes.find(x=>x.id===clienteId);
+  const col=document.getElementById('kpColumna').value;
+  const nuevo = await sbInsert('prospectos',{
+    cliente_id:clienteId, nombre, interes,
+    tel:kpTabActivo==='nuevo'?document.getElementById('kpNcTel').value.trim():(c?.tel||''),
+    email:kpTabActivo==='nuevo'?document.getElementById('kpNcEmail').value.trim():(c?.email||''),
+    nota:document.getElementById('kpNota').value.trim(), col, cerrado:false
+  });
+  if(nuevo){
+    await sbInsert('prospecto_historial',{prospecto_id:nuevo.id,tipo:'sistema',texto:'Prospecto creado'});
+    prospectos.push({id:nuevo.id,clienteId,nombre,interes,tel:nuevo.tel||'',email:nuevo.email||'',nota:nuevo.nota||'',col,historial:[{tipo:'sistema',texto:'Prospecto creado',fecha:new Date().toISOString()}]});
+    cerrarModal('modalAgregarProspecto');
+    renderKanban();
+  }
+  ocultarCargando();
+}
+
+function abrirCierreOportunidad(id){
+  cierreProspectoId=id;
+  document.getElementById('cierreMotivo').value='Desistió';
+  document.getElementById('cierreObs').value='';
+  document.getElementById('modalCerrarOportunidad').classList.add('open');
+}
+
+async function confirmarCierreOportunidad(){
+  const p=prospectos.find(x=>x.id===cierreProspectoId);
+  if(p){
+    mostrarCargando('Cerrando oportunidad...');
+    await sbUpdate('prospectos',p.id,{cerrado:true,motivo_cierre:document.getElementById('cierreMotivo').value,fecha_cierre:new Date().toISOString()});
+    prospectosCerrados.push({...p,motivo:document.getElementById('cierreMotivo').value,obs:document.getElementById('cierreObs').value,fechaCierre:new Date().toISOString()});
+    ocultarCargando();
+  }
+  prospectos=prospectos.filter(p=>p.id!==cierreProspectoId);
+  cerrarModal('modalCerrarOportunidad');
+  renderKanban();
+}
+
+function irAOperarDesdeKanban(idOrProspectoId){
+  // puede recibir clienteId directo o prospectoId desde el modal
+  const p=prospectos.find(x=>x.id===idOrProspectoId);
+  const cid = p ? p.clienteId : idOrProspectoId;
+  clienteModalId=cid;
+  opDesdeCliente();
+}
+
+// Cuando se registra una operación, sacar al cliente del kanban
+function quitarProspectoDelKanban(clienteId){
+  prospectos=prospectos.filter(p=>p.clienteId!==clienteId);
+}
+
+// DESCUENTO Y COMISIÓN EN TIEMPO REAL
+function calcularDescuentoComision(){
+  const vidVal=document.getElementById('opVehiculo').value;
+  const precioVenta=parseFloat(document.getElementById('opPrecio').value)||0;
+  const v=stock.find(x=>x.id===parseInt(vidVal));
+  const dWrap=document.getElementById('opDescuentoWrap');
+  const cWrap=document.getElementById('opComisionWrap');
+  if(!precioVenta){dWrap.style.display='none';cWrap.style.display='none';return;}
+  if(v&&v.precioLista&&v.precioLista>precioVenta){
+    const desc=v.precioLista-precioVenta;
+    const pct=((desc/v.precioLista)*100).toFixed(1);
+    document.getElementById('opDescuentoVal').textContent=`${fmt(desc)} (${pct}% de descuento)`;
+    dWrap.style.display='block';
+  } else { dWrap.style.display='none'; }
+  const comision=Math.round(precioVenta*0.01);
+  document.getElementById('opComisionVal').textContent=`${fmt(comision,opMoneda)}`;
+  cWrap.style.display='block';
+}
+
+// RESUMEN PIPELINE
+function renderResumenPipeline(){
+  const ahora=new Date();
+  const mesActual=ahora.getMonth(), anioActual=ahora.getFullYear();
+  const totalActivos=prospectos.length;
+  const ingresadosMes=prospectos.filter(p=>{
+    const f=new Date(p.historial[0]?.fecha||0);
+    return f.getMonth()===mesActual&&f.getFullYear()===anioActual;
+  }).length;
+  const perdidosMes=prospectosCerrados.filter(p=>{
+    const f=new Date(p.fechaCierre||0);
+    return f.getMonth()===mesActual&&f.getFullYear()===anioActual;
+  });
+  const motivosCierre=perdidosMes.reduce((acc,p)=>{acc[p.motivo]=(acc[p.motivo]||0)+1;return acc;},{});
+  const motivoPrincipal=Object.entries(motivosCierre).sort((a,b)=>b[1]-a[1])[0];
+  // tiempo promedio en pipeline (días desde creación hasta ahora)
+  const tiemposPromedio=prospectos.map(p=>{
+    const inicio=new Date(p.historial[0]?.fecha||ahora);
+    return Math.floor((ahora-inicio)/86400000);
+  });
+  const promDias=tiemposPromedio.length?Math.round(tiemposPromedio.reduce((a,b)=>a+b,0)/tiemposPromedio.length):0;
+
+  document.getElementById('kanbanResumen').innerHTML=`
+    <div>
+      <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);color:var(--muted);margin-bottom:4px;">Prospectos activos</div>
+      <div style="font-size:1.4rem;font-weight:500;font-family:var(--mono);color:var(--accent);">${totalActivos}</div>
+    </div>
+    <div>
+      <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);color:var(--muted);margin-bottom:4px;">Ingresaron este mes</div>
+      <div style="font-size:1.4rem;font-weight:500;font-family:var(--mono);color:var(--green);">${ingresadosMes}</div>
+    </div>
+    <div>
+      <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);color:var(--muted);margin-bottom:4px;">Oportunidades perdidas</div>
+      <div style="font-size:1.4rem;font-weight:500;font-family:var(--mono);color:var(--red);">${perdidosMes.length}</div>
+      ${motivoPrincipal?`<div style="font-size:0.74rem;color:var(--muted);margin-top:2px;">Principal: ${motivoPrincipal[0]}</div>`:''}
+    </div>
+    <div>
+      <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);color:var(--muted);margin-bottom:4px;">Tiempo prom. en pipeline</div>
+      <div style="font-size:1.4rem;font-weight:500;font-family:var(--mono);color:var(--amber);">${promDias}d</div>
+    </div>`;
+}
+
+// META MENSUAL
+function renderMetaMensual(){
+  const meta=parseInt(document.getElementById('metaMensual').value)||8;
+  const ahora=new Date();
+  const vendidosMes=operaciones.filter(o=>{
+    const f=new Date(o.fecha);
+    return o.vendedor===VENDEDOR.nombre&&o.estado==='Entregado'&&f.getMonth()===ahora.getMonth()&&f.getFullYear()===ahora.getFullYear();
+  }).length;
+  const pct=Math.min(Math.round((vendidosMes/meta)*100),100);
+  const color=pct>=100?'var(--green)':pct>=60?'var(--accent)':'var(--amber)';
+  document.getElementById('metaBarWrap').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:0.84rem;color:var(--muted);">${vendidosMes} de ${meta} autos vendidos este mes</span>
+      <span style="font-family:var(--mono);font-weight:600;font-size:1rem;color:${color};">${pct}%</span>
+    </div>
+    <div style="background:var(--surface2);border-radius:99px;height:10px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:99px;transition:width .4s;"></div>
+    </div>
+    ${pct>=100?`<div style="font-size:0.8rem;color:var(--green);margin-top:6px;font-weight:500;">🎉 ¡Meta cumplida!</div>`:
+      `<div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">Faltan ${meta-vendidosMes} auto${meta-vendidosMes!==1?'s':''} para la meta</div>`}`;
+}
+
+// DASHBOARD
+function renderDashboard(){
+  const d=new Date();
+  document.getElementById('dashFecha').textContent=d.toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const disp=stock.filter(v=>v.estado==='Disponible').length,res=stock.filter(v=>v.estado==='Reservado').length,vend=stock.filter(v=>v.estado==='Vendido').length;
+  const mis=operaciones.filter(o=>o.vendedor===VENDEDOR.nombre);
+  document.getElementById('dashCards').innerHTML=`
+    <div class="card"><div class="card-label">Stock disponible</div><div class="card-value neu">${disp}</div><div class="card-sub">vehículos</div></div>
+    <div class="card"><div class="card-label">Reservados</div><div class="card-value amb">${res}</div><div class="card-sub">con seña</div></div>
+    <div class="card"><div class="card-label">Vendidos este mes</div><div class="card-value pos">${vend}</div></div>
+    <div class="card"><div class="card-label">Mis operaciones</div><div class="card-value neu">${mis.length}</div><div class="card-sub">en el mes</div></div>`;
+
+  // Últimos ingresos al stock (los últimos 5 agregados, por id descendente)
+  const ultimos=[...stock].sort((a,b)=>b.id-a.id).slice(0,5);
+  document.getElementById('dashDisponibles').innerHTML=ultimos.length?ultimos.map(v=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <span style="font-weight:500;font-size:0.88rem;">${v.marca} ${v.modelo}</span>
+        <span class="badge b-${v.tipo.toLowerCase()}" style="margin-left:6px;">${v.tipo==='Nuevo'?'0km':'Usado'}</span>
+        <div style="font-size:0.76rem;color:var(--muted);margin-top:2px;">${v.anio}${v.dominio?' · '+v.dominio:''} · <span class="badge b-${v.estado.toLowerCase()}" style="font-size:0.65rem;">${v.estado}</span></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--mono);font-weight:500;font-size:0.84rem;">${fmt(v.precio)}</div>
+        <button class="btn btn-sm" style="margin-top:4px;" onclick="abrirModalVehiculo(${v.id})">Ver</button>
+      </div>
+    </div>`).join(''):'<div class="empty">Sin vehículos en stock</div>';
+
+  // Operaciones en curso: solo las que NO están entregadas
+  const enCurso=operaciones.filter(o=>o.vendedor===VENDEDOR.nombre&&o.estado!=='Entregado');
+  document.getElementById('dashOps').innerHTML=enCurso.length?enCurso.map(o=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <span style="font-weight:500;font-size:0.88rem;">${o.vehiculo}</span>
+        <div style="font-size:0.76rem;color:var(--muted);margin-top:2px;">${o.cliente} · ${fmtFecha(o.fecha)}</div>
+        ${o.fechaEntrega?`<div style="font-size:0.74rem;color:var(--muted);">Entrega est.: ${fmtFecha(o.fechaEntrega)}</div>`:''}
+      </div>
+      <div style="text-align:right;">
+        <span class="badge b-${o.estado==='En trámite'?'tramite':'pendiente'}">${o.estado}</span>
+        <div style="margin-top:4px;"><button class="btn btn-xs btn-g" onclick="abrirModalOp(${o.id})">Detalle</button></div>
+      </div>
+    </div>`).join(''):'<div class="empty" style="padding:20px;">Sin operaciones pendientes 🎉</div>';
+
+  renderKanban();
+  renderResumenPipeline();
+  renderMetaMensual();
+}
+
+// STOCK
+function renderStock(){
+  const q=(document.getElementById('stockBuscar')||{value:''}).value.toLowerCase();
+  const data=stock.filter(v=>(v.marca+' '+v.modelo+' '+v.dominio).toLowerCase().includes(q)&&(stockFiltroEstado==='todos'||v.estado===stockFiltroEstado)&&(!stockFiltroTipo||v.tipo===stockFiltroTipo));
+  document.getElementById('stockStats').innerHTML=`
+    <div class="card"><div class="card-label">Total stock</div><div class="card-value neu">${stock.length}</div></div>
+    <div class="card"><div class="card-label">Disponibles</div><div class="card-value pos">${stock.filter(v=>v.estado==='Disponible').length}</div></div>
+    <div class="card"><div class="card-label">Reservados</div><div class="card-value amb">${stock.filter(v=>v.estado==='Reservado').length}</div></div>
+    <div class="card"><div class="card-label">Vendidos</div><div class="card-value neg">${stock.filter(v=>v.estado==='Vendido').length}</div></div>`;
+  const tb=document.getElementById('tbStock'),em=document.getElementById('tbStockEmpty');
+  if(!data.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tb.innerHTML=data.map(v=>`<tr>
+    <td><strong>${v.marca} ${v.modelo}</strong></td>
+    <td><span class="badge b-${v.tipo.toLowerCase()}">${v.tipo==='Nuevo'?'0 km':'Usado'}</span></td>
+    <td>${v.anio}</td>
+    <td class="mono" style="font-size:0.8rem;">${v.dominio||'—'}</td>
+    <td style="font-size:0.84rem;">${v.km?Number(v.km).toLocaleString('es-AR')+' km':'—'}</td>
+    <td style="font-size:0.84rem;">${v.transmision||'—'}</td>
+    <td style="font-family:var(--mono);font-weight:500;">${fmt(v.precio)}</td>
+    <td style="font-size:0.84rem;">${v.ubicacion||'—'}</td>
+    <td><span class="badge b-${v.estado.toLowerCase()}">${v.estado}</span></td>
+    <td><div style="display:flex;gap:6px;">
+      <button class="btn btn-sm btn-g" onclick="abrirModalVehiculo(${v.id})">Ver</button>
+      ${v.estado==='Disponible'?`<button class="btn btn-sm btn-a" onclick="irAOperar(${v.id})">Vender</button>`:''}
+    </div></td>
+  </tr>`).join('');
+}
+function filtrarStock(est){stockFiltroEstado=est;stockFiltroTipo='';renderStock();}
+function filtrarTipo(t){stockFiltroTipo=stockFiltroTipo===t?'':t;stockFiltroEstado='todos';renderStock();}
+
+function abrirModalVehiculo(id){
+  vehiculoModalId=id;
+  const v=stock.find(x=>x.id===id);
+  document.getElementById('mvTitle').textContent=`${v.marca} ${v.modelo} ${v.anio}`;
+  document.getElementById('mvEstadoBadge').innerHTML=`<span class="badge b-${v.estado.toLowerCase()}">${v.estado}</span>`;
+  document.getElementById('mvContent').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;">
+    ${fila('Tipo',`<span class="badge b-${v.tipo.toLowerCase()}">${v.tipo==='Nuevo'?'0 km':'Usado'}</span>`)}
+    ${fila('Carrocería',v.carroceria||'—')}
+    ${fila('Año',v.anio)}${fila('Dominio',v.dominio||'Sin asignar')}
+    ${fila('Color',v.color||'—')}${fila('Transmisión',v.transmision||'—')}
+    ${fila('Kilometraje',v.km?Number(v.km).toLocaleString('es-AR')+' km':'—')}
+    ${fila('Ubicación',v.ubicacion||'—')}
+    ${fila('Precio de lista',v.precioLista?`<span class="mono">${fmt(v.precioLista)}</span>`:'—')}
+    ${fila('Precio actual',`<span class="mono" style="font-size:1rem;color:var(--accent);font-weight:600;">${fmt(v.precio)}</span>`)}
+    ${v.precioLista&&v.precio&&v.precioLista>v.precio?fila('Bajó en total',`<span class="mono" style="color:var(--red);">- ${fmt(v.precioLista-v.precio)}</span>`):''}
+    ${fila('Entregado por',v.clienteEntregaId?(clientes.find(c=>c.id===parseInt(v.clienteEntregaId))?.nombre||'—'):'—')}
+    ${fila('Procedencia',v.procedencia?`<span class="badge" style="${v.procedencia==='Consignación'?'background:var(--purple-bg);color:var(--purple);border:1px solid #c8c0e8':'background:var(--accent-bg);color:var(--accent);border:1px solid #c0d0ec'}">${v.procedencia}</span>`:'—')}
+    ${fila('N° Chasis',`<span class="mono" style="font-size:0.76rem;">${v.chasis||'—'}</span>`)}
+    ${fila('N° Motor',`<span class="mono" style="font-size:0.76rem;">${v.motor||'—'}</span>`)}
+    ${v.obs?`<div style="grid-column:1/-1;padding-top:8px;border-top:1px solid var(--border);"><span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);">Observaciones</span><div style="margin-top:4px;font-size:0.84rem;">${v.obs}</div></div>`:''}
+  </div>`;
+  document.getElementById('mvNuevoPrecio').value='';
+  document.getElementById('mvMotivoPrecio').value='';
+  renderHistorialPrecios(v);
+  document.getElementById('btnVenderModal').style.display=v.estado==='Disponible'?'inline-flex':'none';
+  document.getElementById('modalVehiculo').classList.add('open');
+}
+
+function renderHistorialPrecios(v){
+  if(!v.historialPrecios||!v.historialPrecios.length){
+    document.getElementById('mvHistorialPrecios').innerHTML='<div style="color:var(--muted);font-size:0.84rem;">Sin historial de precios.</div>';
+    return;
+  }
+  const sorted=[...v.historialPrecios].reverse();
+  document.getElementById('mvHistorialPrecios').innerHTML=sorted.map((h,i)=>{
+    const esActual=i===0;
+    const anterior=sorted[i+1];
+    const diff=anterior?h.precio-anterior.precio:0;
+    return`<div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;">
+      <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;
+        background:${esActual?'var(--accent-bg)':'var(--surface2)'};border:1.5px solid ${esActual?'#c0d0ec':'var(--border)'};">
+        ${esActual?'💰':'📉'}
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-family:var(--mono);font-weight:600;font-size:0.9rem;color:${esActual?'var(--accent)':'var(--text)'};">${fmt(h.precio)}</span>
+          ${diff<0?`<span style="font-size:0.74rem;color:var(--red);font-weight:500;">▼ ${fmt(Math.abs(diff))}</span>`:''}
+          ${esActual?`<span class="badge" style="background:var(--accent-bg);color:var(--accent);border:1px solid #c0d0ec;font-size:0.65rem;">Actual</span>`:''}
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:1px;">${h.nota||'—'}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:1px;">${fmtDatetime(h.fecha)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function actualizarPrecioVehiculo(){
+  const v=stock.find(x=>x.id===vehiculoModalId);
+  const nuevoPrecio=parseFloat(document.getElementById('mvNuevoPrecio').value);
+  const motivo=document.getElementById('mvMotivoPrecio').value.trim();
+  if(!nuevoPrecio||nuevoPrecio<=0){alert('Ingresá un precio válido');return;}
+  if(!motivo){alert('Ingresá el motivo del cambio');return;}
+  mostrarCargando('Actualizando precio...');
+  await sbUpdate('vehiculos',v.id,{precio:nuevoPrecio});
+  await sbInsert('vehiculo_precios',{vehiculo_id:v.id,precio:nuevoPrecio,nota:motivo});
+  if(!v.historialPrecios) v.historialPrecios=[];
+  v.historialPrecios.push({precio:nuevoPrecio,fecha:new Date().toISOString(),nota:motivo});
+  v.precio=nuevoPrecio;
+  ocultarCargando();
+  document.getElementById('mvNuevoPrecio').value='';
+  document.getElementById('mvMotivoPrecio').value='';
+  abrirModalVehiculo(vehiculoModalId);
+  renderStock();
+}
+
+function generarFichaPublica(id){
+  const v=stock.find(x=>x.id===id);
+  const html=`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${v.marca} ${v.modelo} ${v.anio} — Fernández Autos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#f2f1ed;color:#1a1917;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#fff;border-radius:16px;max-width:480px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;}
+.header{background:linear-gradient(135deg,#111009,#1a1917);padding:28px;color:#fff;}
+.agencia{font-size:0.78rem;font-family:Arial,sans-serif;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.titulo{font-family:'IBM Plex Serif',serif;font-size:1.7rem;line-height:1.2;margin-bottom:6px;}
+.subtitulo{font-size:0.88rem;color:rgba(255,255,255,.6);}
+.precio-box{background:rgba(255,255,255,.1);border-radius:10px;padding:16px 20px;margin-top:18px;display:flex;align-items:center;justify-content:space-between;}
+.precio-label{font-size:0.72rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.precio-valor{font-family:Arial,sans-serif;font-size:1.6rem;font-weight:600;color:#fff;}
+.body{padding:24px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.dato-label{font-size:0.67rem;text-transform:uppercase;letter-spacing:1px;color:#9b9890;margin-bottom:3px;}
+.dato-valor{font-size:0.9rem;font-weight:500;color:#1a1917;}
+.divider{height:1px;background:#e0ddd4;margin:16px 0;}
+.obs{font-size:0.84rem;color:#6b6960;line-height:1.6;}
+.footer{padding:18px 24px;background:#f4f3ee;border-top:1px solid #e0ddd4;display:flex;align-items:center;justify-content:space-between;}
+.footer-text{font-size:0.78rem;color:#9b9890;}
+.footer-contacto{font-size:0.82rem;font-weight:500;color:#1a4a8a;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:600;}
+.b-nuevo{background:#e8eef8;color:#1a4a8a;border:1px solid #c0d0ec;}
+.b-usado{background:#f0efe9;color:#6b6960;border:1px solid #e0ddd4;}
+@media print{body{background:#fff;padding:0;} .card{box-shadow:none;border-radius:0;max-width:100%;}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="agencia">Fernández Autos</div>
+    <div class="titulo">${v.marca} ${v.modelo}</div>
+    <div class="subtitulo">${v.anio} · ${v.carroceria||v.tipo} · <span class="badge b-${v.tipo.toLowerCase()}">${v.tipo==='Nuevo'?'0 km':'Usado'}</span></div>
+    <div class="precio-box">
+      <div>
+        <div class="precio-label">Precio</div>
+        <div class="precio-valor">${fmt(v.precio)}</div>
+      </div>
+      ${v.precioLista&&v.precioLista>v.precio?`<div style="text-align:right;"><div style="font-size:0.72rem;color:rgba(255,255,255,.5);margin-bottom:2px;">Precio anterior</div><div style="font-family:Arial,sans-serif;font-size:0.9rem;text-decoration:line-through;color:rgba(255,255,255,.4);">${fmt(v.precioLista)}</div></div>`:''}
+    </div>
+  </div>
+  <div class="body">
+    <div class="grid">
+      ${v.km?`<div><div class="dato-label">Kilometraje</div><div class="dato-valor">${Number(v.km).toLocaleString('es-AR')} km</div></div>`:''}
+      ${v.transmision?`<div><div class="dato-label">Transmisión</div><div class="dato-valor">${v.transmision}</div></div>`:''}
+      ${v.color?`<div><div class="dato-label">Color</div><div class="dato-valor">${v.color}</div></div>`:''}
+      ${v.dominio?`<div><div class="dato-label">Dominio</div><div class="dato-valor" style="font-family:Arial,sans-serif;">${v.dominio}</div></div>`:''}
+    </div>
+    ${v.obs?`<div class="divider"></div><div class="obs">${v.obs}</div>`:''}
+  </div>
+  <div class="footer">
+    <div class="footer-text">Ficha generada por Fernández Autos</div>
+    <div class="footer-contacto">Consultanos por este vehículo</div>
+  </div>
+</div>
+<script>window.onload=()=>window.print();<\/script>
+</body>
+</html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+}
+function venderDesdeModal(){cerrarModal('modalVehiculo');irAOperar(vehiculoModalId);}
+function irAOperar(id){show('operacion');poblarFormOp();document.getElementById('opVehiculo').value=id;autocompletarPrecio();}
+
+async function guardarVehiculo(){
+  const marca=document.getElementById('vMarca').value.trim(),modelo=document.getElementById('vModelo').value.trim();
+  if(!marca||!modelo){alert('Completá marca y modelo');return;}
+  mostrarCargando('Guardando vehículo...');
+  const precio=parseFloat(document.getElementById('vPrecio').value)||0;
+  const precioLista=parseFloat(document.getElementById('vPrecioLista').value)||0;
+  const nuevo = await sbInsert('vehiculos',{
+    marca,modelo,tipo:document.getElementById('vTipo').value,
+    anio:parseInt(document.getElementById('vAnio').value)||new Date().getFullYear(),
+    dominio:document.getElementById('vDominio').value.trim().toUpperCase(),
+    color:document.getElementById('vColor').value.trim(),
+    precio_lista:precioLista, precio,
+    km:parseFloat(document.getElementById('vKm').value)||0,
+    transmision:document.getElementById('vTransmision').value,
+    carroceria:document.getElementById('vCarroceria').value,
+    ubicacion:document.getElementById('vUbicacion').value,
+    procedencia:document.getElementById('vProcedencia').value,
+    cliente_entrega_id:document.getElementById('vClienteEntrega').value||null,
+    chasis:document.getElementById('vChasis').value.trim(),
+    motor:document.getElementById('vMotor').value.trim(),
+    estado:document.getElementById('vEstado').value,
+    obs:document.getElementById('vObs').value.trim()
+  });
+  if(nuevo){
+    // Registrar precio inicial en historial
+    await sbInsert('vehiculo_precios',{vehiculo_id:nuevo.id,precio,nota:'Precio inicial'});
+    stock.push({id:nuevo.id,marca,modelo,tipo:nuevo.tipo,anio:nuevo.anio,dominio:nuevo.dominio||'',
+      chasis:nuevo.chasis||'',motor:nuevo.motor||'',precio,precioLista,km:nuevo.km||0,
+      transmision:nuevo.transmision||'',carroceria:nuevo.carroceria||'',color:nuevo.color||'',
+      ubicacion:nuevo.ubicacion||'',procedencia:nuevo.procedencia||'Propio',
+      clienteEntregaId:nuevo.cliente_entrega_id,estado:nuevo.estado||'Disponible',obs:nuevo.obs||'',
+      historialPrecios:[{precio,fecha:new Date().toISOString(),nota:'Precio inicial'}]});
+    ['vMarca','vModelo','vAnio','vDominio','vColor','vPrecioLista','vPrecio','vKm','vChasis','vMotor','vObs'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('vCarroceria').value='';document.getElementById('vUbicacion').value='';
+    document.getElementById('vProcedencia').value='';document.getElementById('vTransmision').value='';
+    document.getElementById('vClienteEntrega').value='';
+    const msg=document.getElementById('vMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);
+  }
+  ocultarCargando();
+}
+
+// CLIENTES
+function renderClientes(){
+  const q=(document.getElementById('clientesBuscar')||{value:''}).value.toLowerCase();
+  const est=(document.getElementById('filtroEstadoCliente')||{value:''}).value;
+  const data=clientes.filter(c=>(c.nombre+' '+c.dni).toLowerCase().includes(q)&&(est?c.estado===est:true));
+  const tb=document.getElementById('tbClientes'),em=document.getElementById('tbClientesEmpty');
+  if(!data.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tb.innerHTML=data.map(c=>`<tr>
+    <td><div class="cli-cell"><div class="cli-avatar">${iniciales(c.nombre)}</div><div><div class="cli-name">${c.nombre}</div><div class="cli-sub">${c.email}</div></div></div></td>
+    <td class="mono" style="font-size:0.8rem;">${c.dni}</td><td style="font-size:0.84rem;">${c.tel}</td>
+    <td style="font-size:0.82rem;color:var(--muted);">${c.email}</td><td style="font-size:0.84rem;">${c.interes}</td>
+    <td><span class="badge b-${c.estado.toLowerCase()}">${c.estado}</span></td>
+    <td><button class="btn btn-sm btn-g" onclick="abrirModalCliente(${c.id})">Ver ficha</button></td>
+  </tr>`).join('');
+}
+
+function abrirModalCliente(id){
+  clienteModalId=id;
+  const c=clientes.find(x=>x.id===id);
+  document.getElementById('mcTitle').textContent=c.nombre;
+  const ops=operaciones.filter(o=>o.clienteId===id);
+  document.getElementById('mcContent').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div class="cli-avatar" style="width:44px;height:44px;font-size:15px;">${iniciales(c.nombre)}</div>
+      <div><div style="font-weight:500;font-size:1rem;">${c.nombre}</div><div style="font-size:0.8rem;color:var(--muted);">${c.dni}</div></div>
+      <span class="badge b-${c.estado.toLowerCase()}" style="margin-left:auto;">${c.estado}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:0.85rem;margin-bottom:16px;">
+      ${fila('Teléfono',c.tel||'—')}${fila('Email',c.email||'—')}
+      ${fila('DNI / CUIT',c.dni||'—')}${fila('Dirección',c.dir||'No registrada')}
+      ${fila('Ocupación',c.ocup||'—')}${fila('Estado civil',c.civil||'—')}
+      ${fila('Interés',c.interes||'—')}
+    </div>
+    ${c.civil&&(c.civil==='Casado/a'||c.civil==='Unión convivencial')&&c.conyuge?.nombre?`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-bottom:8px;">Cónyuge / Conviviente</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:0.84rem;">
+        ${fila('Nombre',c.conyuge.nombre)}${fila('DNI',c.conyuge.dni||'—')}${fila('Ocupación',c.conyuge.ocup||'—')}
+      </div>
+    </div>`:''}
+    ${c.notas?`<div style="background:var(--surface2);border-radius:var(--r);padding:10px 12px;font-size:0.83rem;color:var(--muted);margin-bottom:16px;">${c.notas}</div>`:''}
+    ${ops.length?`<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-family:var(--mono);">Operaciones</div>
+    ${ops.map(o=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.83rem;">
+      <span>${o.vehiculo} · ${fmtFecha(o.fecha)}</span>
+      <span class="badge b-${o.estado==='Entregado'?'entregado':'tramite'}">${o.estado}</span></div>`).join('')}`:''}`;
+  document.getElementById('modalCliente').classList.add('open');
+}
+function opDesdeCliente(){cerrarModal('modalCliente');show('operacion');poblarFormOp();document.getElementById('opCliente').value=clienteModalId;}
+
+function toggleConyuge(){
+  const civil=document.getElementById('cCivil').value;
+  const mostrar=civil==='Casado/a'||civil==='Unión convivencial';
+  document.getElementById('conyugeBox').style.display=mostrar?'block':'none';
+}
+
+async function guardarCliente(){
+  const nombre=document.getElementById('cNombre').value.trim();
+  if(!nombre){alert('Ingresá el nombre');return;}
+  mostrarCargando('Guardando cliente...');
+  const nuevo = await sbInsert('clientes',{
+    nombre, dni:document.getElementById('cDni').value.trim(),
+    tel:document.getElementById('cTel').value.trim(), email:document.getElementById('cEmail').value.trim(),
+    dir:document.getElementById('cDir').value.trim(), ocup:document.getElementById('cOcup').value.trim(),
+    civil:document.getElementById('cCivil').value,
+    conyuge:document.getElementById('cCoNombre').value.trim()||null,
+    interes:document.getElementById('cInteres').value.trim(),
+    estado:document.getElementById('cEstado').value, notas:document.getElementById('cNotas').value.trim()
+  });
+  if(nuevo){
+    clientes.push({id:nuevo.id,nombre,dni:nuevo.dni||'',tel:nuevo.tel||'',email:nuevo.email||'',
+      dir:nuevo.dir||'',ocup:nuevo.ocup||'',civil:nuevo.civil||'',
+      conyuge:{nombre:nuevo.conyuge||'',dni:document.getElementById('cCoDni').value.trim(),ocup:document.getElementById('cCoOcup').value.trim()},
+      interes:nuevo.interes||'',estado:nuevo.estado||'Prospecto',notas:nuevo.notas||''});
+    ['cNombre','cDni','cTel','cEmail','cDir','cOcup','cInteres','cNotas','cCoNombre','cCoDni','cCoOcup'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('cCivil').value=''; document.getElementById('cEstado').value='Prospecto';
+    document.getElementById('conyugeBox').style.display='none';
+    const msg=document.getElementById('cMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);
+  }
+  ocultarCargando();
+}
+
+// CLIENTE RÁPIDO
+function abrirModalNuevoCliente(){
+  ['ncNombre','ncDni','ncTel','ncEmail','ncInteres','ncNotas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ncEstado').value='Activo';
+  document.getElementById('modalNuevoCliente').classList.add('open');
+}
+async function guardarClienteRapido(){
+  const nombre=document.getElementById('ncNombre').value.trim();
+  if(!nombre){alert('Ingresá el nombre');return;}
+  mostrarCargando('Guardando cliente...');
+  const nuevo = await sbInsert('clientes',{
+    nombre, dni:document.getElementById('ncDni').value.trim(),
+    tel:document.getElementById('ncTel').value.trim(), email:document.getElementById('ncEmail').value.trim(),
+    interes:document.getElementById('ncInteres').value.trim(),
+    estado:document.getElementById('ncEstado').value, notas:document.getElementById('ncNotas').value.trim()
+  });
+  if(nuevo){
+    const nc={id:nuevo.id,nombre,dni:nuevo.dni||'',tel:nuevo.tel||'',email:nuevo.email||'',
+      dir:'',ocup:'',civil:'',conyuge:{nombre:'',dni:'',ocup:''},
+      interes:nuevo.interes||'',estado:nuevo.estado||'Activo',notas:nuevo.notas||''};
+    clientes.push(nc);
+    cerrarModal('modalNuevoCliente');
+    poblarFormOp();
+    document.getElementById('opCliente').value=nuevo.id;
+  }
+  ocultarCargando();
+}
+
+// OPERACIÓN
+function poblarFormOp(){
+  const vSel=document.getElementById('opVehiculo'),cSel=document.getElementById('opCliente');
+  const pV=vSel.value,pC=cSel.value;
+  vSel.innerHTML='<option value="">Seleccionar vehículo disponible...</option>';
+  stock.filter(v=>v.estado==='Disponible').forEach(v=>{
+    const o=document.createElement('option');o.value=v.id;
+    o.textContent=`${v.marca} ${v.modelo} ${v.anio} · ${v.tipo==='Nuevo'?'0km':'Usado'}${v.dominio?' · '+v.dominio:''}`;
+    vSel.appendChild(o);
+  });
+  cSel.innerHTML='<option value="">Seleccionar cliente...</option>';
+  clientes.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre+(c.dni?' — '+c.dni:'');cSel.appendChild(o);});
+  if(pV)vSel.value=pV;if(pC)cSel.value=pC;
+}
+function autocompletarPrecio(){
+  const v=stock.find(x=>x.id===parseInt(document.getElementById('opVehiculo').value));
+  if(v)document.getElementById('opPrecio').value=v.precio;
+}
+
+function guardarOperacion(){
+  const vidVal=document.getElementById('opVehiculo').value,cidVal=document.getElementById('opCliente').value;
+  if(!vidVal||!cidVal){alert('Seleccioná el vehículo y el cliente');return;}
+  const checkIds=['pagoEfectivo','pagoTransferencia','pagoCheque','pagoCredito','pagoPermuta'];
+  const labels=['Efectivo','Transferencia bancaria','Cheque','Crédito bancario','Permuta de vehículo'];
+  const formas=labels.filter((_,i)=>document.getElementById(checkIds[i]).checked);
+  if(!formas.length){alert('Seleccioná al menos una forma de pago');return;}
+
+  // Validar datos del cliente para gestoría
+  const c=clientes.find(x=>x.id===parseInt(cidVal));
+  const necesitaConyuge=c.civil==='Casado/a'||c.civil==='Unión convivencial';
+  const faltantes=[];
+  if(!c.dni) faltantes.push('DNI / CUIT');
+  if(!c.dir) faltantes.push('Dirección');
+  if(!c.civil) faltantes.push('Estado civil');
+  if(!c.ocup) faltantes.push('Ocupación');
+  if(necesitaConyuge&&!c.conyuge?.nombre) faltantes.push('Nombre del cónyuge / conviviente');
+  if(necesitaConyuge&&!c.conyuge?.dni) faltantes.push('DNI del cónyuge / conviviente');
+
+  if(faltantes.length){
+    abrirModalFichaIncompleta(c, faltantes);
+    return;
+  }
+
+  ejecutarGuardadoOperacion(vidVal, cidVal, formas, c);
+}
+
+let fichaIncompletaClienteId=null, fichaIncompletaVidVal=null, fichaIncompletaFormas=null, fichaIncompletaCidVal=null;
+
+function abrirModalFichaIncompleta(c, faltantes){
+  fichaIncompletaClienteId=c.id;
+  fichaIncompletaCidVal=String(c.id);
+  fichaIncompletaVidVal=document.getElementById('opVehiculo').value;
+  fichaIncompletaFormas=(() => {
+    const checkIds=['pagoEfectivo','pagoTransferencia','pagoCheque','pagoCredito','pagoPermuta'];
+    const labels=['Efectivo','Transferencia bancaria','Cheque','Crédito bancario','Permuta de vehículo'];
+    return labels.filter((_,i)=>document.getElementById(checkIds[i]).checked);
+  })();
+  const necesitaConyuge=c.civil==='Casado/a'||c.civil==='Unión convivencial';
+
+  document.getElementById('fichaIncompletaFaltantes').innerHTML=`
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Campos faltantes:</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      ${faltantes.map(f=>`<span style="background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);font-size:0.76rem;padding:3px 10px;border-radius:20px;">⚠ ${f}</span>`).join('')}
+    </div>`;
+
+  document.getElementById('fichaIncompletaForm').innerHTML=`
+    ${!c.dni?`<div class="fgi"><label>DNI / CUIT *</label><input type="text" id="fi_dni" placeholder="XX-XXXXXXXX-X" value="${c.dni||''}"></div>`:''}
+    ${!c.dir?`<div class="fgi"><label>Dirección *</label><input type="text" id="fi_dir" placeholder="Calle, número, ciudad" value="${c.dir||''}"></div>`:''}
+    ${!c.ocup?`<div class="fgi"><label>Ocupación *</label><input type="text" id="fi_ocup" placeholder="Empleado, comerciante..." value="${c.ocup||''}"></div>`:''}
+    ${!c.civil?`<div class="fgi"><label>Estado civil *</label>
+      <select id="fi_civil" onchange="toggleFiConyuge()">
+        <option value="">— Seleccionar —</option>
+        <option value="Soltero/a">Soltero/a</option>
+        <option value="Casado/a">Casado/a</option>
+        <option value="Divorciado/a">Divorciado/a</option>
+        <option value="Viudo/a">Viudo/a</option>
+        <option value="Unión convivencial">Unión convivencial</option>
+      </select></div>`:''}
+    <div class="fgi full" id="fiConyugeBox" style="display:${necesitaConyuge?'block':'none'};">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-bottom:12px;">Datos del cónyuge / conviviente</div>
+        <div class="fg" style="gap:10px;">
+          <div class="fgi"><label>Nombre y apellido *</label><input type="text" id="fi_coNombre" value="${c.conyuge?.nombre||''}"></div>
+          <div class="fgi"><label>DNI *</label><input type="text" id="fi_coDni" value="${c.conyuge?.dni||''}"></div>
+          <div class="fgi full"><label>Ocupación</label><input type="text" id="fi_coOcup" value="${c.conyuge?.ocup||''}"></div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('modalFichaIncompleta').classList.add('open');
+}
+
+function toggleFiConyuge(){
+  const civil=document.getElementById('fi_civil')?.value||'';
+  const mostrar=civil==='Casado/a'||civil==='Unión convivencial';
+  const box=document.getElementById('fiConyugeBox');
+  if(box) box.style.display=mostrar?'block':'none';
+}
+
+function guardarFichaYOperar(){
+  const c=clientes.find(x=>x.id===fichaIncompletaClienteId);
+  if(document.getElementById('fi_dni')) c.dni=document.getElementById('fi_dni').value.trim();
+  if(document.getElementById('fi_dir')) c.dir=document.getElementById('fi_dir').value.trim();
+  if(document.getElementById('fi_ocup')) c.ocup=document.getElementById('fi_ocup').value.trim();
+  if(document.getElementById('fi_civil')) c.civil=document.getElementById('fi_civil').value;
+  const necesitaConyuge=c.civil==='Casado/a'||c.civil==='Unión convivencial';
+  if(necesitaConyuge){
+    if(!c.conyuge) c.conyuge={};
+    if(document.getElementById('fi_coNombre')) c.conyuge.nombre=document.getElementById('fi_coNombre').value.trim();
+    if(document.getElementById('fi_coDni')) c.conyuge.dni=document.getElementById('fi_coDni').value.trim();
+    if(document.getElementById('fi_coOcup')) c.conyuge.ocup=document.getElementById('fi_coOcup').value.trim();
+  }
+  const faltantes=[];
+  if(!c.dni) faltantes.push('DNI / CUIT');
+  if(!c.dir) faltantes.push('Dirección');
+  if(!c.civil) faltantes.push('Estado civil');
+  if(!c.ocup) faltantes.push('Ocupación');
+  if(necesitaConyuge&&!c.conyuge?.nombre) faltantes.push('Nombre del cónyuge');
+  if(necesitaConyuge&&!c.conyuge?.dni) faltantes.push('DNI del cónyuge');
+  if(faltantes.length){
+    document.getElementById('fichaIncompletaFaltantes').innerHTML=`
+      <div style="font-size:0.8rem;color:var(--red);margin-bottom:10px;font-weight:500;">Completá todos los campos obligatorios:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${faltantes.map(f=>`<span style="background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);font-size:0.76rem;padding:3px 10px;border-radius:20px;">⚠ ${f}</span>`).join('')}
+      </div>`;
+    return;
+  }
+  cerrarModal('modalFichaIncompleta');
+  ejecutarGuardadoOperacion(fichaIncompletaVidVal, fichaIncompletaCidVal, fichaIncompletaFormas, c);
+}
+
+async function ejecutarGuardadoOperacion(vidVal, cidVal, formas, c){
+  const v=stock.find(x=>x.id===parseInt(vidVal));
+  const precioVenta=parseFloat(document.getElementById('opPrecio').value)||v.precio;
+  const descuento=v.precioLista&&v.precioLista>precioVenta?v.precioLista-precioVenta:0;
+  const comision=Math.round(precioVenta*0.01);
+  const credito=document.getElementById('pagoCredito').checked?{banco:document.getElementById('credBanco').value,moneda:document.getElementById('credMoneda').value,monto:parseFloat(document.getElementById('credMonto').value)||0,tasa:parseFloat(document.getElementById('credTasa').value)||0,cuotas:parseInt(document.getElementById('credCuotas').value)||0,valorCuota:parseFloat(document.getElementById('credValorCuota').value)||0,obs:document.getElementById('credObs').value}:null;
+  const permuta=document.getElementById('pagoPermuta').checked?{marca:document.getElementById('prmMarca').value,modelo:document.getElementById('prmModelo').value,anio:document.getElementById('prmAnio').value,dominio:document.getElementById('prmDominio').value.toUpperCase(),km:document.getElementById('prmKm').value,valor:parseFloat(document.getElementById('prmValor').value)||0,moneda:document.getElementById('prmMoneda').value,chasis:document.getElementById('prmChasis').value,motor:document.getElementById('prmMotor').value,obs:document.getElementById('prmObs').value}:null;
+  const cheque=document.getElementById('pagoCheque').checked?{monto:parseFloat(document.getElementById('chqMonto').value)||0,moneda:document.getElementById('chqMoneda').value,fecha:document.getElementById('chqFecha').value,banco:document.getElementById('chqBanco').value,numero:document.getElementById('chqNumero').value,tipo:document.getElementById('chqTipo').value}:null;
+
+  mostrarCargando('Guardando operación...');
+
+  // Buscar vendedor_id
+  const vends = await sbGet('vendedores','select=id&limit=1');
+  const vendedorId = vends.length ? vends[0].id : null;
+
+  const nuevaOp = await sbInsert('operaciones',{
+    fecha:hoy(), vehiculo_id:v.id,
+    vehiculo_texto:`${v.marca} ${v.modelo} ${v.anio}${v.dominio?' · '+v.dominio:''}`,
+    cliente_id:c.id, cliente_nombre:c.nombre, vendedor_id:vendedorId,
+    moneda:opMoneda, precio:precioVenta, precio_lista:v.precioLista||0,
+    descuento, comision,
+    senia:parseFloat(document.getElementById('opSenia').value)||0,
+    moneda_senia:document.getElementById('opMonedaSenia').value,
+    formas_pago:formas,
+    valor_transf:parseFloat(document.getElementById('opValorTransf').value)||0,
+    moneda_transf:document.getElementById('opMonedaTransf').value,
+    transf_obs:document.getElementById('opTransfObs').value,
+    credito_banco:credito?.banco||null, credito_monto:credito?.monto||null,
+    credito_cuotas:credito?.cuotas||null, credito_cuota_valor:credito?.valorCuota||null,
+    credito_tasa:credito?.tasa||null, credito_obs:credito?.obs||null,
+    permuta_marca:permuta?.marca||null, permuta_modelo:permuta?.modelo||null,
+    permuta_anio:permuta?.anio||null, permuta_km:permuta?.km||null,
+    permuta_valor:permuta?.valor||null, permuta_moneda:permuta?.moneda||null,
+    cheque_monto:cheque?.monto||null, cheque_moneda:cheque?.moneda||null,
+    cheque_fecha:cheque?.fecha||null, cheque_tipo:cheque?.tipo||null,
+    fecha_entrega:document.getElementById('opFecha').value||null,
+    notas:document.getElementById('opNotas').value.trim(),
+    estado:'Pendiente'
+  });
+
+  if(nuevaOp){
+    const textoHistorial=`Operación registrada. ${v.marca} ${v.modelo} ${v.anio} — ${c.nombre}. ${formas.join(', ')}.`;
+    await sbInsert('operacion_historial',{operacion_id:nuevaOp.id,tipo:'vendedor',sector:'Vendedor',texto:textoHistorial});
+    // Actualizar estado del vehículo
+    await sbUpdate('vehiculos',v.id,{estado:'Reservado'});
+    v.estado='Reservado';
+
+    operaciones.unshift({id:nuevaOp.id,fecha:hoy(),vehiculoId:v.id,vehiculo:nuevaOp.vehiculo_texto,clienteId:c.id,cliente:c.nombre,moneda:opMoneda,precio:precioVenta,precioLista:v.precioLista||0,descuento,comision,senia:nuevaOp.senia||0,monedaSenia:nuevaOp.moneda_senia,formasPago:formas,valorTransf:nuevaOp.valor_transf||0,monedaTransf:nuevaOp.moneda_transf,transfObs:nuevaOp.transf_obs||'',credito,permuta,cheque,fechaEntrega:nuevaOp.fecha_entrega,notas:nuevaOp.notas||'',estado:'Pendiente',vendedor:VENDEDOR.nombre,historial:[{tipo:'vendedor',sector:'Vendedor',texto:textoHistorial,fecha:new Date().toISOString()}]});
+    await enviarNotifNuevaOperacion(nuevaOp, v, c, formas);
+    quitarProspectoDelKanban(c.id);
+    const msg=document.getElementById('opMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',3500);
+    limpiarOperacion(true);
+  }
+  ocultarCargando();
+}
+
+function limpiarOperacion(mantenerMsg=false){
+  ['opVehiculo','opCliente','opPrecio','opSenia','opValorTransf','opTransfObs','opNotas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('opFecha').value=hoy();
+  ['pagoEfectivo','pagoTransferencia','pagoCheque','pagoCredito','pagoPermuta'].forEach(id=>document.getElementById(id).checked=false);
+  ['panelEfectivo','panelTransferencia','panelCheque','panelCredito','panelPermuta'].forEach(id=>document.getElementById(id).classList.remove('visible'));
+  ['efMonto','trfMonto','trfObs','chqMonto','chqBanco','chqNumero','credBanco','credMonto','credTasa','credCuotas','credValorCuota','credObs',
+   'prmMarca','prmModelo','prmAnio','prmDominio','prmKm','prmValor','prmChasis','prmMotor','prmObs'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  setMonedaOp('ARS');
+  if(!mantenerMsg)document.getElementById('opMsg').style.display='none';
+}
+
+// MIS VENTAS
+function renderMisVentas(){
+  const mis=operaciones.filter(o=>o.vendedor===VENDEDOR.nombre);
+  const tARS=mis.filter(o=>o.moneda==='ARS').reduce((a,o)=>a+o.precio,0);
+  const tUSD=mis.filter(o=>o.moneda==='USD').reduce((a,o)=>a+o.precio,0);
+  const comisionTotal=mis.reduce((a,o)=>a+(o.comision||Math.round(o.precio*0.01)),0);
+  const ent=mis.filter(o=>o.estado==='Entregado').length;
+  document.getElementById('misVentasStats').innerHTML=`
+    <div class="card"><div class="card-label">Operaciones del mes</div><div class="card-value neu">${mis.length}</div></div>
+    <div class="card"><div class="card-label">Total en ARS</div><div class="card-value pos" style="font-size:1.1rem;">${fmt(tARS)}</div></div>
+    ${tUSD>0?`<div class="card"><div class="card-label">Total en USD</div><div class="card-value amb" style="font-size:1.1rem;">${fmt(tUSD,'USD')}</div></div>`:''}
+    <div class="card"><div class="card-label">Mi comisión (1%)</div><div class="card-value pos" style="font-size:1.1rem;">${fmt(comisionTotal)}</div></div>
+    <div class="card"><div class="card-label">Entregados</div><div class="card-value pos">${ent}</div></div>
+    <div class="card"><div class="card-label">En trámite</div><div class="card-value amb">${mis.length-ent}</div></div>`;
+  const tb=document.getElementById('tbMisVentas'),em=document.getElementById('tbMisVentasEmpty');
+  if(!mis.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tb.innerHTML=mis.map(o=>`<tr>
+    <td style="font-size:0.82rem;color:var(--muted);">${fmtFecha(o.fecha)}</td>
+    <td><strong style="font-size:0.88rem;">${o.vehiculo}</strong></td>
+    <td style="font-size:0.84rem;">${o.cliente}</td>
+    <td style="font-size:0.8rem;">${o.formasPago.join(', ')}</td>
+    <td class="mono" style="font-size:0.82rem;">${o.senia>0?fmt(o.senia,o.monedaSenia):'—'}</td>
+    <td style="text-align:right;" class="mono">${fmt(o.precio,o.moneda)}</td>
+    <td><span class="badge b-${o.moneda==='ARS'?'ars':'usd'}">${o.moneda}</span></td>
+    <td><span class="badge b-${o.estado==='Entregado'?'entregado':o.estado==='En trámite'?'tramite':'pendiente'}">${o.estado}</span></td>
+    <td><button class="btn btn-xs btn-g" onclick="abrirModalOp(${o.id})">Detalle</button></td>
+  </tr>`).join('');
+}
+
+let opDetalleId=null;
+
+const TL_CONFIG={
+  vendedor:{icon:'👤',bg:'var(--accent-bg)',border:'#b8ccec',color:'var(--accent)',label:'Vendedor'},
+  caja:    {icon:'💰',bg:'var(--green-bg)', border:'var(--green-border)',color:'var(--green)',label:'Caja'},
+  gestoria:{icon:'📋',bg:'var(--amber-bg)', border:'var(--amber-border)',color:'var(--amber)',label:'Gestoría'},
+  sistema: {icon:'⚙', bg:'var(--surface2)', border:'var(--border)',      color:'var(--muted)',label:'Sistema'},
+};
+
+function abrirModalOp(id){
+  opDetalleId=id;
+  const o=operaciones.find(x=>x.id===id);
+  document.getElementById('moTitle').textContent=`${o.vehiculo}`;
+  document.getElementById('moEstadoBadge').innerHTML=`<span class="badge b-${o.estado==='Entregado'?'entregado':o.estado==='En trámite'?'tramite':'pendiente'}">${o.estado}</span>`;
+
+  let ext='';
+  if(o.credito) ext+=`<div style="background:var(--surface2);border-radius:var(--r);padding:10px 12px;margin-top:8px;">
+    <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);margin-bottom:6px;">Crédito bancario</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:0.82rem;">
+      ${fila('Banco',o.credito.banco||'—')}${fila('Monto',fmt(o.credito.monto,o.credito.moneda))}
+      ${fila('Cuotas',o.credito.cuotas)}${fila('Valor cuota',fmt(o.credito.valorCuota,o.credito.moneda))}
+      ${fila('Tasa',o.credito.tasa?o.credito.tasa+'%':'—')}
+    </div></div>`;
+  if(o.permuta) ext+=`<div style="background:var(--surface2);border-radius:var(--r);padding:10px 12px;margin-top:8px;">
+    <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);margin-bottom:6px;">Permuta</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:0.82rem;">
+      ${fila('Vehículo',`${o.permuta.marca} ${o.permuta.modelo} ${o.permuta.anio}`)}
+      ${fila('Dominio',o.permuta.dominio||'—')}
+      ${fila('Km',o.permuta.km?Number(o.permuta.km).toLocaleString('es-AR')+' km':'—')}
+      ${fila('Valor pactado',fmt(o.permuta.valor,o.permuta.moneda))}
+    </div></div>`;
+  if(o.cheque) ext+=`<div style="background:var(--surface2);border-radius:var(--r);padding:10px 12px;margin-top:8px;">
+    <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);margin-bottom:6px;">Cheque</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:0.82rem;">
+      ${fila('Monto',fmt(o.cheque.monto,o.cheque.moneda))}${fila('Banco',o.cheque.banco||'—')}
+      ${fila('N°',o.cheque.numero||'—')}${fila('Fecha',fmtFecha(o.cheque.fecha))}
+    </div></div>`;
+
+  document.getElementById('moContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;">
+      ${fila('Fecha',fmtFecha(o.fecha))}${fila('Cliente',o.cliente)}
+      ${fila('Precio',`<span class="mono">${fmt(o.precio,o.moneda)}</span> <span class="badge b-${o.moneda==='ARS'?'ars':'usd'}">${o.moneda}</span>`)}
+      ${o.descuento>0?fila('Descuento',`<span class="mono" style="color:var(--red);">${fmt(o.descuento,o.moneda)}</span>`):''}
+      ${fila('Comisión (1%)',`<span class="mono" style="color:var(--green);">${fmt(o.comision||Math.round(o.precio*0.01),o.moneda)}</span>`)}
+      ${fila('Seña',o.senia>0?`<span class="mono">${fmt(o.senia,o.monedaSenia)}</span>`:'-')}
+      ${fila('Formas de pago',o.formasPago.join(', '))}
+      ${fila('Entrega est.',fmtFecha(o.fechaEntrega))}
+    </div>
+    <div style="margin-top:10px;background:#f0f4fb;border:1px solid #b8ccec;border-radius:var(--r);padding:9px 12px;">
+      <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);margin-bottom:4px;">💳 Valor de transferencia</div>
+      <span class="mono" style="font-size:0.86rem;">${fmt(o.valorTransf,o.monedaTransf)}</span>
+      <span class="badge b-${o.monedaTransf==='ARS'?'ars':'usd'}" style="margin-left:4px;">${o.monedaTransf}</span>
+      ${o.transfObs?`<div style="font-size:0.78rem;color:var(--muted);margin-top:3px;">${o.transfObs}</div>`:''}
+    </div>
+    ${ext}
+    ${o.notas?`<div style="margin-top:8px;font-size:0.83rem;color:var(--muted);background:var(--surface2);border-radius:var(--r);padding:8px 10px;">${o.notas}</div>`:''}`;
+
+  renderTimelineOp(o);
+  document.getElementById('moNuevaNota').value='';
+  document.getElementById('modalOp').classList.add('open');
+}
+
+function renderTimelineOp(o){
+  const sorted=[...(o.historial||[])].reverse();
+  document.getElementById('moTimeline').innerHTML=sorted.map(h=>{
+    const cfg=TL_CONFIG[h.tipo]||TL_CONFIG.sistema;
+    return`<div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;">
+      <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;
+        background:${cfg.bg};border:1px solid ${cfg.border};">${cfg.icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+          <span style="font-size:0.72rem;font-weight:600;font-family:var(--mono);color:${cfg.color};">${cfg.label}</span>
+        </div>
+        <div style="font-size:0.84rem;color:${h.tipo==='sistema'?'var(--muted)':'var(--text)'};${h.tipo==='sistema'?'font-style:italic;':''}">${h.texto}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${fmtDatetime(h.fecha)}</div>
+      </div>
+    </div>`;
+  }).join('')||'<div style="color:var(--muted);font-size:0.84rem;">Sin actividad registrada.</div>';
+}
+
+async function agregarNotaOperacion(){
+  const texto=document.getElementById('moNuevaNota').value.trim();
+  if(!texto)return;
+  const o=operaciones.find(x=>x.id===opDetalleId);
+  if(!o.historial) o.historial=[];
+  const h={tipo:'vendedor',sector:'Vendedor',texto,fecha:new Date().toISOString()};
+  o.historial.push(h);
+  await sbInsert('operacion_historial',{operacion_id:o.id,tipo:'vendedor',sector:'Vendedor',texto});
+  document.getElementById('moNuevaNota').value='';
+  renderTimelineOp(o);
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  document.getElementById('opFecha').value=hoy();
+  await cargarTodo();
+  document.getElementById('headerAvatar').textContent=VENDEDOR.iniciales;
+  document.getElementById('headerNombre').textContent=VENDEDOR.nombre;
+  renderDashboard();
+});
+document.querySelectorAll('.moverlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// ═══ NOTIFICACIONES (envío) ═══════════════════════════════
+async function enviarNotificacion(para, tipo, titulo, mensaje, operacionId) {
+  try {
+    await sbInsert('notificaciones', {
+      para:para, tipo:tipo, titulo:titulo, mensaje:mensaje,
+      operacion_id:operacionId||null, leida:false
+    });
+  } catch(e){ console.error('Error notificacion:', e); }
+}
+
+async function enviarNotifNuevaOperacion(op, v, c, formas) {
+  try {
+    var precio = fmt(op.precio, op.moneda);
+    var senia  = op.senia>0 ? ' · Seña: '+fmt(op.senia,op.monedaSenia) : '';
+    var msg    = v.marca+' '+v.modelo+' '+v.anio+' — '+c.nombre+'. '+formas.join(', ')+'. '+precio+senia;
+    await enviarNotificacion('caja',    'nueva_operacion','🚗 Nueva operación registrada',msg,op.id);
+    await enviarNotificacion('gestoria','nueva_operacion','🚗 Nueva operación registrada',msg,op.id);
+    await enviarNotificacion('admin',   'nueva_operacion','🚗 Nueva operación registrada',msg,op.id);
+  } catch(e){ console.error('Error enviarNotif:', e); }
+}
+
+</script>
+</body>
+</html>
