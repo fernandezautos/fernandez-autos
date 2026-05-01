@@ -1982,7 +1982,7 @@ async function cargarMovPendientes() {
         '</div>' +
         (p.obs ? '<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;font-style:italic;">' + p.obs + '</div>' : '') +
       '</div>' +
-      '<button onclick="abrirProcesarPendiente('+p.id+',\''+encodeURIComponent(p.concepto)+'\','+( parseFloat(p.monto)||0)+',\''+( p.moneda||'ARS')+'\','+(esCompra?'true':'false')+')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Procesar</button>' +
+      '<button onclick="abrirProcesarPendiente('+p.id+',\''+encodeURIComponent(p.concepto)+'\','+( parseFloat(p.monto)||0)+',\''+( p.moneda||'ARS')+'\','+(esCompra?'true':'false')+','+(p.referencia_id||0)+','+(parseFloat(p.precio_total)||0)+')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Procesar</button>' +
     '</div>';
   }).join('');
 }
