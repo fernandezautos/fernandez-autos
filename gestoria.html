@@ -203,11 +203,12 @@ select.filter:focus{border-color:var(--accent)}
 .hidden{display:none!important}
 @media(max-width:700px){.fr{grid-template-columns:1fr}.legajos-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="topbar">
-  <div><img src="https://i.imgur.com/6cMQaeJ.png" style="height:32px;object-fit:contain;" alt="FA"></div>
+  <div><span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.15rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span></div>
   <div class="tb-search-wrap">
     <span class="tb-search-icon">🔍</span>
     <input type="text" id="busqGlobal" placeholder="Buscar dominio, cliente..." autocomplete="off">
@@ -1265,7 +1266,10 @@ function abrirNotifs(){document.getElementById("modalNotifs").style.display="fle
 function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
 document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
 setInterval(cargarNotifs,30000);
-cargarDatos().then(function(){cargarNotifs();});
+cargarDatos().then(function(){
+  // Pequeño delay para asegurar que la sesión esté cargada
+  setTimeout(function(){ cargarNotifs(); }, 500);
+});
 </script>
 
 </body>
