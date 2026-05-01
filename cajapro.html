@@ -2023,11 +2023,23 @@ async function confirmarMovPendiente() {
 
   // Si hay fecha de agenda, crear ítem para el pago total
   if(fechaAgenda) {
+    let montoSaldo = 0;
+    // Buscar la orden de compra para calcular el saldo (precio - seña)
+    try {
+      const mpData = await sbGet('movimientos_pendientes','select=referencia_id,referencia_tipo&id=eq.'+p.id);
+      if(mpData && mpData.length && mpData[0].referencia_tipo === 'orden_compra' && mpData[0].referencia_id) {
+        const orden = await sbGet('ordenes_compra','select=precio,senia&id=eq.'+mpData[0].referencia_id);
+        if(orden && orden.length) {
+          montoSaldo = parseFloat(orden[0].precio||0) - parseFloat(orden[0].senia||0);
+        }
+      }
+    } catch(e) { console.error(e); }
+
     await sbInsert('agenda',{
       tipo: 'pago',
       cliente: p.concepto,
       fecha: fechaAgenda,
-      monto: null,
+      monto: montoSaldo > 0 ? montoSaldo : monto,
       moneda,
       obs: 'Pago total coordinado desde movimientos pendientes',
       estado: 'pendiente'
