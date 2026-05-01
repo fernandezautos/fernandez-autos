@@ -2525,9 +2525,28 @@ async function guardarOrdenCompra() {
         estado:'pendiente', cargado_por:vendedorNombre, cargado_por_rol:'admin',
         requiere_aprobacion:false, aprobacion_estado:'directa', obs
       });
-      const msgCaja = vTexto+' — Compra a '+cliente+'. '+fmt2(precio,moneda)+(formaPago==='Sena + Saldo'?' (Sena: '+fmt2(senia,moneda)+')':'')+'. Preparar pago.';
+      // Crear movimiento pendiente en caja
+      if(senia > 0) {
+        await sbInsert('movimientos_pendientes',{
+          tipo:'pago_senia',
+          concepto:'Seña de compra — '+vTexto+' (vendedor: '+cliente+')',
+          monto:senia, moneda:document.getElementById('ocMonedaSenia').value,
+          solicitado_por:vendedorNombre,
+          referencia_tipo:'orden_compra', estado:'pendiente',
+          obs:'Pago total: '+fmt2(precio,moneda)
+        });
+      } else {
+        await sbInsert('movimientos_pendientes',{
+          tipo:'pago_total',
+          concepto:'Pago total de compra — '+vTexto+' (vendedor: '+cliente+')',
+          monto:precio, moneda,
+          solicitado_por:vendedorNombre,
+          referencia_tipo:'orden_compra', estado:'pendiente'
+        });
+      }
+      const msgCaja = vTexto+' — Nueva tarea en movimientos pendientes.';
       const msgGest = vTexto+' — Auto ingresando por compra. Asignar legajo y comenzar documentacion.';
-      await enviarNotificacion('caja','orden_compra','🛒 Nueva orden de compra',msgCaja,null);
+      await enviarNotificacion('caja','orden_compra','🛒 Nueva tarea en movimientos pendientes',msgCaja,null);
       await enviarNotificacion('gestoria','orden_compra','🛒 Auto a ingresar — asignar legajo',msgGest,null);
       stock.push({id:nuevoAuto.id,marca,modelo,anio,dominio,color,
         precio,moneda,estado:'A ingresar',subEstado:'Pendiente peritaje',procedencia:'Propio',obs,historialPrecios:[]});

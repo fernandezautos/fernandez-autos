@@ -2078,10 +2078,32 @@ async function responderPropuestaCompra(decision) {
         method:'PATCH', headers:sbH, body:JSON.stringify({vehiculo_id:nuevoAuto.id})
       });
     }
+    // Crear movimiento pendiente en caja
+    const senia = parseFloat(p.senia||0);
+    if(senia > 0) {
+      await sbInsert('movimientos_pendientes',{
+        tipo:'pago_senia',
+        concepto:'Seña de compra — '+p.vehiculo_texto+' (vendedor: '+p.cliente_nombre+')',
+        monto:senia, moneda:p.moneda_senia||p.moneda,
+        solicitado_por:'Admin',
+        referencia_id:p.id, referencia_tipo:'orden_compra',
+        estado:'pendiente',
+        obs:'Propuesta aprobada por admin. Pago total: '+fmt2(p.precio,p.moneda)
+      });
+    } else {
+      await sbInsert('movimientos_pendientes',{
+        tipo:'pago_total',
+        concepto:'Pago total de compra — '+p.vehiculo_texto+' (vendedor: '+p.cliente_nombre+')',
+        monto:p.precio, moneda:p.moneda,
+        solicitado_por:'Admin',
+        referencia_id:p.id, referencia_tipo:'orden_compra',
+        estado:'pendiente'
+      });
+    }
     // Notificar a caja y gestoría
-    const msgCaja = p.vehiculo_texto+' — Compra aprobada. Vendedor: '+p.cliente_nombre+'. Precio: '+fmt2(p.precio,p.moneda)+'. Preparar pago.';
+    const msgCaja = p.vehiculo_texto+' — Compra aprobada. Revisar movimientos pendientes.';
     const msgGest = p.vehiculo_texto+' — Auto ingresando por compra aprobada. Asignar legajo.';
-    await enviarNotificacion('caja','orden_compra','🛒 Compra aprobada — preparar pago',msgCaja,null);
+    await enviarNotificacion('caja','orden_compra','🛒 Nueva tarea en movimientos pendientes',msgCaja,null);
     await enviarNotificacion('gestoria','orden_compra','🛒 Auto a ingresar — asignar legajo',msgGest,null);
   }
 
