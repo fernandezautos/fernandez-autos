@@ -1939,7 +1939,7 @@ async function marcarTodasLeidas() {
 function abrirNotifs(){ document.getElementById('modalNotifs').style.display='flex'; cargarNotifs(); }
 function cerrarNotifs(){ document.getElementById('modalNotifs').style.display='none'; }
 document.addEventListener('click', function(e){ var m=document.getElementById('modalNotifs'); if(m&&e.target===m) cerrarNotifs(); });
-setInterval(cargarNotifs, 30000);
+setInterval(cargarNotifs,10000);
 
 init();
 </script>

@@ -1265,7 +1265,7 @@ async function marcarTodasLeidas(){await fetch(SB_URL+"/rest/v1/notificaciones?p
 function abrirNotifs(){document.getElementById("modalNotifs").style.display="flex";cargarNotifs();}
 function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
 document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
-setInterval(cargarNotifs,30000);
+setInterval(cargarNotifs,10000);
 cargarDatos().then(function(){
   // Pequeño delay para asegurar que la sesión esté cargada
   setTimeout(function(){ cargarNotifs(); }, 500);
