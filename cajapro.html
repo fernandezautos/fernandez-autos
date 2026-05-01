@@ -135,33 +135,47 @@ tbody td{padding:11px 14px;font-size:0.85rem;}
     <h2 style="font-family:Arial, sans-serif;font-size:1.5rem;">Dashboard</h2>
     <div style="font-size:0.82rem;color:var(--muted)" id="dashFecha"></div>
   </div>
-  <div class="cards" id="dashCards"></div>
-  <!-- Cuotas vencidas -->
-  <div id="dashCuotasVencWrap" style="display:none;margin-bottom:20px;">
-    <div class="fc" style="margin:0;border-left:3px solid var(--eg);">
-      <div class="fc-title" style="font-size:1rem;margin-bottom:12px;color:var(--eg);">🚨 Cuotas de financiación vencidas</div>
-      <div id="dashCuotasVenc"></div>
+
+  <!-- Pestañas del dashboard -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0;">
+    <button id="dtab-resumen" onclick="switchDashTab('resumen')" style="padding:8px 18px;border:none;background:none;font-family:Arial,sans-serif;font-size:0.88rem;font-weight:600;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;cursor:pointer;">Resumen</button>
+    <button id="dtab-operaciones" onclick="switchDashTab('operaciones')" style="padding:8px 18px;border:none;background:none;font-family:Arial,sans-serif;font-size:0.88rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">Operaciones en curso <span id="dtab-ops-count" style="background:#e53935;color:#fff;border-radius:20px;padding:1px 7px;font-size:0.72rem;margin-left:4px;display:none;"></span></button>
+  </div>
+
+  <!-- Tab: Resumen -->
+  <div id="dtab-content-resumen">
+    <div class="cards" id="dashCards"></div>
+    <div id="dashCuotasVencWrap" style="display:none;margin-bottom:20px;">
+      <div class="fc" style="margin:0;border-left:3px solid var(--eg);">
+        <div class="fc-title" style="font-size:1rem;margin-bottom:12px;color:var(--eg);">🚨 Cuotas de financiación vencidas</div>
+        <div id="dashCuotasVenc"></div>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:20px;">
+      <div class="fc" style="margin:0">
+        <div class="fc-title" style="font-size:1rem;margin-bottom:12px;">🔔 Cobros próximos</div>
+        <div id="dashCobros"><div class="empty">Sin cobros pendientes</div></div>
+      </div>
+      <div class="fc" style="margin:0">
+        <div class="fc-title" style="font-size:1rem;margin-bottom:12px;">⚠️ Pagos próximos</div>
+        <div id="dashPagos"><div class="empty">Sin pagos pendientes</div></div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-title">Últimos movimientos</div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Moneda</th><th>Concepto</th><th>Cliente/Prov</th><th style="text-align:right">Monto</th></tr></thead>
+        <tbody id="dashMovs"></tbody>
+      </table></div>
+      <div id="dashMovsEmpty" class="empty">Sin movimientos aún</div>
     </div>
   </div>
-  <!-- Alertas -->
-  <div class="fg" style="margin-bottom:20px;">
-    <div class="fc" style="margin:0">
-      <div class="fc-title" style="font-size:1rem;margin-bottom:12px;">🔔 Cobros próximos</div>
-      <div id="dashCobros"><div class="empty">Sin cobros pendientes</div></div>
-    </div>
-    <div class="fc" style="margin:0">
-      <div class="fc-title" style="font-size:1rem;margin-bottom:12px;">⚠️ Pagos próximos</div>
-      <div id="dashPagos"><div class="empty">Sin pagos pendientes</div></div>
-    </div>
+
+  <!-- Tab: Operaciones en curso -->
+  <div id="dtab-content-operaciones" style="display:none;">
+    <div id="opsEnCursoLista"></div>
   </div>
-  <div class="fc">
-    <div class="fc-title">Últimos movimientos</div>
-    <div class="tw"><table>
-      <thead><tr><th>Fecha</th><th>Tipo</th><th>Moneda</th><th>Concepto</th><th>Cliente/Prov</th><th style="text-align:right">Monto</th></tr></thead>
-      <tbody id="dashMovs"></tbody>
-    </table></div>
-    <div id="dashMovsEmpty" class="empty">Sin movimientos aún</div>
-  </div>
+
 </section>
 
 <!-- MOVIMIENTOS -->
@@ -835,7 +849,107 @@ function seleccionarClienteMov(nombre, id) {
   document.getElementById('mClienteDrop').style.display = 'none';
 }
 
-async function guardarMov(){
+// ═══ PESTAÑAS DASHBOARD ═══════════════════════════════════
+function switchDashTab(tab) {
+  ['resumen','operaciones'].forEach(t => {
+    document.getElementById('dtab-content-'+t).style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById('dtab-'+t);
+    btn.style.color = t===tab ? 'var(--accent)' : 'var(--muted)';
+    btn.style.borderBottomColor = t===tab ? 'var(--accent)' : 'transparent';
+  });
+  if(tab==='operaciones') renderOpsEnCurso();
+}
+
+async function renderOpsEnCurso() {
+  const cont = document.getElementById('opsEnCursoLista');
+  if(!cont) return;
+  cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;">Cargando...</div>';
+
+  // Cargar operaciones activas desde Supabase
+  const raw = await sbGet('operaciones', 'select=*&estado=neq.Entregado&order=created_at.desc');
+  const ops = raw || [];
+
+  // Actualizar badge
+  const badge = document.getElementById('dtab-ops-count');
+  if(badge) {
+    if(ops.length > 0) { badge.style.display='inline'; badge.textContent=ops.length; }
+    else { badge.style.display='none'; }
+  }
+
+  if(!ops.length) {
+    cont.innerHTML = '<div class="fc"><div class="empty">No hay operaciones en curso</div></div>';
+    return;
+  }
+
+  const ESTADO_COLOR = {'Pendiente':'#b45309','En trámite':'#1e40af','En curso':'#1e40af','Entregado':'#065f46'};
+  const hoy = new Date();
+
+  let html = '<div style="display:flex;flex-direction:column;gap:14px;">';
+  ops.forEach(op => {
+    const fechaOp = new Date(op.created_at);
+    const dias = Math.floor((hoy - fechaOp) / 86400000);
+    const col = ESTADO_COLOR[op.estado] || '#555';
+    const precio = parseFloat(op.precio||0);
+    const senia = parseFloat(op.senia||0);
+    const saldo = precio - senia;
+    const moneda = op.moneda || 'ARS';
+    const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ') + Number(n).toLocaleString('es-AR');
+
+    html += '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);">';
+
+    // Header
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">';
+    html += '<div>';
+    html += '<div style="font-weight:600;font-size:0.95rem;color:var(--text);">'+(op.vehiculo_texto||'Vehículo')+'</div>';
+    html += '<div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">Cliente: <b>'+(op.cliente_nombre||'—')+'</b></div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:3px 12px;font-size:0.75rem;font-weight:600;">'+op.estado+'</span>';
+    html += '<span style="font-size:0.75rem;color:var(--muted);">'+dias+' día'+(dias!==1?'s':'')+' en curso</span>';
+    html += '</div></div>';
+
+    // Montos
+    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">';
+    html += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;">';
+    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:3px;">Precio total</div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;">'+fmtN(precio,moneda)+'</div></div>';
+    html += '<div style="background:#d1fae518;border:1px solid #d1fae5;border-radius:8px;padding:10px 12px;">';
+    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#065f46;margin-bottom:3px;">Seña cobrada</div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;color:#065f46;">'+fmtN(senia,op.moneda_senia||moneda)+'</div></div>';
+    html += '<div style="background:#fef2f218;border:1px solid #fee2e2;border-radius:8px;padding:10px 12px;">';
+    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#991b1b;margin-bottom:3px;">Saldo pendiente</div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;color:#991b1b;">'+fmtN(saldo,moneda)+'</div></div>';
+    html += '</div>';
+
+    // Formas de pago y fecha entrega
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:0.8rem;color:var(--muted);">';
+    if(op.formas_pago && op.formas_pago.length) {
+      html += '<div>Forma de pago: '+op.formas_pago.join(', ')+'</div>';
+    }
+    if(op.fecha_entrega) {
+      html += '<div>📅 Entrega pactada: <b>'+op.fecha_entrega.split('-').reverse().join('/')+'</b></div>';
+    }
+    if(op.notas) {
+      html += '<div style="width:100%;margin-top:4px;font-style:italic;">'+op.notas+'</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+// Actualizar badge al cargar
+async function actualizarBadgeOps() {
+  const raw = await sbGet('operaciones', 'select=id&estado=neq.Entregado');
+  const badge = document.getElementById('dtab-ops-count');
+  if(badge && raw && raw.length > 0) {
+    badge.style.display = 'inline';
+    badge.textContent = raw.length;
+  }
+}
+
+
   const fecha=document.getElementById('mFecha').value;
   const monto=parseFloat(document.getElementById('mMonto').value);
   if(!fecha||!monto||monto<=0){ alert('Completá fecha y monto.'); return; }
@@ -1695,6 +1809,7 @@ async function init(){
   populateAutosSelect('mAuto');
   renderDash();
   cargarNotifs();
+  actualizarBadgeOps();
 }
 
 // ═══ NOTIFICACIONES ═══════════════════════════════════════
