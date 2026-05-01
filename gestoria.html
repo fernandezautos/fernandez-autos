@@ -637,7 +637,7 @@ function cambiarPag(p,btn) {
   pagActiva = p;
   if(p==='legajos') renderLegs();
   else if(p==='transf') renderTrfs();
-  else if(p==='pendientes') cargarPendientes();
+  else if(p==='pendientes') setTimeout(function(){ if(typeof cargarPendientes === 'function') cargarPendientes(); }, 50);
 }
 
 
@@ -1270,6 +1270,9 @@ g('filtroTrf').addEventListener('change',render);
 
 function render(){if(pagActiva==='legajos') renderLegs(); else renderTrfs();}
 cargarDatos();
+
+
+
 </script>
 <!-- MODAL NOTIFICACIONES -->
 <div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
@@ -1290,6 +1293,57 @@ cargarDatos();
 </div>
 <script>
 
+
+async function confirmarDocOk(trfId) {
+  const t = trfs.find(x=>x.id===trfId);
+  if(!t||!t.legajoOrigen) return;
+  if(!confirm('Confirmar que la documentacion esta completa? Esto avisara a caja para que proceda con el pago total.')) return;
+  mostrarCargando('Notificando a caja...');
+  const raw = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&legajo_origen=eq.'+t.legajoOrigen+'&limit=1');
+  if(raw&&raw.length) {
+    const orden = raw[0];
+    await sbUpdate('ordenes_compra','id',orden.id,{doc_ok:true, doc_ok_fecha:new Date().toISOString()});
+    const saldo = parseFloat(orden.precio||0) - parseFloat(orden.senia||0);
+    const fmtN = function(n,m){ return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR'); };
+    await sbInsert('movimientos_pendientes',{
+      tipo:'pago_total',
+      concepto:'Saldo de compra — '+orden.vehiculo_texto+' (doc OK)',
+      monto:saldo, moneda:orden.moneda||'ARS',
+      solicitado_por:'Gestoria', referencia_id:orden.id,
+      referencia_tipo:'orden_compra', estado:'pendiente',
+      obs:'Documentacion aprobada por gestoria.'
+    });
+    await sbInsert('notificaciones',{para:'caja',tipo:'doc_ok',leida:false,
+      titulo:'Doc OK — nueva tarea pendiente',
+      mensaje:'La documentacion de '+orden.vehiculo_texto+' esta completa. Saldo: '+fmtN(saldo,orden.moneda||'ARS')
+    });
+    ocultarCargando();
+    cerrar('ovDetTrf');
+    alert('Caja fue notificada.');
+  } else {
+    ocultarCargando();
+    alert('No se encontro la orden de compra asociada.');
+  }
+}
+
+
+var _notifs=[];
+function getRolNotif(){return(window._session&&window._session.rol)||"gestoria";}
+async function cargarNotifs(){try{var r=await sbGet("notificaciones","select=*&para=eq."+getRolNotif()+"&order=created_at.desc&limit=50");_notifs=r||[];renderNotifs();actualizarCampanita();mostrarToastsSinLeer();}catch(e){console.error(e);}}
+function actualizarCampanita(){var n=_notifs.filter(function(x){return !x.leida;}).length,el=document.getElementById("bellCount");if(el){if(n>0){el.style.display="inline-block";el.textContent=n>9?"9+":String(n);}else{el.style.display="none";}}}
+function mostrarToastsSinLeer(){var nl=_notifs.filter(function(x){return !x.leida;});if(!nl.length)return;var n=nl[0],t=document.getElementById("toastNotif");if(!t)return;document.getElementById("toastTitulo").textContent=n.titulo;document.getElementById("toastMensaje").textContent=n.mensaje;t.style.display="block";setTimeout(function(){t.style.display="none";},5000);}
+function renderNotifs(){var lista=document.getElementById("notifsLista");if(!lista)return;if(!_notifs.length){lista.innerHTML="<div style='text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;'>Sin notificaciones</div>";return;}var html="";_notifs.forEach(function(n){var bg=n.leida?"#fff":"#f0f4ff",fw=n.leida?"400":"600",ts="";if(n.created_at){var d=new Date(n.created_at);ts=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}html+="<div onclick='marcarLeida("+n.id+")' style='padding:14px 20px;border-bottom:1px solid #f8f6f0;cursor:pointer;background:"+bg+";'><div style='display:flex;justify-content:space-between;'><div style='font-weight:"+fw+";font-size:0.85rem;'>"+n.titulo+"</div><div style='font-size:0.7rem;color:#9b9890;'>"+ts+"</div></div><div style='font-size:0.8rem;color:#6b6960;margin-top:4px;'>"+n.mensaje+"</div>"+(n.leida?"":"<div style='width:8px;height:8px;background:#2558a3;border-radius:50%;margin-top:6px;'></div>")+"</div>";});lista.innerHTML=html;}
+async function marcarLeida(id){await fetch(SB_URL+"/rest/v1/notificaciones?id=eq."+id,{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});var n=_notifs.find(function(x){return x.id===id;});if(n)n.leida=true;renderNotifs();actualizarCampanita();}
+async function marcarTodasLeidas(){var rol=getRolNotif();await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+rol+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
+function abrirNotifs(){document.getElementById("modalNotifs").style.display="flex";cargarNotifs();}
+function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
+document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
+setInterval(cargarNotifs,10000);
+cargarDatos().then(function(){ 
+  setTimeout(function(){ cargarNotifs(); }, 500);
+  // Actualizar badge pendientes
+  setTimeout(function(){ cargarPendientes(); }, 800);
+});
 
 // ═══ PENDIENTES ═══════════════════════════════════════════
 const SUB_ESTADOS_ORD = ['Pendiente peritaje','Peritaje aprobado','Alistamiento','Listo'];
@@ -1396,55 +1450,6 @@ async function pasarADisponible(vehiculoId) {
 }
 
 
-  const t = trfs.find(x=>x.id===trfId);
-  if(!t||!t.legajoOrigen) return;
-  if(!confirm('Confirmar que la documentacion esta completa? Esto avisara a caja para que proceda con el pago total.')) return;
-  mostrarCargando('Notificando a caja...');
-  const raw = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&legajo_origen=eq.'+t.legajoOrigen+'&limit=1');
-  if(raw&&raw.length) {
-    const orden = raw[0];
-    await sbUpdate('ordenes_compra','id',orden.id,{doc_ok:true, doc_ok_fecha:new Date().toISOString()});
-    const saldo = parseFloat(orden.precio||0) - parseFloat(orden.senia||0);
-    const fmtN = function(n,m){ return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR'); };
-    await sbInsert('movimientos_pendientes',{
-      tipo:'pago_total',
-      concepto:'Saldo de compra — '+orden.vehiculo_texto+' (doc OK)',
-      monto:saldo, moneda:orden.moneda||'ARS',
-      solicitado_por:'Gestoria', referencia_id:orden.id,
-      referencia_tipo:'orden_compra', estado:'pendiente',
-      obs:'Documentacion aprobada por gestoria.'
-    });
-    await sbInsert('notificaciones',{para:'caja',tipo:'doc_ok',leida:false,
-      titulo:'Doc OK — nueva tarea pendiente',
-      mensaje:'La documentacion de '+orden.vehiculo_texto+' esta completa. Saldo: '+fmtN(saldo,orden.moneda||'ARS')
-    });
-    ocultarCargando();
-    cerrar('ovDetTrf');
-    alert('Caja fue notificada.');
-  } else {
-    ocultarCargando();
-    alert('No se encontro la orden de compra asociada.');
-  }
-}
-
-
-var _notifs=[];
-function getRolNotif(){return(window._session&&window._session.rol)||"gestoria";}
-async function cargarNotifs(){try{var r=await sbGet("notificaciones","select=*&para=eq."+getRolNotif()+"&order=created_at.desc&limit=50");_notifs=r||[];renderNotifs();actualizarCampanita();mostrarToastsSinLeer();}catch(e){console.error(e);}}
-function actualizarCampanita(){var n=_notifs.filter(function(x){return !x.leida;}).length,el=document.getElementById("bellCount");if(el){if(n>0){el.style.display="inline-block";el.textContent=n>9?"9+":String(n);}else{el.style.display="none";}}}
-function mostrarToastsSinLeer(){var nl=_notifs.filter(function(x){return !x.leida;});if(!nl.length)return;var n=nl[0],t=document.getElementById("toastNotif");if(!t)return;document.getElementById("toastTitulo").textContent=n.titulo;document.getElementById("toastMensaje").textContent=n.mensaje;t.style.display="block";setTimeout(function(){t.style.display="none";},5000);}
-function renderNotifs(){var lista=document.getElementById("notifsLista");if(!lista)return;if(!_notifs.length){lista.innerHTML="<div style='text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;'>Sin notificaciones</div>";return;}var html="";_notifs.forEach(function(n){var bg=n.leida?"#fff":"#f0f4ff",fw=n.leida?"400":"600",ts="";if(n.created_at){var d=new Date(n.created_at);ts=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}html+="<div onclick='marcarLeida("+n.id+")' style='padding:14px 20px;border-bottom:1px solid #f8f6f0;cursor:pointer;background:"+bg+";'><div style='display:flex;justify-content:space-between;'><div style='font-weight:"+fw+";font-size:0.85rem;'>"+n.titulo+"</div><div style='font-size:0.7rem;color:#9b9890;'>"+ts+"</div></div><div style='font-size:0.8rem;color:#6b6960;margin-top:4px;'>"+n.mensaje+"</div>"+(n.leida?"":"<div style='width:8px;height:8px;background:#2558a3;border-radius:50%;margin-top:6px;'></div>")+"</div>";});lista.innerHTML=html;}
-async function marcarLeida(id){await fetch(SB_URL+"/rest/v1/notificaciones?id=eq."+id,{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});var n=_notifs.find(function(x){return x.id===id;});if(n)n.leida=true;renderNotifs();actualizarCampanita();}
-async function marcarTodasLeidas(){var rol=getRolNotif();await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+rol+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
-function abrirNotifs(){document.getElementById("modalNotifs").style.display="flex";cargarNotifs();}
-function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
-document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
-setInterval(cargarNotifs,10000);
-cargarDatos().then(function(){ 
-  setTimeout(function(){ cargarNotifs(); }, 500);
-  // Actualizar badge pendientes
-  setTimeout(function(){ cargarPendientes(); }, 800);
-});
 </script>
 
 </body>
