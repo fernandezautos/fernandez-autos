@@ -357,7 +357,41 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
       </div>
     </div>
   </div>
+
+  <!-- OPERACIONES EN CURSO -->
+  <div class="fc" style="margin-top:0;padding:0;overflow:hidden;">
+    <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;display:flex;align-items:center;justify-content:space-between;">
+      <div class="fc-title" style="margin:0;font-size:1rem;">Operaciones en curso</div>
+      <span class="badge b-amb" id="ops-en-curso-count">—</span>
+    </div>
+    <div id="ops-en-curso-lista">
+      <div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;">Cargando...</div>
+    </div>
+  </div>
+
 </section>
+
+<!-- MODAL CANCELAR OPERACION -->
+<div id="modalCancelarOp" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:1rem;font-weight:600;color:#991b1b;">⚠️ Cancelar operación</div>
+      <button onclick="cerrarModalCancelarOp()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div id="cancelarOpInfo" style="background:#fef2f2;border:1px solid #fee2e2;border-radius:8px;padding:14px;margin-bottom:16px;font-size:0.85rem;"></div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:6px;">Motivo de cancelación</label>
+      <textarea id="cancelarOpMotivo" placeholder="Explicá el motivo de la cancelación..." style="width:100%;padding:10px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;min-height:80px;resize:vertical;"></textarea>
+    </div>
+    <div id="cancelarOpSeniaWrap" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.83rem;">
+      ⚠️ Esta operación tiene una seña cobrada. Recordá gestionar la devolución desde CajaPro.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="cerrarModalCancelarOp()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Volver</button>
+      <button onclick="confirmarCancelarOp()" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar cancelación</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== VENDEDORES ===== -->
 <section id="vendedores" class="section">
@@ -2147,8 +2181,147 @@ show = function(sec, btn) {
   if(sec === 'usuarios') cargarUsuarios();
 };
 
+
+// ═══ OPERACIONES EN CURSO (ADMIN) ══════════════════════════
+let _opACancelarId = null;
+let _opsEnCurso = [];
+
+async function cargarOpsEnCurso() {
+  const raw = await sbGet('operaciones','select=*&estado=neq.Entregado&estado=neq.Cancelada&order=created_at.desc');
+  _opsEnCurso = raw || [];
+
+  const badge = document.getElementById('ops-en-curso-count');
+  if(badge) badge.textContent = _opsEnCurso.length;
+
+  const cont = document.getElementById('ops-en-curso-lista');
+  if(!cont) return;
+
+  if(!_opsEnCurso.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;">No hay operaciones en curso</div>';
+    return;
+  }
+
+  const ESTADO_COLOR = {'Pendiente':'#b45309','En trámite':'#1e40af','En curso':'#1e40af'};
+  const hoy = new Date();
+
+  let html = '<div style="display:flex;flex-direction:column;gap:0;">';
+  _opsEnCurso.forEach(op => {
+    const fechaOp = new Date(op.created_at);
+    const dias = Math.floor((hoy - fechaOp) / 86400000);
+    const col = ESTADO_COLOR[op.estado] || '#555';
+    const precio = parseFloat(op.precio||0);
+    const senia = parseFloat(op.senia||0);
+    const saldo = precio - senia;
+    const moneda = op.moneda || 'ARS';
+    const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ') + Number(n).toLocaleString('es-AR');
+    const tienePermuta = op.permuta_marca ? true : false;
+
+    html += '<div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">';
+
+    // Info principal
+    html += '<div style="flex:1;min-width:200px;">';
+    html += '<div style="font-weight:600;font-size:0.92rem;">'+( op.vehiculo_texto||'Vehículo')+'</div>';
+    html += '<div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">'+( op.cliente_nombre||'—')+(op.vendedor_id?' · Vendedor: '+( op.vendedor_nombre||''):'')+'</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">';
+    html += '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:600;">'+op.estado+'</span>';
+    html += '<span style="font-size:0.72rem;color:var(--muted);padding:2px 0;">'+dias+' día'+(dias!==1?'s':'')+' en curso</span>';
+    if(tienePermuta) html += '<span style="background:#7c3aed18;color:#7c3aed;border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:600;">🔄 Con permuta</span>';
+    html += '</div></div>';
+
+    // Montos
+    html += '<div style="display:flex;gap:16px;flex-wrap:wrap;">';
+    html += '<div style="text-align:right;"><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Total</div><div style="font-weight:600;font-size:0.9rem;">'+fmtN(precio,moneda)+'</div></div>';
+    html += '<div style="text-align:right;"><div style="font-size:0.7rem;color:#065f46;text-transform:uppercase;letter-spacing:.5px;">Seña</div><div style="font-weight:600;font-size:0.9rem;color:#065f46;">'+fmtN(senia,op.moneda_senia||moneda)+'</div></div>';
+    html += '<div style="text-align:right;"><div style="font-size:0.7rem;color:#991b1b;text-transform:uppercase;letter-spacing:.5px;">Saldo</div><div style="font-weight:600;font-size:0.9rem;color:#991b1b;">'+fmtN(saldo,moneda)+'</div></div>';
+    html += '</div>';
+
+    // Botón cancelar
+    html += '<button onclick="abrirModalCancelarOp('+op.id+')" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:6px 14px;font-family:Arial,sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;">Cancelar operación</button>';
+
+    html += '</div>';
+  });
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+function abrirModalCancelarOp(id) {
+  _opACancelarId = id;
+  const op = _opsEnCurso.find(x => x.id === id);
+  if(!op) return;
+  const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ') + Number(n).toLocaleString('es-AR');
+  document.getElementById('cancelarOpMotivo').value = '';
+  document.getElementById('cancelarOpInfo').innerHTML =
+    '<div style="font-weight:600;margin-bottom:6px;">'+( op.vehiculo_texto||'Vehículo')+'</div>'+
+    '<div style="font-size:0.82rem;color:#6b6960;">Cliente: '+( op.cliente_nombre||'—')+'<br>'+
+    'Precio: '+fmtN(op.precio||0, op.moneda||'ARS')+(op.senia>0?' · Seña cobrada: '+fmtN(op.senia, op.moneda_senia||'ARS'):'')+'</div>';
+  document.getElementById('cancelarOpSeniaWrap').style.display = op.senia > 0 ? 'block' : 'none';
+  document.getElementById('modalCancelarOp').style.display = 'flex';
+}
+
+function cerrarModalCancelarOp() {
+  document.getElementById('modalCancelarOp').style.display = 'none';
+  _opACancelarId = null;
+}
+
+async function confirmarCancelarOp() {
+  const motivo = document.getElementById('cancelarOpMotivo').value.trim();
+  if(!motivo) { alert('Ingresá el motivo de cancelación.'); return; }
+
+  const op = _opsEnCurso.find(x => x.id === _opACancelarId);
+  if(!op) return;
+
+  mostrarCargando('Cancelando operación...');
+
+  // 1. Cancelar la operación
+  await fetch(SB_URL+'/rest/v1/operaciones?id=eq.'+op.id, {
+    method:'PATCH', headers:sbH,
+    body:JSON.stringify({estado:'Cancelada', notas:(op.notas||'')+(op.notas?'\n':'')+'CANCELADA: '+motivo})
+  });
+
+  // 2. Volver el auto vendido a Disponible
+  if(op.vehiculo_id) {
+    await fetch(SB_URL+'/rest/v1/vehiculos?id=eq.'+op.vehiculo_id, {
+      method:'PATCH', headers:sbH,
+      body:JSON.stringify({estado:'Disponible', sub_estado:'Propio'})
+    });
+  }
+
+  // 3. Si había permuta, eliminar el auto que había ingresado
+  if(op.permuta_marca) {
+    // Buscar el auto de permuta por dominio y estado "A ingresar"
+    const permutaAutos = await sbGet('vehiculos',
+      'select=id&marca=eq.'+encodeURIComponent(op.permuta_marca)+
+      '&modelo=eq.'+encodeURIComponent(op.permuta_modelo||'')+
+      '&estado=eq.A ingresar&limit=1'
+    );
+    if(permutaAutos && permutaAutos.length) {
+      await fetch(SB_URL+'/rest/v1/vehiculos?id=eq.'+permutaAutos[0].id, {
+        method:'DELETE', headers:sbH
+      });
+    }
+  }
+
+  // 4. Notificar a todos
+  const msg = 'Operación cancelada: '+(op.vehiculo_texto||'')+ ' — '+(op.cliente_nombre||'')+'. Motivo: '+motivo;
+  await enviarNotificacion('caja',     'op_cancelada','❌ Operación cancelada',msg,null);
+  await enviarNotificacion('gestoria', 'op_cancelada','❌ Operación cancelada',msg,null);
+  await enviarNotificacion('vendedor', 'op_cancelada','❌ Operación cancelada',msg,null);
+
+  ocultarCargando();
+  cerrarModalCancelarOp();
+  alert('✓ Operación cancelada correctamente.');
+  cargarOpsEnCurso();
+  cargarDatos();
+}
+
+document.addEventListener('click', function(e) {
+  const m = document.getElementById('modalCancelarOp');
+  if(m && e.target === m) cerrarModalCancelarOp();
+});
+
 cargarDatos();
 cargarPropuestas();
+cargarOpsEnCurso();
 </script>
 </body>
 </html>
