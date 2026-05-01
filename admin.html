@@ -1688,6 +1688,11 @@ function renderStock({stock}) {
 // ═══════════════════════════════════════════════════════════
 //  MODAL VEHÍCULO
 // ═══════════════════════════════════════════════════════════
+function abrirFichaAdmin(id) {
+  const v = _stockGlobal.find(x=>x.id===id);
+  if(v) verVehiculo(v);
+}
+
 function verVehiculo(v) {
   const hoyM = new Date().toISOString().split('T')[0];
   const diasStock = v.fechaIngreso ? diffDias(v.fechaIngreso, v.estado === 'Vendido' && v.fechaVenta ? v.fechaVenta : hoyM) : null;
@@ -2049,7 +2054,7 @@ function renderPropuestasAdmin() {
     const col = ESTADO_COLOR[p.estado]||'#555';
     const btnResponder = p.estado==='pendiente' ? '<button onclick="abrirModalPropuesta('+p.id+')" class="btn btn-sm" style="background:#2558a3;color:#fff;margin-right:4px;">Responder</button>' : '<span style="font-size:0.75rem;color:#9b9890;margin-right:4px;">Respondida</span>';
     const vMatch = _stockGlobal ? _stockGlobal.find(function(v){return v.id===p.vehiculo_id;}) : null;
-    const btnFicha = vMatch ? '<button onclick='verVehiculo('+JSON.stringify(vMatch).replace(/'/g,"&#39;")+')' class="btn btn-sm">Ver ficha</button>' : '';
+    const btnFicha = vMatch ? '<button onclick="abrirFichaAdmin('+vMatch.id+')" class="btn btn-sm">Ver ficha</button>' : '';
     const accion = btnResponder + btnFicha;
     return '<tr>'+
       '<td><div style="font-weight:500;">'+p.vehiculo_texto+'</div></td>'+
