@@ -1711,64 +1711,55 @@ function verVehiculo(v) {
     return `<span class="badge ${cls}">${e}</span>`;
   };
 
-  $('mv-body').innerHTML = `
-    <div class="mv-grid">
-      ${campo('Marca', v.marca)}
-      ${campo('Modelo', v.modelo)}
-      ${campo('Año', v.anio)}
-      ${campo('Tipo', v.tipo)}
-      ${campo('Carrocería', v.carroceria)}
-      ${campo('Transmisión', v.transmision)}
-      ${campo('Color', v.color)}
-      ${campo('Kilometraje', v.km > 0 ? v.km.toLocaleString('es-AR') + ' km' : '0 km')}
-      ${campo('Dominio', v.dominio)}
-      ${campo('Ubicación', v.ubicacion)}
-      ${campo('Procedencia', v.procedencia)}
-      ${campo('Estado', badgeEstado(v.estado))}
-    </div>
-
-    <div class="mv-section">Identificación</div>
-    <div class="mv-grid">
-      ${campo('Chasis', v.chasis)}
-      ${campo('Motor', v.motor)}
-    </div>
-
-    <div class="mv-section">Precio</div>
-    <div class="mv-grid">
-      ${campo('Precio de ingreso', v.precioIngreso > 0 ? fmtARS(v.precioIngreso) : '—')}
-      ${campo('Precio de lista', v.precioLista > 0 ? fmtARS(v.precioLista) : '—')}
-      ${campo('Precio de venta actual', v.precio > 0 ? fmtARS(v.precio) : '—')}
-      ${v.precioIngreso > 0 && v.precio > 0 ? campo('Margen estimado', fmtARS(v.precio - v.precioIngreso)) : campo('', '')}
-    </div>
-
-    ${v.procedencia === 'Consignación' ? `
-    <div class="mv-section">Consignación</div>
-    <div class="mv-grid">
-      ${campo('Entregado por', v.clienteEntregaNombre || '—')}
-    </div>` : ''}
-
-    <div class="mv-section">Tiempos</div>
-    <div class="mv-grid">
-      ${campo('Fecha de ingreso', v.fechaIngreso ? fmtFecha(v.fechaIngreso) : '—')}
-      ${campo('Fecha de venta', v.fechaVenta ? fmtFecha(v.fechaVenta) : '—')}
-      ${campo('Días en stock', diasStock !== null ? `<span class="dias-chip ${diasClase(diasStock)}">${diasStock} días</span>` : '—')}
-      ${campo('', '')}
-    </div>
-
-    ${v.obs ? `<div class="mv-section">Observaciones</div><div class="mv-obs">${v.obs}</div>` : ''}
-
-    ${v.historialPrecios && v.historialPrecios.length > 0 ? `
-    <div class="mv-section">Historial de precios</div>
-    <div style="display:flex;flex-direction:column;gap:0;">
-      ${[...v.historialPrecios].reverse().map((h, i) => `
-        <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);${i===0?'font-weight:600;':' opacity:.75;'}">
-          <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);flex-shrink:0;width:80px;">${h.fecha ? h.fecha.split('T')[0].split('-').reverse().join('/') : '—'}</div>
-          <div style="font-family:var(--mono);font-size:0.88rem;color:${i===0?'var(--accent)':'var(--text)'};">${fmtARS(h.precio)}</div>
-          <div style="font-size:0.78rem;color:var(--muted);flex:1;">${h.nota || ''}</div>
-          ${i===0 ? '<span class="badge b-info">Actual</span>' : ''}
-        </div>`).join('')}
-    </div>` : ''}
-  `;
+  $('mv-body').innerHTML = (function(v, diasStock) {
+    var c = function(label, val) {
+      return '<div class="mv-field"><div class="mv-label">'+label+'</div><div class="mv-val">'+(val||'—')+'</div></div>';
+    };
+    var badgeEstado = function(e) {
+      var cls = e==='Disponible'?'b-info':e==='Reservado'?'b-warn':e==='Vendido'?'b-ok':'b-neu';
+      return '<span class="badge '+cls+'">'+e+'</span>';
+    };
+    var html = '';
+    html += '<div class="mv-grid">';
+    html += c('Marca', v.marca) + c('Modelo', v.modelo) + c('Año', v.anio);
+    html += c('Tipo', v.tipo) + c('Carrocería', v.carroceria) + c('Transmisión', v.transmision);
+    html += c('Color', v.color) + c('Kilometraje', v.km > 0 ? v.km.toLocaleString('es-AR')+' km' : '0 km');
+    html += c('Dominio', v.dominio) + c('Ubicación', v.ubicacion);
+    html += c('Procedencia', v.procedencia) + c('Estado', badgeEstado(v.estado));
+    html += '</div>';
+    html += '<div class="mv-section">Identificación</div><div class="mv-grid">';
+    html += c('Chasis', v.chasis) + c('Motor', v.motor);
+    html += '</div>';
+    html += '<div class="mv-section">Precio</div><div class="mv-grid">';
+    html += c('Precio de ingreso', v.precioIngreso > 0 ? fmtARS(v.precioIngreso) : '—');
+    html += c('Precio de lista', v.precioLista > 0 ? fmtARS(v.precioLista) : '—');
+    html += c('Precio de venta actual', v.precio > 0 ? fmtARS(v.precio) : '—');
+    html += v.precioIngreso > 0 && v.precio > 0 ? c('Margen estimado', fmtARS(v.precio - v.precioIngreso)) : c('','');
+    html += '</div>';
+    if(v.procedencia === 'Consignación') {
+      html += '<div class="mv-section">Consignacion</div><div class="mv-grid">';
+      html += c('Entregado por', v.clienteEntregaNombre || '—');
+      html += '</div>';
+    }
+    html += '<div class="mv-section">Tiempos</div><div class="mv-grid">';
+    html += c('Fecha de ingreso', v.fechaIngreso ? fmtFecha(v.fechaIngreso) : '—');
+    html += c('Fecha de venta', v.fechaVenta ? fmtFecha(v.fechaVenta) : '—');
+    html += c('Días en stock', diasStock !== null ? '<span class="dias-chip '+diasClase(diasStock)+'">'+diasStock+' días</span>' : '—');
+    html += c('','') + '</div>';
+    if(v.obs) html += '<div class="mv-section">Observaciones</div><div class="mv-obs">'+v.obs+'</div>';
+    if(v.historialPrecios && v.historialPrecios.length > 0) {
+      html += '<div class="mv-section">Historial de precios</div><div>';
+      [...v.historialPrecios].reverse().forEach(function(h, i) {
+        html += '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);'+(i===0?'font-weight:600;':'')+'">';
+        html += '<div style="font-size:0.72rem;color:var(--muted);width:80px;">'+(h.fecha?h.fecha.split('T')[0].split('-').reverse().join('/'):'—')+'</div>';
+        html += '<div style="font-size:0.88rem;color:'+(i===0?'var(--accent)':'var(--text)')+';">'+fmtARS(h.precio)+'</div>';
+        html += '<div style="font-size:0.78rem;color:var(--muted);flex:1;">'+(h.nota||'')+'</div>';
+        html += (i===0 ? '<span class="badge b-info">Actual</span>' : '') + '</div>';
+      });
+      html += '</div>';
+    }
+    return html;
+  })(v, diasStock);
 
   const modal = $('modal-vehiculo');
   modal.style.display = 'flex';
