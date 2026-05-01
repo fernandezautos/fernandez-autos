@@ -1152,7 +1152,7 @@ async function cargarDatos() {
 // ═══════════════════════════════════════════════════════════
 function renderDashboard({stock, clientes, ops, movs, fins, agenda, trfs, ingMes, egMes, saldoARS, saldoUSD, disponibles, reservados, vendidos, vtvVenc, vtvProx, cuotasHoy, mesActual}) {
   const opsActivas = ops ? ops.filter(o => o.fecha && o.fecha.startsWith(mesActual)) : [];
-  setText('d-ventas', opsActivas.length || '—');
+  setText('d-ventas', opsActivas.length);
   setText('d-ventas-sub', '+' + opsActivas.length + ' operaciones este mes');
   setText('d-facturado', ingMes > 0 ? fmtARS(ingMes) : '$ 0');
   setText('d-facturado-sub', 'Ingresos ARS del mes');
@@ -1198,7 +1198,7 @@ function renderDashboard({stock, clientes, ops, movs, fins, agenda, trfs, ingMes
     const el = $('sc-prom-dias');
     if (el) { el.textContent = promDias + 'd'; el.style.color = diasColor(promDias); }
   } else {
-    setText('sc-prom-dias', '—');
+    setText('sc-prom-dias', '0 días');
   }
   const gestStatus = $('sc-gest-status');
   if(gestStatus) { gestStatus.className = 'sys-status ' + (vtvVenc.length > 0 ? 'warn' : 'ok'); gestStatus.textContent = vtvVenc.length > 0 ? ('⚠ ' + vtvVenc.length + ' alerta' + (vtvVenc.length>1?'s':'')) : '● En línea'; }
@@ -1364,9 +1364,9 @@ function renderCaja({movs, fins, agenda, saldoARS, saldoUSD, ingMes, egMes, cuot
   const totalPagos  = pagos.filter(a=>a.moneda==='ARS').reduce((s,a)=>s+a.monto,0);
 
   // Cards ingresos/egresos futuros
-  setText('c-cobros-card', totalCobros > 0 ? fmtARS(totalCobros) : '—');
+  setText('c-cobros-card', fmtARS(totalCobros));
   setText('c-cobros-card-sub', cobros.length + ' cobro' + (cobros.length!==1?'s':'') + ' agendado' + (cobros.length!==1?'s':''));
-  setText('c-pagos-card', totalPagos > 0 ? fmtARS(totalPagos) : '—');
+  setText('c-pagos-card', fmtARS(totalPagos));
   setText('c-pagos-card-sub', pagos.length + ' pago' + (pagos.length!==1?'s':'') + ' agendado' + (pagos.length!==1?'s':''));
 
   // Alertas
@@ -1572,7 +1572,7 @@ function renderStock({stock}) {
     const el = $('st-dias-prom');
     if (el) { el.textContent = promDias; el.style.color = diasColor(promDias); }
   } else {
-    setText('st-dias-prom', '—');
+    setText('st-dias-prom', '0 días');
   }
 
   // ── Distribución por carrocería (stock activo) ──
@@ -1830,10 +1830,10 @@ function renderReportes() {
   const ticket = opsPer.length > 0 && facturado > 0 ? Math.round(facturado / opsPer.length) : 0;
 
   setText('rep-op-total', opsPer.length);
-  setText('rep-op-fact', facturado > 0 ? fmtARS(facturado) : '—');
-  setText('rep-op-mejor', mejorV ? mejorV[0].split(',')[0] : '—');
+  setText('rep-op-fact', fmtARS(facturado));
+  setText('rep-op-mejor', mejorV ? mejorV[0].split(',')[0] : 'Sin datos');
   setText('rep-op-mejor-sub', mejorV ? mejorV[1] + ' operaciones' : '');
-  setText('rep-op-ticket', ticket > 0 ? fmtARS(ticket) : '—');
+  setText('rep-op-ticket', ticket > 0 ? fmtARS(ticket) : '$ 0');
 
   // ── Caja ──
   const movsPer = movs.filter(m => m.moneda==='ARS' && m.fecha && m.fecha.startsWith(periodo));
@@ -1842,8 +1842,8 @@ function renderReportes() {
   const resPer = ingPer - egPer;
   const saldoARS = movs.filter(m=>m.moneda==='ARS').reduce((a,m)=>a+(m.tipo==='ingreso'?m.monto:-m.monto),0);
 
-  setText('rep-c-ing', ingPer > 0 ? fmtARS(ingPer) : '—');
-  setText('rep-c-eg', egPer > 0 ? fmtARS(egPer) : '—');
+  setText('rep-c-ing', fmtARS(ingPer));
+  setText('rep-c-eg', fmtARS(egPer));
   setText('rep-c-saldo', fmtARS(saldoARS));
   const resEl = $('rep-c-res');
   if(resEl) { resEl.textContent = fmtARS(resPer); resEl.className = 'card-value ' + (resPer >= 0 ? 'pos' : 'neg'); }
@@ -1860,7 +1860,7 @@ function renderReportes() {
   const vtvVenc = stock.filter(v => v.vtv && new Date(v.vtv) < new Date()).length;
   setText('rep-g-abiertos', '0');
   setText('rep-g-fin', '0');
-  setText('rep-g-prom', '—');
+  setText('rep-g-prom', 'Sin datos');
   setText('rep-g-vtv', vtvVenc || '0');
 }
 
