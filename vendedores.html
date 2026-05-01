@@ -296,7 +296,8 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
         <button class="btn btn-sm" id="btnStockTodos" onclick="filtrarStock('todos')">Todos</button>
         <button class="btn btn-sm" id="btnStockDisp" onclick="filtrarStock('Disponible')" style="border-color:var(--accent);color:var(--accent);">Disponibles</button>
         <button class="btn btn-sm" id="btnStockRes" onclick="filtrarStock('Reservado')">Reservados</button>
-        <button class="btn btn-sm" id="btnStockVend" onclick="filtrarStock('Vendido')">Vendidos</button>
+        <button class="btn btn-sm" id="btnStockVend" onclick="filtrarStock('No disponible')">No disponibles</button>
+        <button class="btn btn-sm" id="btnStockIng" onclick="filtrarStock('A ingresar')">A ingresar</button>
         <button class="btn btn-sm" onclick="filtrarTipo('Nuevo')">0 km</button>
         <button class="btn btn-sm" onclick="filtrarTipo('Usado')">Usados</button>
       </div>
@@ -981,6 +982,17 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
       <div class="modal-title" style="margin:0;" id="mvTitle"></div>
       <span id="mvEstadoBadge"></span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <select id="mvEstado" onchange="actualizarSubEstados()" style="padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Arial,sans-serif;font-size:0.82rem;background:#fff;cursor:pointer;">
+          <option value="Disponible">Disponible</option>
+          <option value="Reservado">Reservado</option>
+          <option value="No disponible">No disponible</option>
+          <option value="A ingresar">A ingresar</option>
+        </select>
+        <select id="mvSubEstado" style="padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Arial,sans-serif;font-size:0.82rem;background:#fff;cursor:pointer;">
+        </select>
+        <button onclick="cambiarEstadoVehiculo()" style="padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:Arial,sans-serif;font-size:0.82rem;cursor:pointer;font-weight:600;">Actualizar</button>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
 
@@ -1139,7 +1151,7 @@ async function cargarTodo(){
       precio:parseFloat(v.precio||0), precioLista:parseFloat(v.precio_lista||0),
       km:v.km||0, transmision:v.transmision||'', carroceria:v.carroceria||'',
       color:v.color||'', ubicacion:v.ubicacion||'', procedencia:v.procedencia||'Propio',
-      estado:v.estado||'Disponible', obs:v.obs||'', clienteEntregaId:v.cliente_entrega_id,
+      estado:v.estado||'Disponible', subEstado:v.sub_estado||'', obs:v.obs||'', clienteEntregaId:v.cliente_entrega_id,
       historialPrecios:(v.vehiculo_precios||[]).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(p=>({precio:parseFloat(p.precio),fecha:p.fecha,nota:p.nota||''}))
     }));
 
@@ -1692,12 +1704,13 @@ function renderDashboard(){
 // STOCK
 function renderStock(){
   const q=(document.getElementById('stockBuscar')||{value:''}).value.toLowerCase();
-  const data=stock.filter(v=>(v.marca+' '+v.modelo+' '+v.dominio).toLowerCase().includes(q)&&(stockFiltroEstado==='todos'||v.estado===stockFiltroEstado)&&(!stockFiltroTipo||v.tipo===stockFiltroTipo));
+  const data=stock.filter(v=>(v.marca+' '+v.modelo+' '+v.dominio).toLowerCase().includes(q)&&(stockFiltroEstado==='todos'||v.estado===stockFiltroEstado||('Reservado'===stockFiltroEstado&&v.estado==='Reservado'))&&(!stockFiltroTipo||v.tipo===stockFiltroTipo));
   document.getElementById('stockStats').innerHTML=`
     <div class="card"><div class="card-label">Total stock</div><div class="card-value neu">${stock.length}</div></div>
     <div class="card"><div class="card-label">Disponibles</div><div class="card-value pos">${stock.filter(v=>v.estado==='Disponible').length}</div></div>
     <div class="card"><div class="card-label">Reservados</div><div class="card-value amb">${stock.filter(v=>v.estado==='Reservado').length}</div></div>
-    <div class="card"><div class="card-label">Vendidos</div><div class="card-value neg">${stock.filter(v=>v.estado==='Vendido').length}</div></div>`;
+    <div class="card"><div class="card-label">No disponibles</div><div class="card-value neg">${stock.filter(v=>v.estado==='No disponible').length}</div></div>
+    <div class="card"><div class="card-label">A ingresar</div><div class="card-value" style="color:#7c3aed;">${stock.filter(v=>v.estado==='A ingresar').length}</div></div>`;
   const tb=document.getElementById('tbStock'),em=document.getElementById('tbStockEmpty');
   if(!data.length){tb.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
@@ -1710,7 +1723,7 @@ function renderStock(){
     <td style="font-size:0.84rem;">${v.transmision||'—'}</td>
     <td style="font-family:var(--mono);font-weight:500;">${fmt(v.precio)}</td>
     <td style="font-size:0.84rem;">${v.ubicacion||'—'}</td>
-    <td><span class="badge b-${v.estado.toLowerCase()}">${v.estado}</span></td>
+    <td><div><span class="badge b-${v.estado==='Disponible'?'pos':v.estado==='Reservado'?'amb':v.estado==='A ingresar'?'info':'neg'}">${v.estado}</span>${v.subEstado?'<div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">'+v.subEstado+'</div>':''}</div></td>
     <td><div style="display:flex;gap:6px;">
       <button class="btn btn-sm btn-g" onclick="abrirModalVehiculo(${v.id})">Ver</button>
       ${v.estado==='Disponible'?`<button class="btn btn-sm btn-a" onclick="irAOperar(${v.id})">Vender</button>`:''}
@@ -1724,7 +1737,13 @@ function abrirModalVehiculo(id){
   vehiculoModalId=id;
   const v=stock.find(x=>x.id===id);
   document.getElementById('mvTitle').textContent=`${v.marca} ${v.modelo} ${v.anio}`;
-  document.getElementById('mvEstadoBadge').innerHTML=`<span class="badge b-${v.estado.toLowerCase()}">${v.estado}</span>`;
+  document.getElementById('mvEstadoBadge').innerHTML=`<span class="badge b-${v.estado==='Disponible'?'pos':v.estado==='Reservado'?'amb':v.estado==='A ingresar'?'info':'neg'}">${v.estado}${v.subEstado?' · '+v.subEstado:''}</span>`;
+  // Precargar selectores de estado
+  const mvEstadoSel = document.getElementById('mvEstado');
+  mvEstadoSel.value = v.estado || 'Disponible';
+  actualizarSubEstados();
+  const mvSubSel = document.getElementById('mvSubEstado');
+  if(v.subEstado) { for(let i=0;i<mvSubSel.options.length;i++){ if(mvSubSel.options[i].value===v.subEstado){mvSubSel.selectedIndex=i;break;} } }
   document.getElementById('mvContent').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;">
     ${fila('Tipo',`<span class="badge b-${v.tipo.toLowerCase()}">${v.tipo==='Nuevo'?'0 km':'Usado'}</span>`)}
     ${fila('Carrocería',v.carroceria||'—')}
@@ -2391,7 +2410,39 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 document.querySelectorAll('.moverlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
 
-// ═══ ORDEN DE COMPRA ══════════════════════════════════════
+// ═══ ESTADO Y SUB-ESTADO DE VEHÍCULOS ═════════════════════
+const SUB_ESTADOS = {
+  'Disponible':    ['Propio','Consignacion'],
+  'Reservado':     ['Reservado'],
+  'No disponible': ['Vendido','Devuelto al dueño'],
+  'A ingresar':    ['Pendiente peritaje','Peritaje aprobado','Alistamiento','Listo']
+};
+
+function actualizarSubEstados() {
+  const estado = document.getElementById('mvEstado').value;
+  const subSel = document.getElementById('mvSubEstado');
+  const subs = SUB_ESTADOS[estado] || [];
+  subSel.innerHTML = subs.map(s=>'<option value="'+s+'">'+s+'</option>').join('');
+}
+
+async function cambiarEstadoVehiculo() {
+  const v = stock.find(x=>x.id===vehiculoModalId);
+  if(!v) return;
+  const nuevoEstado = document.getElementById('mvEstado').value;
+  const nuevoSub = document.getElementById('mvSubEstado').value;
+  mostrarCargando('Actualizando estado...');
+  await sbUpdate('vehiculos', vehiculoModalId, {estado:nuevoEstado, sub_estado:nuevoSub});
+  v.estado = nuevoEstado;
+  v.subEstado = nuevoSub;
+  // Actualizar badge
+  document.getElementById('mvEstadoBadge').innerHTML =
+    '<span class="badge b-'+(nuevoEstado==='Disponible'?'pos':nuevoEstado==='Reservado'?'amb':nuevoEstado==='A ingresar'?'info':'neg')+'">'+nuevoEstado+' · '+nuevoSub+'</span>';
+  ocultarCargando();
+  renderStock();
+  alert('✓ Estado actualizado');
+}
+
+
 function toggleOCSenia() {
   const wrap = document.getElementById('ocSeniaWrap');
   wrap.style.display = document.getElementById('ocFormaPago').value === 'Seña + Saldo' ? 'grid' : 'none';
