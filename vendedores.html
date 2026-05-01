@@ -2252,6 +2252,29 @@ async function ejecutarGuardadoOperacion(vidVal, cidVal, formas, c){
 
     operaciones.unshift({id:nuevaOp.id,fecha:hoy(),vehiculoId:v.id,vehiculo:nuevaOp.vehiculo_texto,clienteId:c.id,cliente:c.nombre,moneda:opMoneda,precio:precioVenta,precioLista:v.precioLista||0,descuento,comision,senia:nuevaOp.senia||0,monedaSenia:nuevaOp.moneda_senia,formasPago:formas,valorTransf:nuevaOp.valor_transf||0,monedaTransf:nuevaOp.moneda_transf,transfObs:nuevaOp.transf_obs||'',credito,permuta,cheque,fechaEntrega:nuevaOp.fecha_entrega,notas:nuevaOp.notas||'',estado:'Pendiente',vendedor:VENDEDOR.nombre,historial:[{tipo:'vendedor',sector:'Vendedor',texto:textoHistorial,fecha:new Date().toISOString()}]});
     await enviarNotifNuevaOperacion(nuevaOp, v, c, formas);
+    // Si hay permuta, crear el auto que ingresa en stock como "A ingresar"
+    if(permuta && permuta.marca && permuta.modelo) {
+      const autoPermuta = await sbInsert('vehiculos',{
+        marca:permuta.marca, modelo:permuta.modelo,
+        anio:parseInt(permuta.anio)||new Date().getFullYear(),
+        dominio:permuta.dominio||'', km:parseInt(permuta.km)||0,
+        precio:permuta.valor||0, moneda_precio:permuta.moneda||'ARS',
+        estado:'A ingresar', sub_estado:'Pendiente peritaje',
+        tipo:'Usado', procedencia:'Propio',
+        obs:'Ingresa por permuta en operación con '+c.nombre+'. '+permuta.obs
+      });
+      if(autoPermuta){
+        stock.push({id:autoPermuta.id,marca:permuta.marca,modelo:permuta.modelo,
+          anio:autoPermuta.anio,dominio:permuta.dominio||'',km:autoPermuta.km||0,
+          precio:permuta.valor||0,moneda:permuta.moneda||'ARS',
+          estado:'A ingresar',subEstado:'Pendiente peritaje',
+          procedencia:'Propio',obs:autoPermuta.obs||'',historialPrecios:[]});
+        // Notificación especial a gestoría por permuta
+        const vTextoPermuta = permuta.marca+' '+permuta.modelo+' '+(permuta.anio||'');
+        const msgGestPermuta = 'Operación con permuta — Se vende: '+v.marca+' '+v.modelo+' '+v.anio+'. Ingresa: '+vTextoPermuta+(permuta.dominio?' · '+permuta.dominio:'')+'. Asignar legajo al auto que ingresa.';
+        await enviarNotificacion('gestoria','permuta','🔄 Permuta — dos trámites requeridos',msgGestPermuta,nuevaOp.id);
+      }
+    }
     quitarProspectoDelKanban(c.id);
     const msg=document.getElementById('opMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',3500);
     limpiarOperacion(true);
