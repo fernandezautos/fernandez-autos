@@ -2088,7 +2088,7 @@ init();
         <select id="mpMoneda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select></div>
       <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Metodo de pago</label>
         <select id="mpMetodo" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;"><option>Efectivo</option><option>Transferencia</option><option>Cheque</option></select></div>
-      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Fecha agenda (opcional)</label>
+      <div><label id="mpFechaAgendaLabel" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Fecha agenda (opcional)</label>
         <input type="date" id="mpFechaAgenda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
     </div>
     <div style="margin-bottom:16px;"><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Observaciones</label>
@@ -2100,4 +2100,106 @@ init();
   </div>
 </div>
 </body>
-</html>
+</html>// ═══ MOVIMIENTOS PENDIENTES ═══════════════════════════════════
+async function cargarMovPendientes() {
+  const raw = await sbGet('movimientos_pendientes','select=*&estado=eq.pendiente&order=created_at.asc');
+  const pendientes = raw || [];
+
+  const wrap  = document.getElementById('movPendientesWrap');
+  const lista = document.getElementById('movPendientesLista');
+  const count = document.getElementById('movPendientesCount');
+
+  if(!pendientes.length){ if(wrap) wrap.style.display='none'; return; }
+  if(wrap) wrap.style.display='block';
+  if(count) count.textContent = pendientes.length;
+
+  const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+
+  lista.innerHTML = pendientes.map(p => {
+    const tienesMonto = p.monto && parseFloat(p.monto) > 0;
+    const esCompra = p.referencia_tipo === 'orden_compra';
+    return '<div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
+      '<div style="flex:1;">' +
+        '<div style="font-weight:600;font-size:0.88rem;">' + p.concepto + '</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);margin-top:3px;">' +
+          'Solicitado por: ' + (p.solicitado_por||'Sistema') +
+          (tienesMonto ? ' &nbsp;·&nbsp; <b style="color:#7c3aed;">' + fmtN(p.monto, p.moneda) + '</b>' : '') +
+        '</div>' +
+        (p.obs ? '<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;font-style:italic;">' + p.obs + '</div>' : '') +
+      '</div>' +
+      '<button onclick="abrirProcesarPendiente(' + p.id + ','' + encodeURIComponent(p.concepto) + '',' + (parseFloat(p.monto)||0) + ','' + (p.moneda||'ARS') + '',' + (esCompra?'true':'false') + ')" ' +
+        'style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">' +
+        'Procesar' +
+      '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function abrirProcesarPendiente(id, conceptoEnc, monto, moneda, esCompra) {
+  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra};
+  document.getElementById('mpConcepto').textContent = decodeURIComponent(conceptoEnc);
+  document.getElementById('mpMonto').value = monto > 0 ? monto : '';
+  document.getElementById('mpMoneda').value = moneda;
+  document.getElementById('mpMetodo').value = 'Efectivo';
+  document.getElementById('mpFechaAgenda').value = '';
+  document.getElementById('mpObs').value = '';
+  // Si es compra, la fecha de agenda es obligatoria
+  const fechaLabel = document.getElementById('mpFechaAgendaLabel');
+  if(fechaLabel) fechaLabel.textContent = esCompra ? 'Fecha estimada pago total *' : 'Fecha agenda (opcional)';
+  document.getElementById('modalMovPendiente').style.display = 'flex';
+}
+
+async function confirmarMovPendiente() {
+  const monto = parseFloat(document.getElementById('mpMonto').value)||0;
+  const moneda = document.getElementById('mpMoneda').value;
+  const metodo = document.getElementById('mpMetodo').value;
+  const fechaAgenda = document.getElementById('mpFechaAgenda').value;
+  const obs = document.getElementById('mpObs').value.trim();
+  const p = _movPendienteActivo;
+
+  if(!monto){ alert('Ingresá el monto.'); return; }
+  if(p.esCompra && !fechaAgenda){ alert('La fecha estimada de pago total es obligatoria.'); return; }
+
+  mostrarCargando('Procesando...');
+
+  // Registrar el movimiento de egreso
+  await sbInsert('movimientos',{
+    fecha: hoy(), monto, tipo: 'egreso', moneda,
+    obs: p.concepto + (obs ? ' — ' + obs : ''),
+    categoria: 'Compra de vehículo', metodo
+  });
+
+  // Si hay fecha de agenda, crear ítem para el pago total
+  if(fechaAgenda) {
+    await sbInsert('agenda',{
+      tipo: 'pago',
+      cliente: p.concepto,
+      fecha: fechaAgenda,
+      monto: null,
+      moneda,
+      obs: 'Pago total coordinado desde movimientos pendientes',
+      estado: 'pendiente'
+    });
+  }
+
+  // Marcar como procesado
+  await fetch(`${SB_URL}/rest/v1/movimientos_pendientes?id=eq.${p.id}`,{
+    method: 'PATCH', headers: sbHeaders,
+    body: JSON.stringify({estado: 'procesado', procesado_at: new Date().toISOString()})
+  });
+
+  ocultarCargando();
+  cerrarModalMovPendiente();
+  cargarMovPendientes();
+  renderDash();
+  alert('Movimiento procesado correctamente');
+}
+
+function cerrarModalMovPendiente() {
+  document.getElementById('modalMovPendiente').style.display = 'none';
+  _movPendienteActivo = null;
+}
+
+let _movPendienteActivo = null;
+
+
