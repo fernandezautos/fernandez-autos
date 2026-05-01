@@ -776,7 +776,7 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
     <div class="tw">
       <table>
         <thead><tr>
-          <th>Vehículo</th><th>Vendedor</th><th>Precio actual</th><th>Precio propuesto</th><th>Justificación</th><th>Estado</th><th>Acción</th>
+          <th>Vehículo</th><th>Vendedor</th><th>Precio actual</th><th>Precio propuesto</th><th>Justificación</th><th>Estado</th><th>Acciones</th>
         </tr></thead>
         <tbody id="tablaPropuestas"><tr class="empty-row"><td colspan="7">Cargando...</td></tr></tbody>
       </table>
@@ -1032,8 +1032,11 @@ async function cargarDatos() {
   const stock = aRaw.map(v=>({
     id:v.id, marca:v.marca, modelo:v.modelo, tipo:v.tipo||'Usado',
     anio:v.anio, dominio:v.dominio||'', precio:parseFloat(v.precio||0),
-    precioLista:parseFloat(v.precio_lista||0), km:v.km||0,
-    transmision:v.transmision||'', carroceria:v.carroceria||'',
+    precioLista:parseFloat(v.precio_lista||0),
+    precioIngreso:parseFloat(v.precio_ingreso||0),
+    clienteEntregaId:v.cliente_entrega_id||null,
+    clienteEntregaNombre:v.cliente_entrega_nombre||null,
+    km:v.km||0, transmision:v.transmision||'', carroceria:v.carroceria||'',
     color:v.color||'', ubicacion:v.ubicacion||'', procedencia:v.procedencia||'Propio',
     estado:v.estado||'Disponible', obs:v.obs||'',
     fechaIngreso:v.created_at?.split('T')[0],
@@ -1118,10 +1121,11 @@ async function cargarDatos() {
     });
   });
 
-  // Guardar en cache para reportes
+  // Guardar en cache para reportes y propuestas
   _datos.stock = stock;
   _datos.ops   = ops;
   _datos.movs  = movs;
+  _stockGlobal = stock;
 
   // ── DASHBOARD ──────────────────────────────────────────
   renderDashboard({stock, clientes, ops, movs, fins, agenda, trfs, ingMes, egMes, saldoARS, saldoUSD, disponibles, reservados, vendidos, vtvVenc, vtvProx, cuotasHoy, mesActual});
@@ -1726,9 +1730,17 @@ function verVehiculo(v) {
 
     <div class="mv-section">Precio</div>
     <div class="mv-grid">
+      ${campo('Precio de ingreso', v.precioIngreso > 0 ? fmtARS(v.precioIngreso) : '—')}
       ${campo('Precio de lista', v.precioLista > 0 ? fmtARS(v.precioLista) : '—')}
-      ${campo('Precio de venta', v.precio > 0 ? fmtARS(v.precio) : '—')}
+      ${campo('Precio de venta actual', v.precio > 0 ? fmtARS(v.precio) : '—')}
+      ${v.precioIngreso > 0 && v.precio > 0 ? campo('Margen estimado', fmtARS(v.precio - v.precioIngreso)) : campo('', '')}
     </div>
+
+    ${v.procedencia === 'Consignación' ? `
+    <div class="mv-section">Consignación</div>
+    <div class="mv-grid">
+      ${campo('Entregado por', v.clienteEntregaNombre || '—')}
+    </div>` : ''}
 
     <div class="mv-section">Tiempos</div>
     <div class="mv-grid">
@@ -1862,6 +1874,7 @@ function imprimirReporte() {
 
 // Cache global de datos para reportes
 const _datos = {};
+let _stockGlobal = [];
 
 // Guardar referencia a cargarDatos original y wrappear
 const _cargarDatosOrig = cargarDatos;
@@ -2034,9 +2047,10 @@ function renderPropuestasAdmin() {
 
   tbody.innerHTML = lista.map(p => {
     const col = ESTADO_COLOR[p.estado]||'#555';
-    const accion = p.estado === 'pendiente'
-      ? '<button onclick="abrirModalPropuesta('+p.id+')" class="btn btn-sm" style="background:#2558a3;color:#fff;">Responder</button>'
-      : '<span style="font-size:0.75rem;color:#9b9890;">—</span>';
+    const btnResponder = p.estado==='pendiente' ? '<button onclick="abrirModalPropuesta('+p.id+')" class="btn btn-sm" style="background:#2558a3;color:#fff;margin-right:4px;">Responder</button>' : '<span style="font-size:0.75rem;color:#9b9890;margin-right:4px;">Respondida</span>';
+    const vMatch = _stockGlobal ? _stockGlobal.find(function(v){return v.id===p.vehiculo_id;}) : null;
+    const btnFicha = vMatch ? '<button onclick='verVehiculo('+JSON.stringify(vMatch).replace(/'/g,"&#39;")+')' class="btn btn-sm">Ver ficha</button>' : '';
+    const accion = btnResponder + btnFicha;
     return '<tr>'+
       '<td><div style="font-weight:500;">'+p.vehiculo_texto+'</div></td>'+
       '<td>'+p.vendedor_nombre+'</td>'+
@@ -2044,7 +2058,7 @@ function renderPropuestasAdmin() {
       '<td style="font-weight:600;color:#2558a3;">$ '+Number(p.precio_propuesto).toLocaleString('es-AR')+'</td>'+
       '<td style="max-width:200px;font-size:0.82rem;color:#6b6960;">'+p.justificacion+'</td>'+
       '<td><span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600;">'+ESTADO_LABEL[p.estado]+'</span></td>'+
-      '<td>'+accion+'</td>'+
+      '<td style="white-space:nowrap;">'+accion+'</td>'+
     '</tr>';
   }).join('');
 }
