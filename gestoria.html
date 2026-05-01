@@ -1273,27 +1273,6 @@ cargarDatos();
 
 
 
-</script>
-<!-- MODAL NOTIFICACIONES -->
-<div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
-  <div style="background:#fff;border-radius:14px;width:380px;max-height:500px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);">
-    <div style="padding:16px 20px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;align-items:center;">
-      <b>Notificaciones</b>
-      <div style="display:flex;gap:10px;">
-        <button onclick="marcarTodasLeidas()" style="font-size:0.75rem;color:#2558a3;background:none;border:none;cursor:pointer;">Marcar leidas</button>
-        <button onclick="cerrarNotifs()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;">X</button>
-      </div>
-    </div>
-    <div id="notifsLista" style="padding:8px 0;"><div style="text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;">Cargando...</div></div>
-  </div>
-</div>
-<div id="toastNotif" style="display:none;position:fixed;bottom:24px;right:24px;background:#1a1917;color:#fff;border-radius:12px;padding:14px 18px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;">
-  <div style="font-weight:600;font-size:0.88rem;margin-bottom:4px;" id="toastTitulo"></div>
-  <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
-</div>
-<script>
-
-
 
 // ═══ BUSCADOR DE CLIENTES (gestoría) ══════════════════════
 let _clientesGS = [];
@@ -1329,6 +1308,28 @@ function selClienteGS(inputId, dropId, dniId, nombre, dni) {
   const drop = document.getElementById(dropId);
   if(drop) drop.style.display = 'none';
 }
+
+</script>
+<!-- MODAL NOTIFICACIONES -->
+<div id="modalNotifs" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;align-items:flex-start;justify-content:flex-end;padding:70px 20px 0 0;">
+  <div style="background:#fff;border-radius:14px;width:380px;max-height:500px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);">
+    <div style="padding:16px 20px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;align-items:center;">
+      <b>Notificaciones</b>
+      <div style="display:flex;gap:10px;">
+        <button onclick="marcarTodasLeidas()" style="font-size:0.75rem;color:#2558a3;background:none;border:none;cursor:pointer;">Marcar leidas</button>
+        <button onclick="cerrarNotifs()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;">X</button>
+      </div>
+    </div>
+    <div id="notifsLista" style="padding:8px 0;"><div style="text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;">Cargando...</div></div>
+  </div>
+</div>
+<div id="toastNotif" style="display:none;position:fixed;bottom:24px;right:24px;background:#1a1917;color:#fff;border-radius:12px;padding:14px 18px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;">
+  <div style="font-weight:600;font-size:0.88rem;margin-bottom:4px;" id="toastTitulo"></div>
+  <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
+</div>
+<script>
+
+
 
 async function confirmarDocOk(trfId) {
   const t = trfs.find(x=>x.id===trfId);
