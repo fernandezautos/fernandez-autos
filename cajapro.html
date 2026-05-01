@@ -993,6 +993,7 @@ async function marcarEntregada(opId) {
 }
 
 
+async function guardarMov(){
   const fecha=document.getElementById('mFecha').value;
   const monto=parseFloat(document.getElementById('mMonto').value);
   if(!fecha||!monto||monto<=0){ alert('Completá fecha y monto.'); return; }
