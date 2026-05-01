@@ -1677,7 +1677,7 @@ function renderStock({stock}) {
           <td>${v.procedencia||'—'}</td>
           <td><span class="badge ${estadoClase(v.estado)}">${v.estado}</span></td>
           <td class="mono">${v.precio > 0 ? fmtARS(v.precio) : '—'}</td>
-          <td>${dias !== null ? `<span class="dias-chip ${diasClase(dias)}">${dias}d</span>` : '—'}</td>
+          <td>${dias !== null ? '<span class="dias-chip '+diasClase(dias)+'">'+dias+'d</span>' : '—'}</td>
           <td><button class="btn btn-sm" onclick='verVehiculo(${JSON.stringify(v).replace(/'/g,"&#39;")})'>Ver</button></td>
         </tr>`;
       }).join('');
