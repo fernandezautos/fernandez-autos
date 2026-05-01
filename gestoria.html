@@ -273,7 +273,7 @@ select.filter:focus{border-color:var(--accent)}
   <div class="mb">
     <div id="mLegNum" style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);margin-bottom:14px"></div>
     <div class="fr"><div class="fg"><label>Dominio *</label><input id="lDom" type="text" placeholder="ABC 123" style="text-transform:uppercase"></div><div class="fg"><label>Vehículo</label><input id="lVeh" type="text" placeholder="VW Gol 2019"></div></div>
-    <div class="fr"><div class="fg"><label>Propietario *</label><input id="lCli" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI / CUIT</label><input id="lDni" type="text" placeholder="20-12345678-9"></div></div>
+    <div class="fr"><div class="fg"><label>Propietario *</label><div style="position:relative;"><input id="lCli" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('lCli','lCliDrop','lDni',this.value)" onfocus="filtrarClientesGS('lCli','lCliDrop','lDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('lCliDrop');if(d)d.style.display='none';},200)"><div id="lCliDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI / CUIT</label><input id="lDni" type="text" placeholder="20-12345678-9"></div></div>
     <div class="fr"><div class="fg"><label>Fecha de ingreso</label><input id="lFecha" type="date"></div><div class="fg"><label>Precio (referencia)</label><input id="lPrecio" type="text" placeholder="$ 0"></div></div>
     <div class="fg"><label>Vencimiento VTV</label><input id="lVtv" type="date" title="Fecha de vencimiento de la VTV"></div>
     <div class="fg">
@@ -310,7 +310,7 @@ select.filter:focus{border-color:var(--accent)}
     <div class="vender-info" id="venderInfo"></div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Al confirmar, el legajo físico queda <strong>libre</strong> y se crea automáticamente una transferencia en seguimiento.</p>
     <div class="section-label">Datos del comprador</div>
-    <div class="fr"><div class="fg"><label>Nombre y apellido *</label><input id="vComp" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="vDni" type="text" placeholder="12.345.678"></div></div>
+    <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="vComp" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('vComp','vCompDrop','vDni',this.value)" onfocus="filtrarClientesGS('vComp','vCompDrop','vDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('vCompDrop');if(d)d.style.display='none';},200)"><div id="vCompDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="vDni" type="text" placeholder="12.345.678"></div></div>
     <div class="fg"><label>Dirección completa</label><input id="vDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
     <div class="fr"><div class="fg"><label>Teléfono</label><input id="vTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="vMail" type="text" placeholder="ejemplo@mail.com"></div></div>
     <div class="fr">
@@ -346,14 +346,14 @@ select.filter:focus{border-color:var(--accent)}
     </div>
     <div class="ptabs"><button class="ptab active" id="ptabVend" onclick="switchTab('vend')">Vendedor</button><button class="ptab" id="ptabComp" onclick="switchTab('comp')">Comprador</button></div>
     <div id="panelVend">
-      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><input id="tVNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tVDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="tVNom" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('tVNom','tVNomDrop','tVDni',this.value)" onfocus="filtrarClientesGS('tVNom','tVNomDrop','tVDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('tVNomDrop');if(d)d.style.display='none';},200)"><div id="tVNomDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="tVDni" type="text" placeholder="12.345.678"></div></div>
       <div class="fg"><label>Dirección completa</label><input id="tVDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
       <div class="fr"><div class="fg"><label>Teléfono</label><input id="tVTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="tVMail" type="text" placeholder="ejemplo@mail.com"></div></div>
       <div class="fr"><div class="fg"><label>Estado civil</label><select id="tVCivil" onchange="toggleCon('V')"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div><div class="fg"><label>Ocupación / Actividad</label><input id="tVOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
       <div id="tVConBox" class="conyuge-box hidden"><div class="conyuge-title">Datos del cónyuge</div><div class="fr"><div class="fg"><label>Nombre completo</label><input id="tVCoNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tVCoDni" type="text" placeholder="12.345.678"></div></div><div class="fg"><label>Ocupación / Actividad</label><input id="tVCoOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
     </div>
     <div id="panelComp" class="hidden">
-      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><input id="tCNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tCDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="tCNom" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('tCNom','tCNomDrop','tCDni',this.value)" onfocus="filtrarClientesGS('tCNom','tCNomDrop','tCDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('tCNomDrop');if(d)d.style.display='none';},200)"><div id="tCNomDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="tCDni" type="text" placeholder="12.345.678"></div></div>
       <div class="fg"><label>Dirección completa</label><input id="tCDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
       <div class="fr"><div class="fg"><label>Teléfono</label><input id="tCTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="tCMail" type="text" placeholder="ejemplo@mail.com"></div></div>
       <div class="fr"><div class="fg"><label>Estado civil</label><select id="tCCivil" onchange="toggleCon('C')"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div><div class="fg"><label>Ocupación / Actividad</label><input id="tCOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
@@ -1293,6 +1293,42 @@ cargarDatos();
 </div>
 <script>
 
+
+
+// ═══ BUSCADOR DE CLIENTES (gestoría) ══════════════════════
+let _clientesGS = [];
+
+async function cargarClientesGS() {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/clientes?select=id,nombre,dni,tel&order=nombre.asc&limit=500',{headers:sbH});
+    _clientesGS = r.ok ? await r.json() : [];
+  } catch(e){ _clientesGS = []; }
+}
+
+function filtrarClientesGS(inputId, dropId, dniId, q) {
+  const drop = document.getElementById(dropId);
+  if(!drop) return;
+  const lista = _clientesGS.filter(c => !q || c.nombre.toLowerCase().includes(q.toLowerCase()) || (c.dni&&c.dni.includes(q))).slice(0,8);
+  if(!lista.length){ drop.style.display='none'; return; }
+  drop.style.display = 'block';
+  drop.innerHTML = lista.map(c =>
+    '<div onclick="selClienteGS(\''+inputId+'\',\''+dropId+'\',\''+dniId+'\',\''+c.nombre.replace(/'/g,"&#39;")+'\',' + (c.dni?'\''+c.dni+'\'':"''") + ')" '+
+    'style="padding:9px 14px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid #f0ede4;" '+
+    'onmouseover="this.style.background=\'#f4f3ee\'" onmouseout="this.style.background=\'#fff\'">' +
+    '<span style="font-weight:500;">'+c.nombre+'</span>' +
+    (c.dni?'<span style="font-size:0.75rem;color:#9b9890;margin-left:8px;">'+c.dni+'</span>':'') +
+    (c.tel?'<span style="font-size:0.73rem;color:#9b9890;margin-left:8px;">'+c.tel+'</span>':'') +
+    '</div>'
+  ).join('');
+}
+
+function selClienteGS(inputId, dropId, dniId, nombre, dni) {
+  const inp = document.getElementById(inputId);
+  if(inp) inp.value = nombre;
+  if(dniId) { const d = document.getElementById(dniId); if(d && dni) d.value = dni; }
+  const drop = document.getElementById(dropId);
+  if(drop) drop.style.display = 'none';
+}
 
 async function confirmarDocOk(trfId) {
   const t = trfs.find(x=>x.id===trfId);
