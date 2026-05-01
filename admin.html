@@ -2088,6 +2088,7 @@ async function responderPropuestaCompra(decision) {
         solicitado_por:'Admin',
         referencia_id:p.id, referencia_tipo:'orden_compra',
         estado:'pendiente',
+        precio_total:parseFloat(p.precio||0),
         obs:'Propuesta aprobada por admin. Pago total: '+fmt2(p.precio,p.moneda)
       });
     } else {

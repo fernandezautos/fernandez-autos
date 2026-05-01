@@ -1987,8 +1987,8 @@ async function cargarMovPendientes() {
   }).join('');
 }
 
-function abrirProcesarPendiente(id, conceptoEnc, monto, moneda, esCompra) {
-  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra};
+function abrirProcesarPendiente(id, conceptoEnc, monto, moneda, esCompra, referenciaId, precioTotal) {
+  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra, referenciaId: referenciaId||0, precioTotal: precioTotal||0};
   document.getElementById('mpConcepto').textContent = decodeURIComponent(conceptoEnc);
   document.getElementById('mpMonto').value = monto > 0 ? monto : '';
   document.getElementById('mpMoneda').value = moneda;
@@ -2025,15 +2025,17 @@ async function confirmarMovPendiente() {
   if(fechaAgenda) {
     let montoSaldo = 0;
     // Buscar la orden de compra para calcular el saldo (precio - seña)
-    try {
-      const mpData = await sbGet('movimientos_pendientes','select=referencia_id,referencia_tipo&id=eq.'+p.id);
-      if(mpData && mpData.length && mpData[0].referencia_tipo === 'orden_compra' && mpData[0].referencia_id) {
-        const orden = await sbGet('ordenes_compra','select=precio,senia&id=eq.'+mpData[0].referencia_id);
+    // Si tenemos el precio total guardado, calcular el saldo directamente
+    if(p.precioTotal && p.precioTotal > 0) {
+      montoSaldo = p.precioTotal - p.monto; // precio total - seña ya pagada
+    } else if(p.referenciaId) {
+      try {
+        const orden = await sbGet('ordenes_compra','select=precio,senia&id=eq.'+p.referenciaId);
         if(orden && orden.length) {
           montoSaldo = parseFloat(orden[0].precio||0) - parseFloat(orden[0].senia||0);
         }
-      }
-    } catch(e) { console.error(e); }
+      } catch(e) { console.error(e); }
+    }
 
     await sbInsert('agenda',{
       tipo: 'pago',

@@ -2533,6 +2533,7 @@ async function guardarOrdenCompra() {
           monto:senia, moneda:document.getElementById('ocMonedaSenia').value,
           solicitado_por:vendedorNombre,
           referencia_tipo:'orden_compra', estado:'pendiente',
+          precio_total:precio,
           obs:'Pago total: '+fmt2(precio,moneda)
         });
       } else {
