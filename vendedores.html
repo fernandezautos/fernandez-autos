@@ -2492,55 +2492,71 @@ async function guardarOrdenCompra() {
   const modelo = document.getElementById('ocModelo').value.trim();
   const cliente = document.getElementById('ocCliente').value.trim();
   const precio = parseFloat(document.getElementById('ocPrecio').value)||0;
-  if(!marca||!modelo||!cliente||!precio){alert('Completá marca, modelo, cliente y precio.');return;}
+  if(!marca||!modelo||!cliente||!precio){alert('Completa marca, modelo, cliente y precio.');return;}
 
-  mostrarCargando('Registrando orden de compra...');
   const dominio = document.getElementById('ocDominio').value.trim().toUpperCase();
   const anio = parseInt(document.getElementById('ocAnio').value)||new Date().getFullYear();
   const moneda = document.getElementById('ocMoneda').value;
   const formaPago = document.getElementById('ocFormaPago').value;
   const senia = parseFloat(document.getElementById('ocSenia').value)||0;
   const obs = document.getElementById('ocObs').value.trim();
+  const color = document.getElementById('ocColor').value.trim();
   const clienteId = document.getElementById('ocClienteId').value||null;
   const vTexto = marca+' '+modelo+' '+anio+(dominio?' · '+dominio:'');
   const vendedorNombre = (window._session&&window._session.nombre)||'Vendedor';
+  const esAdmin = window._session&&window._session.rol==='admin';
+  const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
 
-  // Crear vehículo en stock como "A ingresar"
-  const nuevoAuto = await sbInsert('vehiculos',{
-    marca, modelo, anio, dominio, color:document.getElementById('ocColor').value.trim(),
-    precio, moneda_precio:moneda, estado:'A ingresar', tipo:'Usado',
-    procedencia:'Propio', cliente_entrega_id:clienteId||null, obs
-  });
+  mostrarCargando(esAdmin ? 'Registrando orden de compra...' : 'Enviando propuesta de compra...');
 
-  if(nuevoAuto){
-    // Crear orden de compra
+  if(esAdmin) {
+    // Admin: crear directamente en stock y notificar
+    const nuevoAuto = await sbInsert('vehiculos',{
+      marca, modelo, anio, dominio, color,
+      precio, moneda_precio:moneda, estado:'A ingresar', sub_estado:'Pendiente peritaje',
+      tipo:'Usado', procedencia:'Propio', cliente_entrega_id:clienteId||null, obs
+    });
+    if(nuevoAuto){
+      await sbInsert('ordenes_compra',{
+        vehiculo_id:nuevoAuto.id, vehiculo_texto:vTexto,
+        cliente_id:clienteId||null, cliente_nombre:cliente,
+        precio, moneda, forma_pago:formaPago,
+        senia:senia||0, moneda_senia:document.getElementById('ocMonedaSenia').value,
+        estado:'pendiente', cargado_por:vendedorNombre, cargado_por_rol:'admin',
+        requiere_aprobacion:false, aprobacion_estado:'directa', obs
+      });
+      const msgCaja = vTexto+' — Compra a '+cliente+'. '+fmt2(precio,moneda)+(formaPago==='Sena + Saldo'?' (Sena: '+fmt2(senia,moneda)+')':'')+'. Preparar pago.';
+      const msgGest = vTexto+' — Auto ingresando por compra. Asignar legajo y comenzar documentacion.';
+      await enviarNotificacion('caja','orden_compra','🛒 Nueva orden de compra',msgCaja,null);
+      await enviarNotificacion('gestoria','orden_compra','🛒 Auto a ingresar — asignar legajo',msgGest,null);
+      stock.push({id:nuevoAuto.id,marca,modelo,anio,dominio,color,
+        precio,moneda,estado:'A ingresar',subEstado:'Pendiente peritaje',procedencia:'Propio',obs,historialPrecios:[]});
+    }
+  } else {
+    // Vendedor: crear propuesta pendiente de aprobacion
     await sbInsert('ordenes_compra',{
-      vehiculo_id:nuevoAuto.id, vehiculo_texto:vTexto,
+      vehiculo_id:null, vehiculo_texto:vTexto,
       cliente_id:clienteId||null, cliente_nombre:cliente,
       precio, moneda, forma_pago:formaPago,
       senia:senia||0, moneda_senia:document.getElementById('ocMonedaSenia').value,
-      estado:'pendiente', cargado_por:vendedorNombre, obs
+      estado:'pendiente', cargado_por:vendedorNombre, cargado_por_rol:'vendedor',
+      requiere_aprobacion:true, aprobacion_estado:'pendiente',
+      obs:(obs?obs+'. ':'')+'Color: '+color+'. Dominio: '+(dominio||'sin dato')
     });
-
-    // Notificaciones
-    const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
-    const msgCaja = vTexto+' — Compra a '+cliente+'. '+fmt2(precio,moneda)+(formaPago==='Seña + Saldo'?' (Seña: '+fmt2(senia,moneda)+')':'')+'. Preparar pago.';
-    const msgGest = vTexto+' — Auto ingresando por compra. Asignar legajo y comenzar documentación.';
-    await enviarNotificacion('caja','orden_compra','🛒 Nueva orden de compra',msgCaja,null);
-    await enviarNotificacion('gestoria','orden_compra','🛒 Auto a ingresar — asignar legajo',msgGest,null);
-    await enviarNotificacion('admin','orden_compra','🛒 Nueva orden de compra registrada',msgCaja,null);
-
-    // Agregar al stock local
-    stock.push({id:nuevoAuto.id,marca,modelo,anio,dominio,color:nuevoAuto.color||'',
-      precio,moneda:moneda,estado:'A ingresar',procedencia:'Propio',obs,historialPrecios:[]});
-
-    ['ocMarca','ocModelo','ocAnio','ocDominio','ocColor','ocPrecio','ocSenia','ocObs','ocCliente'].forEach(id=>{
-      const el=document.getElementById(id); if(el) el.value='';
-    });
-    document.getElementById('ocClienteId').value='';
-    const msg=document.getElementById('ocMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',3000);
-    cargarOrdenesCompra();
+    const msgAdmin = vendedorNombre+' propone comprar: '+vTexto+' a '+cliente+'. Precio: '+fmt2(precio,moneda)+'. Requiere aprobacion.';
+    await enviarNotificacion('admin','propuesta_compra','🛒 Nueva propuesta de compra',msgAdmin,null);
   }
+
+  ['ocMarca','ocModelo','ocAnio','ocDominio','ocColor','ocPrecio','ocSenia','ocObs','ocCliente'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('ocClienteId').value='';
+  document.getElementById('ocSeniaWrap').style.display='none';
+  const msgEl=document.getElementById('ocMsg');
+  msgEl.textContent = esAdmin ? '✓ Orden registrada correctamente' : '✓ Propuesta enviada al administrador';
+  msgEl.style.display='inline';
+  setTimeout(()=>msgEl.style.display='none',3000);
+  cargarOrdenesCompra();
   ocultarCargando();
 }
 

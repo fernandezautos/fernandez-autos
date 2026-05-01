@@ -784,12 +784,21 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
   </div>
 </section>
 
-<!-- ═══ PROPUESTAS DE PRECIO ════════════════════════════════ -->
+<!-- ═══ PROPUESTAS ══════════════════════════════════════════ -->
 <section id="propuestas" class="section">
   <div class="page-head">
-    <h2>Propuestas de cambio de precio</h2>
+    <h2>Propuestas</h2>
     <div style="font-size:0.8rem;color:var(--text3);">Revisá y respondé las propuestas enviadas por los vendedores</div>
   </div>
+
+  <!-- Pestañas -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0;">
+    <button id="ptab-precio" onclick="switchPropTab('precio')" style="padding:8px 18px;border:none;background:none;font-family:Arial,sans-serif;font-size:0.88rem;font-weight:600;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;cursor:pointer;">Propuestas de precio</button>
+    <button id="ptab-compra" onclick="switchPropTab('compra')" style="padding:8px 18px;border:none;background:none;font-family:Arial,sans-serif;font-size:0.88rem;font-weight:600;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">Propuestas de compra <span id="ptab-compra-count" style="background:#e53935;color:#fff;border-radius:20px;padding:1px 7px;font-size:0.72rem;margin-left:4px;display:none;"></span></button>
+  </div>
+
+  <!-- Tab: Propuestas de precio -->
+  <div id="ptab-content-precio">
   <div class="cards">
     <div class="card"><div class="card-label">Pendientes</div><div class="card-value" style="color:#b45309;" id="pr-pendientes">—</div><div class="card-sub">esperando respuesta</div></div>
     <div class="card"><div class="card-label">Aprobadas</div><div class="card-value pos" id="pr-aprobadas">—</div><div class="card-sub">este mes</div></div>
@@ -816,9 +825,49 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
       </table>
     </div>
   </div>
+  </div><!-- fin ptab-content-precio -->
+
+  <!-- Tab: Propuestas de compra -->
+  <div id="ptab-content-compra" style="display:none;">
+    <div class="cards" style="margin-bottom:16px;">
+      <div class="card"><div class="card-label">Pendientes</div><div class="card-value" style="color:#b45309;" id="pc-pendientes">—</div><div class="card-sub">esperando respuesta</div></div>
+      <div class="card"><div class="card-label">Aprobadas</div><div class="card-value pos" id="pc-aprobadas">—</div><div class="card-sub">este mes</div></div>
+      <div class="card"><div class="card-label">Rechazadas</div><div class="card-value" style="color:#991b1b;" id="pc-rechazadas">—</div><div class="card-sub">este mes</div></div>
+    </div>
+    <div class="fc" style="padding:0;overflow:hidden;">
+      <div class="fc-header" style="padding:15px 20px;border-bottom:1px solid var(--border);margin:0;">
+        <div class="fc-title" style="margin:0;font-size:1rem;">Propuestas de compra de vendedores</div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Vendedor</th><th>Vehículo</th><th>Vendedor del auto</th><th>Precio</th><th>Forma pago</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaPropuestasCompra"><tr class="empty-row"><td colspan="7">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </section>
 
-<!-- MODAL RESPONDER PROPUESTA -->
+<!-- MODAL RESPONDER PROPUESTA COMPRA -->
+<div id="modalPropuestaCompra" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:32px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:1rem;font-weight:600;">Responder propuesta de compra</div>
+      <button onclick="cerrarModalPropuestaCompra()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div id="modalPropuestaCompraInfo" style="background:#f4f3ee;border-radius:8px;padding:14px;margin-bottom:20px;font-size:0.85rem;"></div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Mensaje para el vendedor (opcional)</label>
+      <input id="pcRespuesta" type="text" placeholder="Ej: Aprobado, proceder con la compra." style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalPropuestaCompra()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
+      <button onclick="responderPropuestaCompra('rechazada')" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">❌ Rechazar</button>
+      <button onclick="responderPropuestaCompra('aprobada')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">✅ Aprobar</button>
+    </div>
+  </div>
+</div>
 <div id="modalPropuesta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:14px;padding:32px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -1912,6 +1961,147 @@ cargarDatos = async function() {
   await _cargarDatosOrig();
 };
 
+
+// ═══ PESTAÑAS PROPUESTAS ══════════════════════════════════
+function switchPropTab(tab) {
+  ['precio','compra'].forEach(t => {
+    document.getElementById('ptab-content-'+t).style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById('ptab-'+t);
+    btn.style.color = t===tab ? 'var(--accent)' : 'var(--text3)';
+    btn.style.borderBottomColor = t===tab ? 'var(--accent)' : 'transparent';
+  });
+  if(tab==='compra') cargarPropuestasCompra();
+}
+
+// ═══ PROPUESTAS DE COMPRA ════════════════════════════════
+let _propuestasCompra = [];
+let _propuestaCompraActivaId = null;
+
+async function cargarPropuestasCompra() {
+  const raw = await sbGet('ordenes_compra','select=*&cargado_por_rol=eq.vendedor&order=created_at.desc');
+  _propuestasCompra = raw || [];
+
+  const pendientes = _propuestasCompra.filter(p=>p.aprobacion_estado==='pendiente').length;
+  const badge = document.getElementById('ptab-compra-count');
+  if(badge) { if(pendientes>0){badge.style.display='inline';badge.textContent=pendientes;}else{badge.style.display='none';} }
+
+  const mesActual = new Date().toISOString().substring(0,7);
+  setText('pc-pendientes', pendientes);
+  setText('pc-aprobadas',  _propuestasCompra.filter(p=>p.aprobacion_estado==='aprobada'&&p.created_at?.startsWith(mesActual)).length);
+  setText('pc-rechazadas', _propuestasCompra.filter(p=>p.aprobacion_estado==='rechazada'&&p.created_at?.startsWith(mesActual)).length);
+
+  // Actualizar badge del nav también
+  actualizarBadgePropuestaCompra();
+
+  const tbody = document.getElementById('tablaPropuestasCompra');
+  if(!tbody) return;
+  if(!_propuestasCompra.length){tbody.innerHTML='<tr class="empty-row"><td colspan="7">Sin propuestas de compra</td></tr>';return;}
+
+  const COL = {pendiente:'#b45309',aprobada:'#065f46',rechazada:'#991b1b',directa:'#555'};
+  const LAB = {pendiente:'Pendiente',aprobada:'Aprobada',rechazada:'Rechazada',directa:'Directa'};
+
+  tbody.innerHTML = _propuestasCompra.map(p => {
+    const col = COL[p.aprobacion_estado]||'#555';
+    const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+    const accion = p.aprobacion_estado==='pendiente'
+      ? '<button onclick="abrirModalPropuestaCompra('+p.id+')" class="btn btn-sm" style="background:#2558a3;color:#fff;">Responder</button>'
+      : '<span style="font-size:0.75rem;color:#9b9890;">Respondida</span>';
+    return '<tr>'+
+      '<td style="font-weight:500;">'+( p.cargado_por||'—')+'</td>'+
+      '<td>'+p.vehiculo_texto+'</td>'+
+      '<td>'+p.cliente_nombre+'</td>'+
+      '<td>'+fmt2(p.precio,p.moneda)+'</td>'+
+      '<td>'+p.forma_pago+(p.senia>0?' (Seña: '+fmt2(p.senia,p.moneda_senia||p.moneda)+')':'')+'</td>'+
+      '<td><span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600;">'+LAB[p.aprobacion_estado]+'</span></td>'+
+      '<td>'+accion+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function actualizarBadgePropuestaCompra() {
+  const pendientes = _propuestasCompra.filter(p=>p.aprobacion_estado==='pendiente').length;
+  const btn = document.getElementById('btnNavPropuestas');
+  const totalPend = (_propuestas.filter(p=>p.estado==='pendiente').length) + pendientes;
+  if(btn) btn.textContent = 'Propuestas' + (totalPend > 0 ? ' ('+totalPend+')' : '');
+}
+
+function abrirModalPropuestaCompra(id) {
+  _propuestaCompraActivaId = id;
+  const p = _propuestasCompra.find(x=>x.id===id);
+  if(!p) return;
+  const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+  document.getElementById('pcRespuesta').value='';
+  document.getElementById('modalPropuestaCompraInfo').innerHTML =
+    '<div style="font-weight:600;margin-bottom:8px;">'+p.vehiculo_texto+'</div>'+
+    '<div style="font-size:0.82rem;color:#6b6960;">'+
+    'Vendedor que propone: <b>'+( p.cargado_por||'—')+'</b><br>'+
+    'Vendedor del auto: '+p.cliente_nombre+'<br>'+
+    'Precio: '+fmt2(p.precio,p.moneda)+
+    (p.senia>0?' · Seña: '+fmt2(p.senia,p.moneda_senia||p.moneda):'')+
+    (p.obs?'<br>Obs: '+p.obs:'')+'</div>';
+  document.getElementById('modalPropuestaCompra').style.display='flex';
+}
+
+function cerrarModalPropuestaCompra() {
+  document.getElementById('modalPropuestaCompra').style.display='none';
+  _propuestaCompraActivaId = null;
+}
+
+async function responderPropuestaCompra(decision) {
+  const p = _propuestasCompra.find(x=>x.id===_propuestaCompraActivaId);
+  if(!p) return;
+  const respuesta = document.getElementById('pcRespuesta').value.trim();
+  mostrarCargando('Procesando respuesta...');
+
+  // Actualizar orden de compra
+  await fetch(SB_URL+'/rest/v1/ordenes_compra?id=eq.'+p.id,{
+    method:'PATCH', headers:sbH,
+    body:JSON.stringify({aprobacion_estado:decision, aprobacion_respuesta:respuesta||null})
+  });
+
+  const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+
+  if(decision==='aprobada') {
+    // Crear el auto en stock
+    const obs = p.obs||'';
+    const partes = p.vehiculo_texto.split(' ');
+    const marca = partes[0]||'';
+    const modelo = partes[1]||'';
+    const anio = parseInt(partes[2])||new Date().getFullYear();
+    const nuevoAuto = await sbInsert('vehiculos',{
+      marca, modelo, anio, precio:p.precio, moneda_precio:p.moneda,
+      estado:'A ingresar', sub_estado:'Pendiente peritaje',
+      tipo:'Usado', procedencia:'Propio', obs
+    });
+    if(nuevoAuto){
+      await fetch(SB_URL+'/rest/v1/ordenes_compra?id=eq.'+p.id,{
+        method:'PATCH', headers:sbH, body:JSON.stringify({vehiculo_id:nuevoAuto.id})
+      });
+    }
+    // Notificar a caja y gestoría
+    const msgCaja = p.vehiculo_texto+' — Compra aprobada. Vendedor: '+p.cliente_nombre+'. Precio: '+fmt2(p.precio,p.moneda)+'. Preparar pago.';
+    const msgGest = p.vehiculo_texto+' — Auto ingresando por compra aprobada. Asignar legajo.';
+    await enviarNotificacion('caja','orden_compra','🛒 Compra aprobada — preparar pago',msgCaja,null);
+    await enviarNotificacion('gestoria','orden_compra','🛒 Auto a ingresar — asignar legajo',msgGest,null);
+  }
+
+  // Notificar al vendedor
+  const decLabel = decision==='aprobada' ? 'aprobada ✅' : 'rechazada ❌';
+  const msgVend = 'Tu propuesta de compra para '+p.vehiculo_texto+' fue '+decLabel+'.'+(respuesta?' Mensaje del admin: '+respuesta:'');
+  await enviarNotificacion('vendedor','respuesta_propuesta_compra','🛒 Respuesta a tu propuesta de compra',msgVend,null);
+
+  p.aprobacion_estado = decision;
+  ocultarCargando();
+  cerrarModalPropuestaCompra();
+  cargarPropuestasCompra();
+  alert('Respuesta enviada correctamente.');
+}
+
+document.addEventListener('click',function(e){
+  const m=document.getElementById('modalPropuestaCompra');
+  if(m&&e.target===m) cerrarModalPropuestaCompra();
+});
+
 // ═══ GESTIÓN DE USUARIOS ══════════════════════════════════
 let _usuarios = [];
 let _editUsuarioId = null;
@@ -2177,7 +2367,7 @@ async function responderPropuesta(decision) {
 const _showOrigAdmin = show;
 show = function(sec, btn) {
   _showOrigAdmin(sec, btn);
-  if(sec === 'propuestas') cargarPropuestas();
+  if(sec === 'propuestas') { cargarPropuestas(); cargarPropuestasCompra(); }
   if(sec === 'usuarios') cargarUsuarios();
 };
 
