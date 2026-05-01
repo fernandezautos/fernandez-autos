@@ -1764,7 +1764,7 @@ function fmtTs(ts) {
 }
 
 async function marcarLeida(id) {
-  await fetch(SB_URL+'/rest/v1/notificaciones?id=eq.'+id, {method:'PATCH',headers:sbH,body:JSON.stringify({leida:true})});
+  await fetch(SB_URL+'/rest/v1/notificaciones?id=eq.'+id, {method:'PATCH',headers:sbHeaders,body:JSON.stringify({leida:true})});
   var n = _notifs.find(function(x){ return x.id===id; });
   if(n) n.leida = true;
   renderNotifs(); actualizarCampanita();
@@ -1772,7 +1772,7 @@ async function marcarLeida(id) {
 
 async function marcarTodasLeidas() {
   var rol = getRolNotif();
-  await fetch(SB_URL+'/rest/v1/notificaciones?para=eq.'+rol+'&leida=eq.false', {method:'PATCH',headers:sbH,body:JSON.stringify({leida:true})});
+  await fetch(SB_URL+'/rest/v1/notificaciones?para=eq.'+rol+'&leida=eq.false', {method:'PATCH',headers:sbHeaders,body:JSON.stringify({leida:true})});
   _notifs.forEach(function(n){ n.leida=true; });
   renderNotifs(); actualizarCampanita();
 }
