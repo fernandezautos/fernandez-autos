@@ -1369,7 +1369,7 @@ async function cargarPendientes() {
         html1 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">';
         html1 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
         html1 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' · Sin legajo asignado</div></div>';
-        html1 += '<button onclick="irALegajos()" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
+        html1 += '<button onclick="irALegajosConAuto('+v.id+',\''+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'\',\''+encodeURIComponent(v.dominio||'')+'\')'  + '" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
         html1 += '</div>';
       });
       html1 += '</div>';
@@ -1439,7 +1439,88 @@ let _cancelarOpGestId = null;
 
 function gestVerDetTrf(e){ var id=e.currentTarget.getAttribute('data-id'); if(id) abrirDetTrf(id); }
 
-function irALegajos(){ cambiarPag('legajos', g('navLeg')); }
+
+function irALegajosConAuto(vehiculoId, marcaModeloEnc, dominioEnc) {
+  var marcaModelo = decodeURIComponent(marcaModeloEnc);
+  var dominio = decodeURIComponent(dominioEnc);
+  var libres = legs.filter(function(l){ return l.libre; });
+  if(!libres.length) { alert('No hay legajos libres disponibles.'); return; }
+
+  var html = '<div style="padding:20px;">';
+  html += '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;">';
+  html += '<div style="font-weight:600;margin-bottom:2px;">Auto a asignar:</div>';
+  html += '<div>'+marcaModelo+(dominio?' · '+dominio:'')+'</div></div>';
+  html += '<div style="font-size:0.85rem;color:var(--text2);margin-bottom:12px;">Seleccioná el legajo:</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;">';
+  libres.forEach(function(l) {
+    html += '<div onclick="seleccionarLegajoConAuto('+l.num+','+vehiculoId+',\''+encodeURIComponent(marcaModelo)+'\',\''+encodeURIComponent(dominio)+'\')" style="background:var(--green-bg);border:1.5px dashed var(--green-border);border-radius:8px;padding:14px 8px;text-align:center;cursor:pointer;" onmouseover="this.style.background=\'#c8edc9\'" onmouseout="this.style.background=\'var(--green-bg)\'">';
+    html += '<div style="font-size:1.1rem;font-weight:700;color:var(--green);">'+String(l.num).padStart(2,'0')+'</div>';
+    html += '<div style="font-size:0.7rem;color:var(--green);margin-top:2px;">Libre</div></div>';
+  });
+  html += '</div></div>';
+
+  var modal = document.getElementById('ovAsignarLegajo');
+  if(!modal) {
+    modal = document.createElement('div');
+    modal.id = 'ovAsignarLegajo';
+    modal.className = 'overlay';
+    modal.innerHTML = '<div class="modal" style="max-width:500px;"><div class="mh"><h3>Asignar legajo</h3><button class="mbtn" onclick="cerrar(\'ovAsignarLegajo\')">✕</button></div><div class="mb" id="ovAsignarLegajoBody"></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e){ if(e.target===modal) cerrar('ovAsignarLegajo'); });
+  }
+  document.getElementById('ovAsignarLegajoBody').innerHTML = html;
+  modal.classList.remove('hidden');
+}
+
+function seleccionarLegajoConAuto(num, vehiculoId, marcaModeloEnc, dominioEnc) {
+  cerrar('ovAsignarLegajo');
+  var marcaModelo = decodeURIComponent(marcaModeloEnc);
+  var dominio = decodeURIComponent(dominioEnc);
+  // Abrir modal de asignacion con datos precargados
+  abrirModalLeg(num, false);
+  // Precargar campos del auto
+  setTimeout(function() {
+    sv('lVeh', marcaModelo);
+    sv('lDom', dominio);
+    // Guardar el vehiculo_id para actualizar el sub_estado despues
+    document.getElementById('ovLeg').dataset.vehiculoId = vehiculoId;
+  }, 50);
+}
+
+function irALegajos() {
+  // Mostrar modal con legajos libres
+  var libres = legs.filter(function(l){ return l.libre; });
+  if(!libres.length) { alert('No hay legajos libres disponibles.'); return; }
+
+  var html = '<div style="padding:20px;">';
+  html += '<div style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;">Selecciona el legajo a asignar:</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;">';
+  libres.forEach(function(l) {
+    html += '<div onclick="seleccionarLegajoLibre('+l.num+')" style="background:var(--green-bg);border:1.5px dashed var(--green-border);border-radius:8px;padding:14px 8px;text-align:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background=\'#c8edc9\'" onmouseout="this.style.background=\'var(--green-bg)\'">';
+    html += '<div style="font-size:1.1rem;font-weight:700;color:var(--green);">'+String(l.num).padStart(2,'0')+'</div>';
+    html += '<div style="font-size:0.7rem;color:var(--green);margin-top:2px;">Libre</div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  var modal = document.getElementById('ovAsignarLegajo');
+  if(!modal) {
+    modal = document.createElement('div');
+    modal.id = 'ovAsignarLegajo';
+    modal.className = 'overlay';
+    modal.innerHTML = '<div class="modal" style="max-width:500px;"><div class="mh"><h3>Asignar legajo</h3><button class="mbtn" onclick="cerrar(\'ovAsignarLegajo\')">✕</button></div><div class="mb" id="ovAsignarLegajoBody"></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e){ if(e.target===modal) cerrar('ovAsignarLegajo'); });
+  }
+  document.getElementById('ovAsignarLegajoBody').innerHTML = html;
+  modal.classList.remove('hidden');
+}
+
+function seleccionarLegajoLibre(num) {
+  cerrar('ovAsignarLegajo');
+  // Abrir directamente el modal de asignación de legajo
+  abrirModalLeg(num, false);
+}
 
 function abrirCancelarOpGest(opId, vehiculoEnc, clienteEnc) {
   _cancelarOpGestId = opId;
