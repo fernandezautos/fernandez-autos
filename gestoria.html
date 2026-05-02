@@ -501,7 +501,7 @@ async function sbInsert(t,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}`,{m
 async function sbUpdate(t,col,val,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${val}`,{method:'PATCH',headers:sbH,body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} return r.json(); }
 async function sbDelete(t,col,val){ await fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${val}`,{method:'DELETE',headers:sbH}); }
 
-function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML=`<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">${msg}</div>`;document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
+function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML='<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">'+msg+'</div>';document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
 function ocultarCargando(){ const el=document.getElementById('_ld');if(el)el.remove(); }
 
 // Guarda legajo completo en Supabase
@@ -597,22 +597,7 @@ function vtvEstado(fechaVtv) {
 }
 
 // ═══ DATOS INICIALES ═══
-function initLegs() {
-  const arr = [];
-  for(let i=1;i<=TOTAL;i++) arr.push({num:i,libre:true,auto:null});
-  arr[0]={num:1,libre:false,auto:{dominio:'GHK 452',vehiculo:'Chevrolet Cruze 2021',cliente:'Martínez, Carlos',dni:'20-34567890-1',fecha:'2026-04-10',precio:'$18.500.000',vtv:'2026-12-15',notas:'Comprado en remate.',notas_hilo:[],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:true},{n:'Cédula verde',ok:true},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
-  arr[1]={num:2,libre:false,auto:{dominio:'JKL 789',vehiculo:'Toyota Hilux 2022',cliente:'Rodríguez, Ana',dni:'27-45678901-2',fecha:'2026-04-18',precio:'',vtv:'2026-05-10',notas:'',notas_hilo:[{ts:'2026-04-19T10:00:00.000Z',txt:'Llamé a la titular, trae el 08 la semana que viene.'}],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:false},{n:'Cédula verde',ok:false},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
-  arr[4]={num:5,libre:false,auto:{dominio:'MNO 234',vehiculo:'Ford Focus 2018',cliente:'López, Sergio',dni:'23-56789012-3',fecha:'2026-04-05',precio:'$9.200.000',vtv:'2027-03-20',notas:'Tiene prenda a cancelar.',notas_hilo:[],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:true},{n:'Libre deuda patente',ok:true},{n:'Cédula verde',ok:true},{n:'Formulario 08 certificado',ok:true},{n:'Libre deuda infracciones',ok:true},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:true},{n:'Historial de servicios',ok:true}]}};
-  arr[7]={num:8,libre:false,auto:{dominio:'STU 890',vehiculo:'Peugeot 208 2023',cliente:'González, Pablo',dni:'28-78901234-5',fecha:'2026-04-20',precio:'',vtv:'',notas:'',notas_hilo:[],docs:[{n:'Título original',ok:false},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:false},{n:'Cédula verde',ok:false},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:false},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
-  return arr;
-}
-
-function initTrfs() {
-  return [
-    {id:'TRF-001',vendedor:'Fernández, María',vendedorData:{nombre:'Fernández, María',dni:'25-67890-1',dir:'San Martín 1234, Mar del Plata',tel:'223-1234567',mail:'mfernandez@mail.com',civil:'casado',ocup:'Docente',conyuge:{nombre:'Pérez, Juan',dni:'22-11111-2',ocup:'Empleado'}},comprador:'Suárez, Ricardo',compradorData:{nombre:'Suárez, Ricardo',dni:'28-99999-3',dir:'Rivadavia 567, Mar del Plata',tel:'223-9876543',mail:'rsuarez@mail.com',civil:'soltero',ocup:'Comerciante',conyuge:null},dominio:'PQR 567',vehiculo:'Renault Sandero 2020',estado:'finalizada',fecha:'2026-03-28',precio:'$8.000.000',honorario:'$80.000',honorarioEst:'cobrado',legajoOrigen:12,notas:'Finalizado. Entregado el 15/04.',historial:[{estado:'prep-doc',label:'Preparando documentación',ts:'2026-03-28T09:00:00.000Z',nota:'Trámite creado.'},{estado:'en-escribania',label:'Doc. en escribanía',ts:'2026-03-30T10:30:00.000Z',nota:''},{estado:'retirado',label:'Retirado de escribanía',ts:'2026-04-05T11:00:00.000Z',nota:''},{estado:'en-gestoria',label:'En gestoría',ts:'2026-04-08T09:00:00.000Z',nota:''},{estado:'para-entregar',label:'Para entregar doc.',ts:'2026-04-12T15:00:00.000Z',nota:''},{estado:'finalizada',label:'Finalizada',ts:'2026-04-15T14:00:00.000Z',nota:'Entregado al comprador.'}]},
-    {id:'TRF-002',vendedor:'Gómez, Héctor',vendedorData:{nombre:'Gómez, Héctor',dni:'23-55555-4',dir:'Luro 890, Mar del Plata',tel:'223-5555555',mail:'hgomez@mail.com',civil:'casado',ocup:'Jubilado',conyuge:{nombre:'Ruiz, Carmen',dni:'24-44444-5',ocup:'Ama de casa'}},comprador:'Torres, Laura',compradorData:{nombre:'Torres, Laura',dni:'30-33333-6',dir:'Independencia 321, Mar del Plata',tel:'223-3333333',mail:'ltorres@mail.com',civil:'soltero',ocup:'Empleada',conyuge:null},dominio:'VWX 123',vehiculo:'Honda Civic 2017',estado:'en-escribania',fecha:'2026-04-14',precio:'$12.500.000',honorario:'$120.000',honorarioEst:'pendiente-cobro',legajoOrigen:3,notas:'Trámite urgente. Cliente viaja el 30/04.',historial:[{estado:'prep-doc',label:'Preparando documentación',ts:'2026-04-14T08:00:00.000Z',nota:'Trámite creado al registrar la venta.'},{estado:'en-escribania',label:'Doc. en escribanía',ts:'2026-04-16T10:00:00.000Z',nota:''}]}
-  ];
-}
+function initLegs() { return []; }
 
 let legs = [];
 let trfs = [];
@@ -987,7 +972,7 @@ function filtTrfs() {
 
 function renderTrfRow(t) {
   const op='';
-  return '<tr onclick="abrirDetTrf(\''+t.id+'\')" style="'+op+'">'+
+        html3 += '<button onclick="gestVerDetTrf(event)" data-id="'+t.id+'" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>';
     '<td class="td-mono" style="color:var(--accent);font-weight:500">'+t.id+'</td>'+
     '<td>'+t.vendedor+'</td><td>'+t.comprador+'</td>'+
     '<td><span class="td-dom">'+t.dominio+'</span></td>'+
@@ -1349,121 +1334,110 @@ function selClienteGS(inputId, dropId, dniId, nombre, dni) {
 
 
 async function cargarPendientes() {
-  // Autos a ingresar
-  const autosRaw = await sbGet('vehiculos','select=*&estado=eq.A ingresar&order=created_at.asc');
-  const autos = autosRaw || [];
+  var autosRaw = await sbGet('vehiculos','select=*&estado=eq.A ingresar&order=created_at.asc');
+  var autos = autosRaw || [];
+  var legajosOcupados = legs.filter(function(l){return !l.libre;}).map(function(l){return l.auto&&l.auto.dominio;}).filter(Boolean);
+  var sinLegajo = autos.filter(function(v){return v.dominio && !legajosOcupados.includes(v.dominio);});
+  var conLegajo = autos.filter(function(v){return !v.dominio || legajosOcupados.includes(v.dominio);});
+  var trfsActivas = trfs.filter(function(t){return t.estado !== 'finalizada';});
+  var opsActivas = [];
+  try { opsActivas = await sbGet('operaciones','select=*&estado=neq.Entregado&estado=neq.Cancelada&order=created_at.desc&limit=20'); } catch(e){}
 
-  // Legajos ocupados (para detectar cuales no tienen legajo)
-  const legajosOcupados = legs.filter(l=>!l.libre).map(l=>l.auto&&l.auto.dominio).filter(Boolean);
-
-  // Autos sin legajo = autos a ingresar cuyo dominio no está en ningun legajo
-  const sinLegajo = autos.filter(v => v.dominio && !legajosOcupados.includes(v.dominio));
-  const conLegajo = autos.filter(v => !v.dominio || legajosOcupados.includes(v.dominio));
-
-  // Transferencias activas
-  const trfsActivas = trfs.filter(t => t.estado !== 'finalizada');
-
-  // Operaciones activas (para cancelar)
-  let opsActivas = [];
-  try {
-    opsActivas = await sbGet('operaciones','select=*&estado=neq.Entregado&estado=neq.Cancelada&order=created_at.desc&limit=20');
-  } catch(e){}
-
-  // Badge nav
-  const total = autos.length + trfsActivas.length + sinLegajo.length;
-  const badge = document.getElementById('navPendCount');
+  // Badge
+  var total = autos.length + trfsActivas.length + sinLegajo.length;
+  var badge = document.getElementById('navPendCount');
   if(badge){ if(total>0){badge.style.display='inline';badge.textContent=total;}else{badge.style.display='none';} }
 
   // Stats
-  const stats = document.getElementById('statsPend');
+  var stats = document.getElementById('statsPend');
   if(stats) {
-    const mkStat = (lbl, val, col) => '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div><div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>';
-    stats.innerHTML =
-      mkStat('Sin legajo', sinLegajo.length, '#991b1b') +
-      mkStat('A documentar', conLegajo.length, '#1e40af') +
-      mkStat('Transferencias', trfsActivas.length, '#b45309') +
-      mkStat('Ops activas', opsActivas.length, '#7c3aed');
+    var mkStat = function(lbl,val,col){ return '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div><div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>'; };
+    stats.innerHTML = mkStat('Sin legajo',sinLegajo.length,'#991b1b') + mkStat('A documentar',conLegajo.length,'#1e40af') + mkStat('Transferencias',trfsActivas.length,'#b45309') + mkStat('Ops activas',opsActivas.length,'#7c3aed');
   }
 
-  const cardStyle = 'background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
+  var cs = 'background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
 
-  // ── Autos sin legajo ────────────────────────────────────
-  const listaSinLeg = document.getElementById('pendSinLegajoLista');
+  // Sin legajo
+  var listaSinLeg = document.getElementById('pendSinLegajoLista');
   if(listaSinLeg) {
     if(!sinLegajo.length) {
-      listaSinLeg.innerHTML = '<div style="'+cardStyle+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de asignación de legajo</div>';
+      listaSinLeg.innerHTML = '<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de asignacion de legajo</div>';
     } else {
-      listaSinLeg.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+sinLegajo.map(v => {
-        const dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
-        return '<div style="'+cardStyle+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">'+
-          '<div style="flex:1;">'+
-            '<div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>'+
-            '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' día'+(dias!==1?'s':'')+' · Sin legajo asignado</div>'+
-          '</div>'+
-          '<button onclick="irALegajos()" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>'+
-        '</div>';
-      }).join('')+'</div>';
+      var html1 = '<div style="display:flex;flex-direction:column;gap:10px;">';
+      sinLegajo.forEach(function(v){
+        var dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
+        html1 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">';
+        html1 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
+        html1 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' · Sin legajo asignado</div></div>';
+        html1 += '<button onclick="irALegajos()" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
+        html1 += '</div>';
+      });
+      html1 += '</div>';
+      listaSinLeg.innerHTML = html1;
     }
   }
 
-  // ── Autos a documentar ──────────────────────────────────
-  const listaAutos = document.getElementById('pendAutosLista');
+  // Con legajo - autos a documentar
+  var listaAutos = document.getElementById('pendAutosLista');
   if(listaAutos) {
     if(!conLegajo.length) {
-      listaAutos.innerHTML = '<div style="'+cardStyle+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentacion</div>';
+      listaAutos.innerHTML = '<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentacion</div>';
     } else {
-      listaAutos.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+conLegajo.map(v => {
-        const sub = v.sub_estado || 'Pendiente a peritaje';
-        const col = SUB_COLOR[sub] || '#555';
-        const idx = SUB_ESTADOS_ORD.indexOf(sub);
-        const siguiente = idx >= 0 && idx < SUB_ESTADOS_ORD.length-1 ? SUB_ESTADOS_ORD[idx+1] : null;
-        const dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
-        return '<div style="'+cardStyle+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
-          '<div style="flex:1;">'+
-            '<div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>'+
-            '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' día'+(dias!==1?'s':'')+' en sistema</div>'+
-            (v.obs?'<div style="font-size:0.76rem;color:var(--text3);margin-top:2px;font-style:italic;">'+v.obs+'</div>':'')+
-          '</div>'+
-          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
-            '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>'+
-            (siguiente ? '<button onclick="avanzarSubEstado('+v.id+',''+siguiente+'')" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>' : '')+
-            (sub==='Documentacion lista' ? '<button onclick="pasarADisponible('+v.id+')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>' : '')+
-          '</div>'+
-        '</div>';
-      }).join('')+'</div>';
+      var html2 = '<div style="display:flex;flex-direction:column;gap:10px;">';
+      conLegajo.forEach(function(v){
+        var sub = v.sub_estado || 'Pendiente a peritaje';
+        var col = SUB_COLOR[sub] || '#555';
+        var idx = SUB_ESTADOS_ORD.indexOf(sub);
+        var siguiente = (idx >= 0 && idx < SUB_ESTADOS_ORD.length-1) ? SUB_ESTADOS_ORD[idx+1] : null;
+        var dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
+        html2 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+        html2 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
+        html2 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' en sistema</div>';
+        if(v.obs) html2 += '<div style="font-size:0.76rem;color:var(--text3);margin-top:2px;font-style:italic;">'+v.obs+'</div>';
+        html2 += '</div>';
+        html2 += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html2 += '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
+        if(siguiente) html2 += '<button onclick="avanzarSubEstadoGS('+v.id+', this)" data-sub="'+siguiente+'" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>';
+        if(sub==='Documentacion lista') html2 += '<button onclick="pasarADisponible('+v.id+')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>';
+        html2 += '</div></div>';
+      });
+      html2 += '</div>';
+      listaAutos.innerHTML = html2;
     }
   }
 
-  // ── Transferencias activas ─────────────────────────────
-  const listaTrfs = document.getElementById('pendTrfsLista');
+  // Transferencias activas
+  var listaTrfs = document.getElementById('pendTrfsLista');
   if(listaTrfs) {
     if(!trfsActivas.length) {
-      listaTrfs.innerHTML = '<div style="'+cardStyle+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin transferencias activas</div>';
+      listaTrfs.innerHTML = '<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin transferencias activas</div>';
     } else {
-      listaTrfs.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+trfsActivas.map(t => {
-        const col = {'prep-doc':'#b45309','en-escribania':'#1e40af','retirado':'#555','en-gestoria':'#7c3aed','para-entregar':'#065f46'}[t.estado]||'#555';
-        const label = ELABELS[t.estado]||t.estado;
-        const dias = t.fecha ? Math.floor((new Date()-new Date(t.fecha))/86400000) : 0;
-        // Buscar operacion relacionada
-        const opRelacionada = opsActivas.find(o => o.vehiculo_texto && t.dominio && o.vehiculo_texto.includes(t.dominio));
-        return '<div style="'+cardStyle+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
-          '<div style="flex:1;">'+
-            '<div style="font-weight:600;font-size:0.92rem;">'+t.id+' — '+t.dominio+'</div>'+
-            '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+t.vendedor+' → '+t.comprador+' · '+dias+' día'+(dias!==1?'s':'')+' en curso</div>'+
-          '</div>'+
-          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
-            '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+label+'</span>'+
-            (opRelacionada ? '<button onclick="abrirDetalleOp(''+opRelacionada.id+'')" style="background:#f4f3ee;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver operación</button>' : '')+
-            '<button onclick="abrirDetTrf(''+t.id+'')" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>'+
-            (opRelacionada ? '<button onclick="abrirCancelarOpGest(''+opRelacionada.id+'',''+encodeURIComponent(opRelacionada.vehiculo_texto||'')+'',''+encodeURIComponent(opRelacionada.cliente_nombre||'')+'')" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Cancelar</button>' : '')+
-          '</div>'+
-        '</div>';
-      }).join('')+'</div>';
+      var html3 = '<div style="display:flex;flex-direction:column;gap:10px;">';
+      trfsActivas.forEach(function(t){
+        var colMap = {'prep-doc':'#b45309','en-escribania':'#1e40af','retirado':'#555','en-gestoria':'#7c3aed','para-entregar':'#065f46'};
+        var col2 = colMap[t.estado]||'#555';
+        var label = ELABELS[t.estado]||t.estado;
+        var dias = t.fecha ? Math.floor((new Date()-new Date(t.fecha))/86400000) : 0;
+        var opRel = opsActivas.find(function(o){return o.vehiculo_texto && t.dominio && o.vehiculo_texto.includes(t.dominio);});
+        html3 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+        html3 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+t.id+' — '+t.dominio+'</div>';
+        html3 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+t.vendedor+' → '+t.comprador+' · '+dias+' dia'+(dias!==1?'s':'')+' en curso</div></div>';
+        html3 += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html3 += '<span style="background:'+col2+'18;color:'+col2+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+label+'</span>';
+        if(opRel) html3 += '<button onclick="abrirDetalleOp(\'' + opRel.id + '\')"; style="background:#f4f3ee;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver operacion</button>';
+        html3 += '<button onclick="gestVerDetTrf(event)" data-id="'+t.id+'" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>';
+        if(opRel) html3 += '<button onclick="abrirCancelarOpGest(' + JSON.stringify(opRel.id) + ',\''+encodeURIComponent(opRel.vehiculo_texto||'')+'\',' + '\'' + encodeURIComponent(opRel.cliente_nombre||'') + '\')" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Cancelar</button>';
+        html3 += '</div></div>';
+      });
+      html3 += '</div>';
+      listaTrfs.innerHTML = html3;
     }
   }
 }
 
 let _cancelarOpGestId = null;
+
+function gestVerDetTrf(e){ var id=e.currentTarget.getAttribute('data-id'); if(id) abrirDetTrf(id); }
 
 function irALegajos(){ cambiarPag('legajos', g('navLeg')); }
 
@@ -1653,6 +1627,8 @@ const SUB_COLOR = {
   'Juntando documentacion':'#1e40af',
   'Documentacion lista':'#065f46'
 };
+
+function avanzarSubEstadoGS(id, btn) { var sub = btn.getAttribute('data-sub'); avanzarSubEstado(id, sub); }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
   if(!confirm('Avanzar a "'+nuevoSub+'"?')) return;
