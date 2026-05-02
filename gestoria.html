@@ -203,11 +203,12 @@ select.filter:focus{border-color:var(--accent)}
 .hidden{display:none!important}
 @media(max-width:700px){.fr{grid-template-columns:1fr}.legajos-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="topbar">
-  <div><img src="https://i.imgur.com/6cMQaeJ.png" style="height:32px;object-fit:contain;" alt="FA"></div>
+  <div><span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.1rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span></div>
   <div class="tb-search-wrap">
     <span class="tb-search-icon">🔍</span>
     <input type="text" id="busqGlobal" placeholder="Buscar dominio, cliente..." autocomplete="off">
@@ -383,13 +384,21 @@ select.filter:focus{border-color:var(--accent)}
   <div class="page-header">
     <div>
       <div class="page-title">Pendientes</div>
-      <div class="page-sub">Autos a documentar y transferencias activas</div>
+      <div class="page-sub">Tareas del día — autos sin legajo, a documentar y transferencias activas</div>
     </div>
     <button class="btn" onclick="cargarPendientes()">↻ Actualizar</button>
   </div>
 
   <!-- Stats -->
   <div class="stats-row" id="statsPend"></div>
+
+  <!-- Autos sin legajo -->
+  <div style="margin-bottom:24px;">
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:#991b1b;font-weight:600;margin-bottom:12px;">🔴 Autos sin legajo asignado</div>
+    <div id="pendSinLegajoLista">
+      <div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div>
+    </div>
+  </div>
 
   <!-- Autos a documentar -->
   <div style="margin-bottom:24px;">
@@ -406,6 +415,30 @@ select.filter:focus{border-color:var(--accent)}
       <div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div>
     </div>
   </div>
+</div>
+
+<!-- MODAL: CANCELAR OPERACION GESTORIA -->
+<div class="overlay hidden" id="ovCancelarOp">
+<div class="modal">
+  <div class="mh"><h3>Cancelar operación</h3><button class="mbtn" onclick="cerrar('ovCancelarOp')">✕</button></div>
+  <div class="mb">
+    <div id="cancelarOpGestInfo" style="background:#fef2f2;border:1px solid #fee2e2;border-radius:8px;padding:12px;margin-bottom:14px;font-size:0.85rem;"></div>
+    <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px;">Motivo de cancelación *</label>
+    <textarea id="cancelarOpGestMotivo" placeholder="Describí el problema con la documentación..." style="width:100%;min-height:80px;padding:10px;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:0.9rem;resize:vertical;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+      <button class="btn" onclick="cerrar('ovCancelarOp')">Volver</button>
+      <button class="btn danger" onclick="confirmarCancelarOpGest()">Confirmar cancelación</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: DETALLE OPERACION EN PENDIENTES -->
+<div class="overlay hidden" id="ovDetallePend">
+<div class="modal xwide">
+  <div class="mh"><h3>Detalle de operación</h3><button class="mbtn" onclick="cerrar('ovDetallePend')">✕</button></div>
+  <div class="mb" id="detallePendBody"></div>
+</div>
 </div>
 
 <!-- MODAL: DETALLE TRANSFERENCIA -->
@@ -1384,12 +1417,12 @@ cargarDatos().then(function(){
 });
 
 // ═══ PENDIENTES ═══════════════════════════════════════════
-const SUB_ESTADOS_ORD = ['Pendiente peritaje','Peritaje aprobado','Alistamiento','Listo'];
+const SUB_ESTADOS_ORD = ['Pendiente a peritaje','Peritaje aprobado','Juntando documentacion','Documentacion lista'];
 const SUB_COLOR = {
-  'Pendiente peritaje':'#991b1b',
+  'Pendiente a peritaje':'#991b1b',
   'Peritaje aprobado':'#b45309',
-  'Alistamiento':'#1e40af',
-  'Listo':'#065f46'
+  'Juntando documentacion':'#1e40af',
+  'Documentacion lista':'#065f46'
 };
 
 async function cargarPendientes() {
@@ -1397,11 +1430,24 @@ async function cargarPendientes() {
   const autosRaw = await sbGet('vehiculos','select=*&estado=eq.A ingresar&order=created_at.asc');
   const autos = autosRaw || [];
 
+  // Legajos ocupados (para detectar cuales no tienen legajo)
+  const legajosOcupados = legs.filter(l=>!l.libre).map(l=>l.auto&&l.auto.dominio).filter(Boolean);
+
+  // Autos sin legajo = autos a ingresar cuyo dominio no está en ningun legajo
+  const sinLegajo = autos.filter(v => v.dominio && !legajosOcupados.includes(v.dominio));
+  const conLegajo = autos.filter(v => !v.dominio || legajosOcupados.includes(v.dominio));
+
   // Transferencias activas
   const trfsActivas = trfs.filter(t => t.estado !== 'finalizada');
 
+  // Operaciones activas (para cancelar)
+  let opsActivas = [];
+  try {
+    opsActivas = await sbGet('operaciones','select=*&estado=neq.Entregado&estado=neq.Cancelada&order=created_at.desc&limit=20');
+  } catch(e){}
+
   // Badge nav
-  const total = autos.length + trfsActivas.length;
+  const total = autos.length + trfsActivas.length + sinLegajo.length;
   const badge = document.getElementById('navPendCount');
   if(badge){ if(total>0){badge.style.display='inline';badge.textContent=total;}else{badge.style.display='none';} }
 
@@ -1410,73 +1456,230 @@ async function cargarPendientes() {
   if(stats) {
     const mkStat = (lbl, val, col) => '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div><div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>';
     stats.innerHTML =
-      mkStat('Autos a documentar', autos.length, '#1e40af') +
-      mkStat('Transferencias activas', trfsActivas.length, '#b45309') +
-      mkStat('Listos para disponible', autos.filter(v=>v.sub_estado==='Listo').length, '#065f46');
+      mkStat('Sin legajo', sinLegajo.length, '#991b1b') +
+      mkStat('A documentar', conLegajo.length, '#1e40af') +
+      mkStat('Transferencias', trfsActivas.length, '#b45309') +
+      mkStat('Ops activas', opsActivas.length, '#7c3aed');
   }
 
-  // Autos a documentar
+  const cardStyle = 'background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
+
+  // ── Autos sin legajo ────────────────────────────────────
+  const listaSinLeg = document.getElementById('pendSinLegajoLista');
+  if(listaSinLeg) {
+    if(!sinLegajo.length) {
+      listaSinLeg.innerHTML = '<div style="'+cardStyle+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de asignación de legajo</div>';
+    } else {
+      listaSinLeg.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+sinLegajo.map(v => {
+        const dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
+        return '<div style="'+cardStyle+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">'+
+          '<div style="flex:1;">'+
+            '<div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>'+
+            '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' día'+(dias!==1?'s':'')+' · Sin legajo asignado</div>'+
+          '</div>'+
+          '<button onclick="cambiarPag('legajos',g('navLeg'))" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>'+
+        '</div>';
+      }).join('')+'</div>';
+    }
+  }
+
+  // ── Autos a documentar ──────────────────────────────────
   const listaAutos = document.getElementById('pendAutosLista');
   if(listaAutos) {
-    if(!autos.length) {
-      listaAutos.innerHTML = '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:20px;text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentación</div>';
+    if(!conLegajo.length) {
+      listaAutos.innerHTML = '<div style="'+cardStyle+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentacion</div>';
     } else {
-      listaAutos.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+autos.map(v => {
-        const sub = v.sub_estado || 'Pendiente peritaje';
+      listaAutos.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+conLegajo.map(v => {
+        const sub = v.sub_estado || 'Pendiente a peritaje';
         const col = SUB_COLOR[sub] || '#555';
         const idx = SUB_ESTADOS_ORD.indexOf(sub);
-        const siguiente = idx < SUB_ESTADOS_ORD.length-1 ? SUB_ESTADOS_ORD[idx+1] : null;
+        const siguiente = idx >= 0 && idx < SUB_ESTADOS_ORD.length-1 ? SUB_ESTADOS_ORD[idx+1] : null;
         const dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
-        return '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
+        return '<div style="'+cardStyle+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
           '<div style="flex:1;">'+
             '<div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>'+
             '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' día'+(dias!==1?'s':'')+' en sistema</div>'+
             (v.obs?'<div style="font-size:0.76rem;color:var(--text3);margin-top:2px;font-style:italic;">'+v.obs+'</div>':'')+
           '</div>'+
-          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
-            '<div>'+
-              '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">Sub-estado</div>'+
-              '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>'+
-            '</div>'+
-            (siguiente ? '<button onclick="avanzarSubEstado('+v.id+',\''+siguiente+'\')" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>' : '')+
-            (sub==='Listo' ? '<button onclick="pasarADisponible('+v.id+')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>' : '')+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+            '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>'+
+            (siguiente ? '<button onclick="avanzarSubEstado('+v.id+',''+siguiente+'')" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>' : '')+
+            (sub==='Documentacion lista' ? '<button onclick="pasarADisponible('+v.id+')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>' : '')+
           '</div>'+
         '</div>';
       }).join('')+'</div>';
     }
   }
 
-  // Transferencias activas
+  // ── Transferencias activas ─────────────────────────────
   const listaTrfs = document.getElementById('pendTrfsLista');
   if(listaTrfs) {
     if(!trfsActivas.length) {
-      listaTrfs.innerHTML = '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:20px;text-align:center;color:var(--text3);font-size:0.85rem;">Sin transferencias activas</div>';
+      listaTrfs.innerHTML = '<div style="'+cardStyle+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin transferencias activas</div>';
     } else {
       listaTrfs.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">'+trfsActivas.map(t => {
-        const col = {
-          'prep-doc':'#b45309','en-escribania':'#1e40af',
-          'retirado':'#555','en-gestoria':'#7c3aed',
-          'para-entregar':'#065f46'
-        }[t.estado]||'#555';
+        const col = {'prep-doc':'#b45309','en-escribania':'#1e40af','retirado':'#555','en-gestoria':'#7c3aed','para-entregar':'#065f46'}[t.estado]||'#555';
         const label = ELABELS[t.estado]||t.estado;
         const dias = t.fecha ? Math.floor((new Date()-new Date(t.fecha))/86400000) : 0;
-        return '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;" onclick="abrirDetTrf(\''+t.id+'\')" style="cursor:pointer;">'+
+        // Buscar operacion relacionada
+        const opRelacionada = opsActivas.find(o => o.vehiculo_texto && t.dominio && o.vehiculo_texto.includes(t.dominio));
+        return '<div style="'+cardStyle+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'+
           '<div style="flex:1;">'+
             '<div style="font-weight:600;font-size:0.92rem;">'+t.id+' — '+t.dominio+'</div>'+
             '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+t.vendedor+' → '+t.comprador+' · '+dias+' día'+(dias!==1?'s':'')+' en curso</div>'+
           '</div>'+
-          '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+label+'</span>'+
-          '<button onclick="event.stopPropagation();abrirDetTrf(\''+t.id+'\')" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+            '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+label+'</span>'+
+            (opRelacionada ? '<button onclick="abrirDetalleOp(''+opRelacionada.id+'')" style="background:#f4f3ee;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver operación</button>' : '')+
+            '<button onclick="abrirDetTrf(''+t.id+'')" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>'+
+            (opRelacionada ? '<button onclick="abrirCancelarOpGest(''+opRelacionada.id+'',''+encodeURIComponent(opRelacionada.vehiculo_texto||'')+'',''+encodeURIComponent(opRelacionada.cliente_nombre||'')+'')" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Cancelar</button>' : '')+
+          '</div>'+
         '</div>';
       }).join('')+'</div>';
     }
   }
 }
 
+let _cancelarOpGestId = null;
+
+function abrirCancelarOpGest(opId, vehiculoEnc, clienteEnc) {
+  _cancelarOpGestId = opId;
+  const vehiculo = decodeURIComponent(vehiculoEnc);
+  const cliente = decodeURIComponent(clienteEnc);
+  document.getElementById('cancelarOpGestInfo').innerHTML =
+    '<div style="font-weight:600;margin-bottom:4px;">'+vehiculo+'</div>'+
+    '<div style="font-size:0.82rem;color:#6b6960;">Cliente: '+cliente+'</div>';
+  document.getElementById('cancelarOpGestMotivo').value = '';
+  g('ovCancelarOp').classList.remove('hidden');
+}
+
+async function confirmarCancelarOpGest() {
+  const motivo = document.getElementById('cancelarOpGestMotivo').value.trim();
+  if(!motivo){ alert('Ingresa el motivo de cancelacion.'); return; }
+  mostrarCargando('Cancelando operacion...');
+
+  // Cancelar la operacion
+  await fetch(SB_URL+'/rest/v1/operaciones?id=eq.'+_cancelarOpGestId,{
+    method:'PATCH', headers:sbH,
+    body:JSON.stringify({estado:'Cancelada', notas:'CANCELADA POR GESTORIA: '+motivo})
+  });
+
+  // Buscar el auto de la operacion y volver a disponible
+  const ops = await sbGet('operaciones','select=vehiculo_id,permuta_marca,permuta_modelo&id=eq.'+_cancelarOpGestId);
+  if(ops && ops.length && ops[0].vehiculo_id) {
+    await sbUpdate('vehiculos','id',ops[0].vehiculo_id,{estado:'Disponible',sub_estado:'Propio'});
+    // Si tenia permuta, eliminar el auto que habia ingresado
+    if(ops[0].permuta_marca) {
+      const permAutoRaw = await sbGet('vehiculos','select=id&marca=eq.'+encodeURIComponent(ops[0].permuta_marca)+'&estado=eq.A ingresar&limit=1');
+      if(permAutoRaw && permAutoRaw.length) {
+        await fetch(SB_URL+'/rest/v1/vehiculos?id=eq.'+permAutoRaw[0].id,{method:'DELETE',headers:sbH});
+      }
+    }
+  }
+
+  // Notificar a todos
+  const msg = 'Operacion cancelada por gestoria. Motivo: '+motivo;
+  await sbInsert('notificaciones',{para:'caja',tipo:'op_cancelada',leida:false,titulo:'❌ Operacion cancelada',mensaje:msg});
+  await sbInsert('notificaciones',{para:'vendedor',tipo:'op_cancelada',leida:false,titulo:'❌ Operacion cancelada',mensaje:msg});
+  await sbInsert('notificaciones',{para:'admin',tipo:'op_cancelada',leida:false,titulo:'❌ Operacion cancelada',mensaje:msg});
+
+  ocultarCargando();
+  cerrar('ovCancelarOp');
+  cargarPendientes();
+  alert('Operacion cancelada.');
+}
+
+async function abrirDetalleOp(opId) {
+  mostrarCargando('Cargando datos...');
+  const ops = await sbGet('operaciones','select=*&id=eq.'+opId);
+  if(!ops || !ops.length){ ocultarCargando(); return; }
+  const op = ops[0];
+  const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+  const fila = (l,v) => v ? '<div style="margin-bottom:8px;"><div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);">'+l+'</div><div style="font-weight:500;">'+v+'</div></div>' : '';
+
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
+  html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Vehiculo</div>';
+  html += fila('Auto', op.vehiculo_texto);
+  html += fila('Estado', op.estado);
+  html += fila('Fecha', op.fecha);
+  html += '</div>';
+  html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Cliente comprador</div>';
+  html += fila('Nombre', op.cliente_nombre);
+  // Buscar datos del cliente
+  let clienteData = null;
+  try {
+    const cli = await sbGet('clientes','select=*&id=eq.'+op.cliente_id);
+    if(cli && cli.length) clienteData = cli[0];
+  } catch(e){}
+  if(clienteData) {
+    html += fila('DNI', clienteData.dni);
+    html += fila('Tel', clienteData.tel);
+    html += fila('Email', clienteData.email);
+    html += fila('Direccion', clienteData.dir);
+  }
+  html += '</div>';
+  html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Condiciones</div>';
+  html += fila('Precio', fmtN(op.precio, op.moneda));
+  html += fila('Señia', op.senia > 0 ? fmtN(op.senia, op.moneda_senia||op.moneda) : 'Sin señia');
+  html += fila('Forma de pago', op.formas_pago ? op.formas_pago.join(', ') : '');
+  html += fila('Entrega pactada', op.fecha_entrega);
+  html += '</div>';
+  if(op.permuta_marca) {
+    html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:#7c3aed;margin-bottom:10px;">Auto en permuta</div>';
+    html += fila('Auto', op.permuta_marca+' '+op.permuta_modelo+' '+(op.permuta_anio||''));
+    html += fila('Km', op.permuta_km ? Number(op.permuta_km).toLocaleString('es-AR')+' km' : '');
+    html += fila('Valor', op.permuta_valor ? fmtN(op.permuta_valor, op.permuta_moneda||'ARS') : '');
+    html += '</div>';
+  }
+  if(op.credito_banco) {
+    html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:#1e40af;margin-bottom:10px;">Credito bancario</div>';
+    html += fila('Banco', op.credito_banco);
+    html += fila('Monto', fmtN(op.credito_monto, op.moneda));
+    html += fila('Cuotas', op.credito_cuotas+' cuotas de '+fmtN(op.credito_cuota_valor, op.moneda));
+    html += '</div>';
+  }
+  html += '</div>';
+  if(op.notas) html += '<div style="margin-top:14px;padding:12px;background:#f4f3ee;border-radius:8px;font-size:0.85rem;"><b>Notas:</b> '+op.notas+'</div>';
+
+  document.getElementById('detallePendBody').innerHTML = html;
+  ocultarCargando();
+  g('ovDetallePend').classList.remove('hidden');
+}
+
+
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
   if(!confirm('Avanzar a "'+nuevoSub+'"?')) return;
   mostrarCargando('Actualizando...');
   await sbUpdate('vehiculos','id',vehiculoId,{sub_estado:nuevoSub});
+
+  // Si llega a "Documentacion lista" → notificar a caja
+  if(nuevoSub === 'Documentacion lista') {
+    // Buscar la orden de compra asociada a este vehiculo
+    const ordenes = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&vehiculo_id=eq.'+vehiculoId+'&limit=1');
+    if(ordenes && ordenes.length) {
+      const o = ordenes[0];
+      const saldo = parseFloat(o.precio||0) - parseFloat(o.senia||0);
+      const fmtN = function(n,m){ return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR'); };
+      // Crear movimiento pendiente en caja
+      await sbInsert('movimientos_pendientes',{
+        tipo:'pago_total',
+        concepto:'Saldo de compra — '+o.vehiculo_texto+' (doc OK)',
+        monto: saldo > 0 ? saldo : parseFloat(o.precio||0),
+        moneda: o.moneda||'ARS',
+        solicitado_por:'Gestoria',
+        referencia_id: o.id,
+        referencia_tipo:'orden_compra',
+        precio_total: parseFloat(o.precio||0),
+        estado:'pendiente',
+        obs:'Documentacion aprobada por gestoria.'
+      });
+      await sbInsert('notificaciones',{
+        para:'caja', tipo:'doc_lista', leida:false,
+        titulo:'✅ Documentacion lista — proceder con pago',
+        mensaje: o.vehiculo_texto+' listo. Saldo: '+fmtN(saldo > 0 ? saldo : parseFloat(o.precio||0), o.moneda||'ARS')
+      });
+    }
+  }
   ocultarCargando();
   cargarPendientes();
 }
