@@ -1472,19 +1472,57 @@ function irALegajosConAuto(vehiculoId, marcaModeloEnc, dominioEnc) {
   modal.classList.remove('hidden');
 }
 
-function seleccionarLegajoConAuto(num, vehiculoId, marcaModeloEnc, dominioEnc) {
+async function seleccionarLegajoConAuto(num, vehiculoId, marcaModeloEnc, dominioEnc) {
   cerrar('ovAsignarLegajo');
   var marcaModelo = decodeURIComponent(marcaModeloEnc);
   var dominio = decodeURIComponent(dominioEnc);
+
+  // Buscar datos del titular (cliente_entrega_id)
+  var titular = null;
+  try {
+    var vRaw = await sbGet('vehiculos','select=cliente_entrega_id,cliente_entrega_nombre,obs&id=eq.'+vehiculoId);
+    if(vRaw && vRaw.length && vRaw[0].cliente_entrega_id) {
+      var cRaw = await sbGet('clientes','select=*&id=eq.'+vRaw[0].cliente_entrega_id);
+      if(cRaw && cRaw.length) titular = cRaw[0];
+    }
+  } catch(e) { console.error(e); }
+
   // Abrir modal de asignacion con datos precargados
   abrirModalLeg(num, false);
-  // Precargar campos del auto
+
   setTimeout(function() {
     sv('lVeh', marcaModelo);
     sv('lDom', dominio);
-    // Guardar el vehiculo_id para actualizar el sub_estado despues
+    // Precargar datos del titular si existen
+    if(titular) {
+      sv('lCli', titular.nombre || '');
+      sv('lDni', titular.dni || '');
+    }
     document.getElementById('ovLeg').dataset.vehiculoId = vehiculoId;
-  }, 50);
+    // Mostrar info del titular en el modal
+    var infoEl = document.getElementById('mLegTitularInfo');
+    if(!infoEl) {
+      infoEl = document.createElement('div');
+      infoEl.id = 'mLegTitularInfo';
+      infoEl.style.cssText = 'background:#f0f4ff;border:1px solid #c7d7f4;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:0.84rem;';
+      var mb = document.querySelector('#ovLeg .mb');
+      if(mb) mb.insertBefore(infoEl, mb.firstChild);
+    }
+    if(titular) {
+      var info = '<div style="font-weight:600;margin-bottom:6px;color:#1e40af;">👤 Titular actual del vehículo</div>';
+      info += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">';
+      if(titular.nombre) info += '<div><b>Nombre:</b> '+titular.nombre+'</div>';
+      if(titular.dni)    info += '<div><b>DNI:</b> '+titular.dni+'</div>';
+      if(titular.tel)    info += '<div><b>Tel:</b> '+titular.tel+'</div>';
+      if(titular.email)  info += '<div><b>Email:</b> '+titular.email+'</div>';
+      if(titular.dir)    info += '<div style="grid-column:1/-1"><b>Dirección:</b> '+titular.dir+'</div>';
+      info += '</div>';
+      infoEl.innerHTML = info;
+      infoEl.style.display = 'block';
+    } else {
+      infoEl.style.display = 'none';
+    }
+  }, 100);
 }
 
 function irALegajos() {
