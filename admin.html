@@ -371,6 +371,43 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
 
 </section>
 
+<!-- MODAL EDITAR VEHICULO -->
+<div id="modalEditarVehiculo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:28px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:1rem;font-weight:600;" id="editVehTitulo">Editar vehículo</div>
+      <button onclick="cerrarEditarVehiculo()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Marca</label><input id="evMarca" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Modelo</label><input id="evModelo" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Año</label><input id="evAnio" type="number" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Dominio</label><input id="evDominio" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;text-transform:uppercase;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Color</label><input id="evColor" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Km</label><input id="evKm" type="number" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Precio</label><input id="evPrecio" type="number" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Moneda</label>
+        <select id="evMoneda" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;">
+          <option value="ARS">$ ARS</option><option value="USD">U$D USD</option>
+        </select>
+      </div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Transmisión</label><input id="evTransmision" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Carrocería</label><input id="evCarroceria" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Ubicación</label><input id="evUbicacion" type="text" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Procedencia</label>
+        <select id="evProcedencia" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;">
+          <option value="Propio">Propio</option><option value="Consignación">Consignación</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1;"><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Observaciones</label><textarea id="evObs" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;min-height:60px;resize:vertical;"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button onclick="cerrarEditarVehiculo()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
+      <button onclick="guardarEdicionVehiculo()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CANCELAR OPERACION -->
 <div id="modalCancelarOp" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:14px;padding:32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
@@ -651,7 +688,10 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
         <div style="font-family:var(--serif);font-size:1.2rem;" id="mv-titulo">—</div>
         <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);margin-top:3px;" id="mv-subtitulo">—</div>
       </div>
-      <button onclick="cerrarModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem;color:var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;">✕</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+        <button onclick="abrirEditarVehiculo()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;">✏️ Editar</button>
+        <button onclick="cerrarModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem;color:var(--muted);display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
     </div>
     <div style="padding:24px;" id="mv-body"></div>
   </div>
@@ -1777,6 +1817,7 @@ function abrirFichaAdmin(id) {
 }
 
 function verVehiculo(v) {
+  _vehiculoActualId = v.id;
   const hoyM = new Date().toISOString().split('T')[0];
   const diasStock = v.fechaIngreso ? diffDias(v.fechaIngreso, v.estado === 'Vendido' && v.fechaVenta ? v.fechaVenta : hoyM) : null;
 
@@ -2254,7 +2295,70 @@ async function toggleUsuario(id, activo) {
 }
 
 
-// ═══ PROPUESTAS DE PRECIO ══════════════════════════════════
+
+// ═══ EDITAR VEHÍCULO ══════════════════════════════════════
+let _vehiculoEditandoId = null;
+let _vehiculoActualId = null;
+
+function abrirEditarVehiculo() {
+  const v = _stockGlobal.find(x => x.id === _vehiculoActualId);
+  if(!v) return;
+  _vehiculoEditandoId = v.id;
+  document.getElementById('editVehTitulo').textContent = 'Editar — '+v.marca+' '+v.modelo+' '+v.anio;
+  document.getElementById('evMarca').value       = v.marca||'';
+  document.getElementById('evModelo').value      = v.modelo||'';
+  document.getElementById('evAnio').value        = v.anio||'';
+  document.getElementById('evDominio').value     = v.dominio||'';
+  document.getElementById('evColor').value       = v.color||'';
+  document.getElementById('evKm').value          = v.km||0;
+  document.getElementById('evPrecio').value      = v.precio||0;
+  document.getElementById('evMoneda').value      = v.moneda||'ARS';
+  document.getElementById('evTransmision').value = v.transmision||'';
+  document.getElementById('evCarroceria').value  = v.carroceria||'';
+  document.getElementById('evUbicacion').value   = v.ubicacion||'';
+  document.getElementById('evProcedencia').value = v.procedencia||'Propio';
+  document.getElementById('evObs').value         = v.obs||'';
+  document.getElementById('modalEditarVehiculo').style.display = 'flex';
+}
+
+function cerrarEditarVehiculo() {
+  document.getElementById('modalEditarVehiculo').style.display = 'none';
+  _vehiculoEditandoId = null;
+}
+
+async function guardarEdicionVehiculo() {
+  if(!_vehiculoEditandoId) return;
+  mostrarCargando('Guardando cambios...');
+  const data = {
+    marca:        document.getElementById('evMarca').value.trim(),
+    modelo:       document.getElementById('evModelo').value.trim(),
+    anio:         parseInt(document.getElementById('evAnio').value)||0,
+    dominio:      document.getElementById('evDominio').value.trim().toUpperCase(),
+    color:        document.getElementById('evColor').value.trim(),
+    km:           parseInt(document.getElementById('evKm').value)||0,
+    precio:       parseFloat(document.getElementById('evPrecio').value)||0,
+    moneda_precio:document.getElementById('evMoneda').value,
+    transmision:  document.getElementById('evTransmision').value.trim(),
+    carroceria:   document.getElementById('evCarroceria').value.trim(),
+    ubicacion:    document.getElementById('evUbicacion').value.trim(),
+    procedencia:  document.getElementById('evProcedencia').value,
+    obs:          document.getElementById('evObs').value.trim(),
+  };
+  await fetch(SB_URL+'/rest/v1/vehiculos?id=eq.'+_vehiculoEditandoId, {
+    method:'PATCH', headers:sbH, body:JSON.stringify(data)
+  });
+  // Update local cache
+  const v = _stockGlobal.find(x => x.id === _vehiculoEditandoId);
+  if(v) Object.assign(v, {marca:data.marca,modelo:data.modelo,anio:data.anio,dominio:data.dominio,color:data.color,km:data.km,precio:data.precio,moneda:data.moneda_precio,transmision:data.transmision,carroceria:data.carroceria,ubicacion:data.ubicacion,procedencia:data.procedencia,obs:data.obs});
+  ocultarCargando();
+  cerrarEditarVehiculo();
+  // Refresh the vehicle modal
+  if(_vehiculoActualId) verVehiculo(_stockGlobal.find(x=>x.id===_vehiculoActualId));
+  renderStock({stock:_stockGlobal});
+  alert('✓ Vehículo actualizado correctamente');
+}
+
+
 let _propuestas = [];
 let _propuestaActivaId = null;
 

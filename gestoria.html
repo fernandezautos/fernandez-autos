@@ -833,6 +833,7 @@ function abrirDetLeg(num) {
         '<div class="section-label" style="margin-bottom:10px">Datos del vehículo</div>'+
         '<div class="fr2"><span class="fl">Propietario</span><span class="fv">'+a.cliente+'</span></div>'+
         '<div class="fr2"><span class="fl">DNI / CUIT</span><span class="fv">'+(a.dni||'-')+'</span></div>'+
+        '<div id="legTitularInfo_'+num+'"></div>'+
         '<div class="fr2"><span class="fl">Dominio</span><span class="fv" style="font-family:var(--mono)">'+a.dominio+'</span></div>'+
         '<div class="fr2"><span class="fl">Vehículo</span><span class="fv">'+(a.vehiculo||'-')+'</span></div>'+
         '<div class="fr2"><span class="fl">Ingreso</span><span class="fv" style="font-family:var(--mono)">'+fmt(a.fecha)+'</span></div>'+
@@ -861,6 +862,8 @@ function abrirDetLeg(num) {
       '<button class="btn sm danger" onclick="cerrar(\'ovDetLeg\');pedirElimLeg('+num+')">🗑 Liberar legajo</button>'+
     '</div>';
   g('ovDetLeg').classList.remove('hidden');
+  // Cargar datos del titular desde Supabase
+  cargarTitularLegajo(num, l.auto && l.auto.dominio);
 }
 
 async function agregarNota(num) {
@@ -1524,6 +1527,28 @@ async function seleccionarLegajoConAuto(num, vehiculoId, marcaModeloEnc, dominio
     }
   }, 100);
 }
+
+async function cargarTitularLegajo(num, dominio) {
+  if(!dominio) return;
+  try {
+    var vRaw = await sbGet('vehiculos','select=cliente_entrega_id,procedencia&dominio=eq.'+encodeURIComponent(dominio)+'&limit=1');
+    if(!vRaw || !vRaw.length || !vRaw[0].cliente_entrega_id) return;
+    var cRaw = await sbGet('clientes','select=nombre,dni,tel,email,dir&id=eq.'+vRaw[0].cliente_entrega_id);
+    if(!cRaw || !cRaw.length) return;
+    var c = cRaw[0];
+    var el = document.getElementById('legTitularInfo_'+num);
+    if(!el) return;
+    var html = '<div style="background:#f0f4ff;border:1px solid #c7d7f4;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:0.82rem;">';
+    html += '<div style="font-weight:600;color:#1e40af;margin-bottom:4px;">👤 Titular / Quien lo entregó</div>';
+    if(c.nombre) html += '<div class="fr2"><span class="fl">Nombre</span><span class="fv">'+c.nombre+'</span></div>';
+    if(c.dni)    html += '<div class="fr2"><span class="fl">DNI</span><span class="fv">'+c.dni+'</span></div>';
+    if(c.tel)    html += '<div class="fr2"><span class="fl">Tel</span><span class="fv">'+c.tel+'</span></div>';
+    if(c.email)  html += '<div class="fr2"><span class="fl">Email</span><span class="fv">'+c.email+'</span></div>';
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e) { console.error(e); }
+}
+
 
 function irALegajos() {
   // Mostrar modal con legajos libres
