@@ -1392,8 +1392,9 @@ async function cargarPendientes() {
         if(idx2<0){idx2=0;sub=SUB_ESTADOS_ORD[0];}
         var siguiente=(idx2<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx2+1]:null;
         var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
-        var legNum2 = (function(dom){ var l=legs.find(function(x){return x.auto&&x.auto.dominio===dom;}); return l?l.num:null; })(v.dominio);
-        html2+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;'+(legNum2?'cursor:pointer;':'')+'" '+(legNum2?'onclick="cambiarPag(\"legajos\",g(\"navLeg\"));setTimeout(function(){abrirDetLeg('+legNum2+');},100);"':'')+'>';
+                var legNum2 = (function(dom){ var l=legs.find(function(x){return x.auto&&x.auto.dominio===dom;}); return l?l.num:null; })(v.dominio);
+        var cardAttr = legNum2 ? ' data-legnum="'+legNum2+'" onclick="abrirLegajoDesdePendiente(this)"' : '';
+        html2+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;'+(legNum2?'cursor:pointer;':'')+'"'+cardAttr+'>';
         html2+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
         html2+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' en sistema</div>';
         if(v.obs) html2+='<div style="font-size:0.76rem;color:var(--text3);font-style:italic;">'+v.obs+'</div>';
@@ -1409,6 +1410,13 @@ async function cargarPendientes() {
     }
   }
 
+}
+
+function abrirLegajoDesdePendiente(el) {
+  var num = parseInt(el.getAttribute('data-legnum'));
+  if(!num) return;
+  cambiarPag('legajos', g('navLeg'));
+  setTimeout(function(){ abrirDetLeg(num); }, 150);
 }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
