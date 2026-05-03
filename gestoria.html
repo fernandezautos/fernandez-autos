@@ -1477,7 +1477,7 @@ async function editarDocsSinLegajo(vehiculoId) {
 // Sobreescribir toggleDoc para el caso SL — guarda en vehiculos en vez de legajos
 var _origToggleDoc = null;
 async function toggleDocSL_vehiculo(vehiculoId, docNombre, el) {
-  var vRaw = await sbGet('vehiculos','select=docs,notas_hilo&id=eq.'+vehiculoId);
+  var vRaw = await sbGet('vehiculos','select=*&id=eq.'+vehiculoId);
   if(!vRaw||!vRaw.length) return;
   var docs = vRaw[0].docs||[];
   var notas_hilo = vRaw[0].notas_hilo||[];
@@ -1535,8 +1535,9 @@ async function abrirDetVehiculoSinLegajo(vehiculoId) {
   // Inyectar botones de accion correctos para SL
   setTimeout(function(){
     var sub = v.sub_estado||'Pendiente a peritaje';
-    var idx3 = SUB_ESTADOS_ORD.indexOf(sub);
-    var sig = (idx3>=0&&idx3<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx3+1]:null;
+    var _SU = ['Pendiente a peritaje','Peritaje aprobado','Juntando documentacion','Documentacion lista'];
+    var idx3 = _SU.indexOf(sub);
+    var sig = (idx3>=0&&idx3<_SU.length-1)?_SU[idx3+1]:null;
     var acciones = document.getElementById('detLegAcciones_SL');
     if(acciones){
       var btns = '';
