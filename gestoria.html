@@ -1477,15 +1477,16 @@ async function abrirDetVehiculoSinLegajo(vehiculoId) {
   if(!vRaw||!vRaw.length){ ocultarCargando(); return; }
   var v = vRaw[0];
   ocultarCargando();
+  var docsVehiculo = v.docs && v.docs.length ? v.docs : DOCS_BASE.map(function(n){ return {n:n, ok:false}; });
   var legajoTemporal = {
-    num: 'SL', libre: false, docs: v.docs||[], notas_hilo: v.notas_hilo||[],
+    num: 'SL', libre: false, docs: docsVehiculo, notas_hilo: v.notas_hilo||[],
     auto: {
       dominio: v.dominio, vehiculo: v.marca+' '+v.modelo+' '+(v.anio||''),
       cliente: v.cliente_entrega_nombre||'Sin titular', dni: '',
       fecha: v.created_at?new Date(v.created_at).toLocaleDateString('es-AR'):'',
       precio: v.precio?Number(v.precio).toLocaleString('es-AR'):'',
       vtv: v.vtv||null, verif: v.verif||null, notas: v.obs||'',
-      docs: v.docs||[], notas_hilo: v.notas_hilo||[]
+      docs: docsVehiculo, notas_hilo: v.notas_hilo||[]
     }
   };
   var idx0 = legs.findIndex(function(l){ return l.num==='SL'; });
@@ -1501,7 +1502,9 @@ async function abrirDetVehiculoSinLegajo(vehiculoId) {
     var idx3 = SUB_ESTADOS_ORD.indexOf(sub);
     var sig = (idx3>=0&&idx3<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx3+1]:null;
     var body = document.getElementById('detLegBody');
-    var acciones = body?body.querySelector('div[style*="border-top"]'):null;
+    // El div de acciones es el ultimo div directo del body
+    var divs = body ? body.children : [];
+    var acciones = divs.length ? divs[divs.length-1] : null;
     if(acciones){
       var btns = '';
       if(sig){
