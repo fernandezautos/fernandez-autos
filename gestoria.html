@@ -208,7 +208,7 @@ select.filter:focus{border-color:var(--accent)}
 <body>
 
 <div class="topbar">
-  <div><span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.1rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span></div>
+  <div><span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.1rem;color:#fff;">Fernandez Autos</span></div>
   <div class="tb-search-wrap">
     <span class="tb-search-icon">🔍</span>
     <input type="text" id="busqGlobal" placeholder="Buscar dominio, cliente..." autocomplete="off">
@@ -274,7 +274,7 @@ select.filter:focus{border-color:var(--accent)}
   <div class="mb">
     <div id="mLegNum" style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);margin-bottom:14px"></div>
     <div class="fr"><div class="fg"><label>Dominio *</label><input id="lDom" type="text" placeholder="ABC 123" style="text-transform:uppercase"></div><div class="fg"><label>Vehículo</label><input id="lVeh" type="text" placeholder="VW Gol 2019"></div></div>
-    <div class="fr"><div class="fg"><label>Propietario *</label><div style="position:relative;"><input id="lCli" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('lCli','lCliDrop','lDni',this.value)" onfocus="filtrarClientesGS('lCli','lCliDrop','lDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('lCliDrop');if(d)d.style.display='none';},200)"><div id="lCliDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI / CUIT</label><input id="lDni" type="text" placeholder="20-12345678-9"></div></div>
+    <div class="fr"><div class="fg"><label>Propietario *</label><div style="position:relative;"><input id="lCli" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('lCli','lCliDrop','lDni',this.value)" onfocus="filtrarClientesGS('lCli','lCliDrop','lDni',this.value)" onblur="setTimeout(function(){var d=document.getElementById('lCliDrop');if(d)d.style.display='none';},200)"><div id="lCliDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI / CUIT</label><input id="lDni" type="text" placeholder="20-12345678-9"></div></div>
     <div class="fr"><div class="fg"><label>Fecha de ingreso</label><input id="lFecha" type="date"></div><div class="fg"><label>Precio (referencia)</label><input id="lPrecio" type="text" placeholder="$ 0"></div></div>
     <div class="fg"><label>Vencimiento VTV</label><input id="lVtv" type="date" title="Fecha de vencimiento de la VTV"></div>
     <div class="fg">
@@ -311,7 +311,7 @@ select.filter:focus{border-color:var(--accent)}
     <div class="vender-info" id="venderInfo"></div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Al confirmar, el legajo físico queda <strong>libre</strong> y se crea automáticamente una transferencia en seguimiento.</p>
     <div class="section-label">Datos del comprador</div>
-    <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="vComp" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('vComp','vCompDrop','vDni',this.value)" onfocus="filtrarClientesGS('vComp','vCompDrop','vDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('vCompDrop');if(d)d.style.display='none';},200)"><div id="vCompDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="vDni" type="text" placeholder="12.345.678"></div></div>
+    <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="vComp" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('vComp','vCompDrop','vDni',this.value)" onfocus="filtrarClientesGS('vComp','vCompDrop','vDni',this.value)" onblur="setTimeout(function(){var d=document.getElementById('vCompDrop');if(d)d.style.display='none';},200)"><div id="vCompDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="vDni" type="text" placeholder="12.345.678"></div></div>
     <div class="fg"><label>Dirección completa</label><input id="vDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
     <div class="fr"><div class="fg"><label>Teléfono</label><input id="vTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="vMail" type="text" placeholder="ejemplo@mail.com"></div></div>
     <div class="fr">
@@ -347,14 +347,14 @@ select.filter:focus{border-color:var(--accent)}
     </div>
     <div class="ptabs"><button class="ptab active" id="ptabVend" onclick="switchTab('vend')">Vendedor</button><button class="ptab" id="ptabComp" onclick="switchTab('comp')">Comprador</button></div>
     <div id="panelVend">
-      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="tVNom" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('tVNom','tVNomDrop','tVDni',this.value)" onfocus="filtrarClientesGS('tVNom','tVNomDrop','tVDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('tVNomDrop');if(d)d.style.display='none';},200)"><div id="tVNomDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="tVDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="tVNom" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('tVNom','tVNomDrop','tVDni',this.value)" onfocus="filtrarClientesGS('tVNom','tVNomDrop','tVDni',this.value)" onblur="setTimeout(function(){var d=document.getElementById('tVNomDrop');if(d)d.style.display='none';},200)"><div id="tVNomDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="tVDni" type="text" placeholder="12.345.678"></div></div>
       <div class="fg"><label>Dirección completa</label><input id="tVDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
       <div class="fr"><div class="fg"><label>Teléfono</label><input id="tVTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="tVMail" type="text" placeholder="ejemplo@mail.com"></div></div>
       <div class="fr"><div class="fg"><label>Estado civil</label><select id="tVCivil" onchange="toggleCon('V')"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div><div class="fg"><label>Ocupación / Actividad</label><input id="tVOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
       <div id="tVConBox" class="conyuge-box hidden"><div class="conyuge-title">Datos del cónyuge</div><div class="fr"><div class="fg"><label>Nombre completo</label><input id="tVCoNom" type="text" placeholder="Apellido, Nombre"></div><div class="fg"><label>DNI</label><input id="tVCoDni" type="text" placeholder="12.345.678"></div></div><div class="fg"><label>Ocupación / Actividad</label><input id="tVCoOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
     </div>
     <div id="panelComp" class="hidden">
-      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="tCNom" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('tCNom','tCNomDrop','tCDni',this.value)" onfocus="filtrarClientesGS('tCNom','tCNomDrop','tCDni',this.value)" onblur="setTimeout(()=>{const d=document.getElementById('tCNomDrop');if(d)d.style.display='none';},200)"><div id="tCNomDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="tCDni" type="text" placeholder="12.345.678"></div></div>
+      <div class="fr"><div class="fg"><label>Nombre y apellido *</label><div style="position:relative;"><input id="tCNom" type="text" placeholder="Apellido, Nombre" autocomplete="off" oninput="filtrarClientesGS('tCNom','tCNomDrop','tCDni',this.value)" onfocus="filtrarClientesGS('tCNom','tCNomDrop','tCDni',this.value)" onblur="setTimeout(function(){var d=document.getElementById('tCNomDrop');if(d)d.style.display='none';},200)"><div id="tCNomDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e0ddd4;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:180px;overflow-y:auto;margin-top:2px;"></div></div></div><div class="fg"><label>DNI</label><input id="tCDni" type="text" placeholder="12.345.678"></div></div>
       <div class="fg"><label>Dirección completa</label><input id="tCDir" type="text" placeholder="Calle 123, Mar del Plata"></div>
       <div class="fr"><div class="fg"><label>Teléfono</label><input id="tCTel" type="text" placeholder="223-4567890"></div><div class="fg"><label>Mail</label><input id="tCMail" type="text" placeholder="ejemplo@mail.com"></div></div>
       <div class="fr"><div class="fg"><label>Estado civil</label><select id="tCCivil" onchange="toggleCon('C')"><option value="">— Seleccionar —</option><option value="soltero">Soltero/a</option><option value="casado">Casado/a</option><option value="divorciado">Divorciado/a</option><option value="viudo">Viudo/a</option><option value="union">Unión convivencial</option></select></div><div class="fg"><label>Ocupación / Actividad</label><input id="tCOcup" type="text" placeholder="Empleado, Comerciante..."></div></div>
@@ -382,64 +382,41 @@ select.filter:focus{border-color:var(--accent)}
 <!-- PENDIENTES -->
 <div class="page hidden" id="page-pendientes">
   <div class="page-header">
-    <div>
-      <div class="page-title">Pendientes</div>
-      <div class="page-sub">Tareas del día — autos sin legajo, a documentar y transferencias activas</div>
-    </div>
+    <div><div class="page-title">Pendientes</div><div class="page-sub">Tareas del dia</div></div>
     <button class="btn" onclick="cargarPendientes()">↻ Actualizar</button>
   </div>
-
-  <!-- Stats -->
   <div class="stats-row" id="statsPend"></div>
-
-  <!-- Autos sin legajo -->
   <div style="margin-bottom:24px;">
     <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:#991b1b;font-weight:600;margin-bottom:12px;">🔴 Autos sin legajo asignado</div>
-    <div id="pendSinLegajoLista">
-      <div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div>
-    </div>
+    <div id="pendSinLegajoLista"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div></div>
   </div>
-
-  <!-- Autos a documentar -->
   <div style="margin-bottom:24px;">
     <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text2);font-weight:600;margin-bottom:12px;">🚗 Autos a documentar</div>
-    <div id="pendAutosLista">
-      <div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div>
-    </div>
+    <div id="pendAutosLista"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div></div>
   </div>
-
-  <!-- Transferencias activas -->
   <div>
     <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text2);font-weight:600;margin-bottom:12px;">🔄 Transferencias activas</div>
-    <div id="pendTrfsLista">
-      <div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div>
-    </div>
+    <div id="pendTrfsLista"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div></div>
   </div>
 </div>
 
-<!-- MODAL: CANCELAR OPERACION GESTORIA -->
+<!-- MODAL CANCELAR OPERACION GESTORIA -->
 <div class="overlay hidden" id="ovCancelarOp">
-<div class="modal">
-  <div class="mh"><h3>Cancelar operación</h3><button class="mbtn" onclick="cerrar('ovCancelarOp')">✕</button></div>
-  <div class="mb">
-    <div id="cancelarOpGestInfo" style="background:#fef2f2;border:1px solid #fee2e2;border-radius:8px;padding:12px;margin-bottom:14px;font-size:0.85rem;"></div>
-    <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px;">Motivo de cancelación *</label>
-    <textarea id="cancelarOpGestMotivo" placeholder="Describí el problema con la documentación..." style="width:100%;min-height:80px;padding:10px;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:0.9rem;resize:vertical;"></textarea>
-    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
-      <button class="btn" onclick="cerrar('ovCancelarOp')">Volver</button>
-      <button class="btn danger" onclick="confirmarCancelarOpGest()">Confirmar cancelación</button>
-    </div>
+<div class="modal"><div class="mh"><h3>Cancelar operacion</h3><button class="mbtn" onclick="cerrar('ovCancelarOp')">✕</button></div>
+<div class="mb">
+  <div id="cancelarOpGestInfo" style="background:#fef2f2;border:1px solid #fee2e2;border-radius:8px;padding:12px;margin-bottom:14px;font-size:0.85rem;"></div>
+  <label style="font-size:0.72rem;text-transform:uppercase;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Motivo *</label>
+  <textarea id="cancelarOpGestMotivo" placeholder="Describí el problema..." style="width:100%;min-height:80px;padding:10px;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:0.9rem;resize:vertical;"></textarea>
+  <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+    <button class="btn" onclick="cerrar('ovCancelarOp')">Volver</button>
+    <button class="btn danger" onclick="confirmarCancelarOpGest()">Confirmar cancelacion</button>
   </div>
-</div>
-</div>
+</div></div></div>
 
-<!-- MODAL: DETALLE OPERACION EN PENDIENTES -->
+<!-- MODAL DETALLE OPERACION PENDIENTES -->
 <div class="overlay hidden" id="ovDetallePend">
-<div class="modal xwide">
-  <div class="mh"><h3>Detalle de operación</h3><button class="mbtn" onclick="cerrar('ovDetallePend')">✕</button></div>
-  <div class="mb" id="detallePendBody"></div>
-</div>
-</div>
+<div class="modal xwide"><div class="mh"><h3>Detalle de operacion</h3><button class="mbtn" onclick="cerrar('ovDetallePend')">✕</button></div>
+<div class="mb" id="detallePendBody"></div></div></div>
 
 <!-- MODAL: DETALLE TRANSFERENCIA -->
 <div class="overlay hidden" id="ovDetTrf">
@@ -501,7 +478,7 @@ async function sbInsert(t,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}`,{m
 async function sbUpdate(t,col,val,data){ const r=await fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${val}`,{method:'PATCH',headers:sbH,body:JSON.stringify(data)}); if(!r.ok){console.error(await r.text());return null;} return r.json(); }
 async function sbDelete(t,col,val){ await fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${val}`,{method:'DELETE',headers:sbH}); }
 
-function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML='<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">'+msg+'</div>';document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
+function mostrarCargando(msg='Cargando...'){ let el=document.getElementById('_ld');if(!el){el=document.createElement('div');el.id='_ld';el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';el.innerHTML=`<div style="background:#fff;border-radius:10px;padding:20px 32px;font-family:sans-serif;font-size:0.9rem;">${msg}</div>`;document.body.appendChild(el);}else{el.querySelector('div').textContent=msg;}}
 function ocultarCargando(){ const el=document.getElementById('_ld');if(el)el.remove(); }
 
 // Guarda legajo completo en Supabase
@@ -597,7 +574,22 @@ function vtvEstado(fechaVtv) {
 }
 
 // ═══ DATOS INICIALES ═══
-function initLegs() { return []; }
+function initLegs() {
+  const arr = [];
+  for(let i=1;i<=TOTAL;i++) arr.push({num:i,libre:true,auto:null});
+  arr[0]={num:1,libre:false,auto:{dominio:'GHK 452',vehiculo:'Chevrolet Cruze 2021',cliente:'Martínez, Carlos',dni:'20-34567890-1',fecha:'2026-04-10',precio:'$18.500.000',vtv:'2026-12-15',notas:'Comprado en remate.',notas_hilo:[],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:true},{n:'Cédula verde',ok:true},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
+  arr[1]={num:2,libre:false,auto:{dominio:'JKL 789',vehiculo:'Toyota Hilux 2022',cliente:'Rodríguez, Ana',dni:'27-45678901-2',fecha:'2026-04-18',precio:'',vtv:'2026-05-10',notas:'',notas_hilo:[{ts:'2026-04-19T10:00:00.000Z',txt:'Llamé a la titular, trae el 08 la semana que viene.'}],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:false},{n:'Cédula verde',ok:false},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
+  arr[4]={num:5,libre:false,auto:{dominio:'MNO 234',vehiculo:'Ford Focus 2018',cliente:'López, Sergio',dni:'23-56789012-3',fecha:'2026-04-05',precio:'$9.200.000',vtv:'2027-03-20',notas:'Tiene prenda a cancelar.',notas_hilo:[],docs:[{n:'Título original',ok:true},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:true},{n:'Libre deuda patente',ok:true},{n:'Cédula verde',ok:true},{n:'Formulario 08 certificado',ok:true},{n:'Libre deuda infracciones',ok:true},{n:'Copia de llaves',ok:true},{n:'Manuales del vehículo',ok:true},{n:'Historial de servicios',ok:true}]}};
+  arr[7]={num:8,libre:false,auto:{dominio:'STU 890',vehiculo:'Peugeot 208 2023',cliente:'González, Pablo',dni:'28-78901234-5',fecha:'2026-04-20',precio:'',vtv:'',notas:'',notas_hilo:[],docs:[{n:'Título original',ok:false},{n:'DNI titular',ok:true},{n:'VTV vigente',ok:false},{n:'Libre deuda patente',ok:false},{n:'Cédula verde',ok:false},{n:'Formulario 08 certificado',ok:false},{n:'Libre deuda infracciones',ok:false},{n:'Copia de llaves',ok:false},{n:'Manuales del vehículo',ok:false},{n:'Historial de servicios',ok:false}]}};
+  return arr;
+}
+
+function initTrfs() {
+  return [
+    {id:'TRF-001',vendedor:'Fernández, María',vendedorData:{nombre:'Fernández, María',dni:'25-67890-1',dir:'San Martín 1234, Mar del Plata',tel:'223-1234567',mail:'mfernandez@mail.com',civil:'casado',ocup:'Docente',conyuge:{nombre:'Pérez, Juan',dni:'22-11111-2',ocup:'Empleado'}},comprador:'Suárez, Ricardo',compradorData:{nombre:'Suárez, Ricardo',dni:'28-99999-3',dir:'Rivadavia 567, Mar del Plata',tel:'223-9876543',mail:'rsuarez@mail.com',civil:'soltero',ocup:'Comerciante',conyuge:null},dominio:'PQR 567',vehiculo:'Renault Sandero 2020',estado:'finalizada',fecha:'2026-03-28',precio:'$8.000.000',honorario:'$80.000',honorarioEst:'cobrado',legajoOrigen:12,notas:'Finalizado. Entregado el 15/04.',historial:[{estado:'prep-doc',label:'Preparando documentación',ts:'2026-03-28T09:00:00.000Z',nota:'Trámite creado.'},{estado:'en-escribania',label:'Doc. en escribanía',ts:'2026-03-30T10:30:00.000Z',nota:''},{estado:'retirado',label:'Retirado de escribanía',ts:'2026-04-05T11:00:00.000Z',nota:''},{estado:'en-gestoria',label:'En gestoría',ts:'2026-04-08T09:00:00.000Z',nota:''},{estado:'para-entregar',label:'Para entregar doc.',ts:'2026-04-12T15:00:00.000Z',nota:''},{estado:'finalizada',label:'Finalizada',ts:'2026-04-15T14:00:00.000Z',nota:'Entregado al comprador.'}]},
+    {id:'TRF-002',vendedor:'Gómez, Héctor',vendedorData:{nombre:'Gómez, Héctor',dni:'23-55555-4',dir:'Luro 890, Mar del Plata',tel:'223-5555555',mail:'hgomez@mail.com',civil:'casado',ocup:'Jubilado',conyuge:{nombre:'Ruiz, Carmen',dni:'24-44444-5',ocup:'Ama de casa'}},comprador:'Torres, Laura',compradorData:{nombre:'Torres, Laura',dni:'30-33333-6',dir:'Independencia 321, Mar del Plata',tel:'223-3333333',mail:'ltorres@mail.com',civil:'soltero',ocup:'Empleada',conyuge:null},dominio:'VWX 123',vehiculo:'Honda Civic 2017',estado:'en-escribania',fecha:'2026-04-14',precio:'$12.500.000',honorario:'$120.000',honorarioEst:'pendiente-cobro',legajoOrigen:3,notas:'Trámite urgente. Cliente viaja el 30/04.',historial:[{estado:'prep-doc',label:'Preparando documentación',ts:'2026-04-14T08:00:00.000Z',nota:'Trámite creado al registrar la venta.'},{estado:'en-escribania',label:'Doc. en escribanía',ts:'2026-04-16T10:00:00.000Z',nota:''}]}
+  ];
+}
 
 let legs = [];
 let trfs = [];
@@ -639,7 +631,6 @@ async function cargarDatos() {
   }
   ocultarCargando();
   render();
-  cargarClientesGS();
 }
 
 // ═══ ESTADO UI ═══
@@ -647,18 +638,18 @@ let pagActiva='legajos', filtroLeg=null, editLeg=null, editTrf=null, vendNum=nul
 
 // ═══ NAVEGACIÓN ═══
 function cambiarPag(p,btn) {
-  ['legajos','transf','pendientes'].forEach(id => {
-    g('page-'+id).classList.toggle('hidden', id!==p);
-    g('page-'+id).classList.toggle('active', id===p);
+  ['legajos','transf','pendientes'].forEach(function(id){
+    var pg=g('page-'+id); if(!pg) return;
+    pg.classList.toggle('hidden',id!==p);
+    pg.classList.toggle('active',id===p);
   });
-  ['navLeg','navTrf','navPend'].forEach(id => g(id)&&g(id).classList.remove('active'));
+  ['navLeg','navTrf','navPend'].forEach(function(id){var b=g(id);if(b)b.classList.remove('active');});
   if(btn) btn.classList.add('active');
-  pagActiva = p;
+  pagActiva=p;
   if(p==='legajos') renderLegs();
   else if(p==='transf') renderTrfs();
-  else if(p==='pendientes') setTimeout(function(){ if(typeof cargarPendientes === 'function') cargarPendientes(); }, 50);
+  else if(p==='pendientes') setTimeout(function(){if(typeof cargarPendientes==='function')cargarPendientes();},50);
 }
-
 
 // ═══ BÚSQUEDA GLOBAL ═══
 function buscarGlobal(q) {
@@ -824,6 +815,7 @@ function abrirDetLeg(num) {
       '<div><div style="font-size:16px;font-weight:600">'+a.cliente+'</div><div style="font-size:13px;color:var(--text2)">'+a.dominio+' · '+(a.vehiculo||'')+'</div></div>'+
       '<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+
         '<span class="badge '+(st.full?'doc-ok':'doc-inc')+'">'+(st.full?'Documentación lista':'Completando documentación')+'</span>'+
+        '<span id="subEstadoBadge_'+num+'"></span>'+
         (vtv?'<span class="badge '+vtv.cls+'">'+vtv.label+'</span>':'')+
         '<span style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+st.ok+'/'+st.total+' docs</span>'+
       '</div>'+
@@ -862,8 +854,7 @@ function abrirDetLeg(num) {
       '<button class="btn sm danger" onclick="cerrar(\'ovDetLeg\');pedirElimLeg('+num+')">🗑 Liberar legajo</button>'+
     '</div>';
   g('ovDetLeg').classList.remove('hidden');
-  // Cargar datos del titular desde Supabase
-  cargarTitularLegajo(num, l.auto && l.auto.dominio);
+  if(l.auto&&l.auto.dominio){cargarTitularLegajo(num,l.auto.dominio);cargarSubEstadoLegajo(num,l.auto.dominio);}
 }
 
 async function agregarNota(num) {
@@ -975,7 +966,7 @@ function filtTrfs() {
 
 function renderTrfRow(t) {
   const op='';
-        html3 += '<button onclick="gestVerDetTrf(event)" data-id="'+t.id+'" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>';
+  return '<tr onclick="abrirDetTrf(\''+t.id+'\')" style="'+op+'">'+
     '<td class="td-mono" style="color:var(--accent);font-weight:500">'+t.id+'</td>'+
     '<td>'+t.vendedor+'</td><td>'+t.comprador+'</td>'+
     '<td><span class="td-dom">'+t.dominio+'</span></td>'+
@@ -1291,50 +1282,35 @@ g('searchTrf').addEventListener('input',render);
 g('filtroTrf').addEventListener('change',render);
 
 function render(){if(pagActiva==='legajos') renderLegs(); else renderTrfs();}
-cargarDatos().then(function(){
-  setTimeout(function(){ cargarNotifs(); }, 500);
-  setTimeout(function(){ cargarPendientes(); }, 800);
-  cargarClientesGS();
-});
-
-
-
-
+cargarDatos();
 // ═══ BUSCADOR DE CLIENTES (gestoría) ══════════════════════
-let _clientesGS = [];
-
+var _clientesGS = [];
 async function cargarClientesGS() {
   try {
-    const r = await fetch(SB_URL+'/rest/v1/clientes?select=id,nombre,dni,tel&order=nombre.asc&limit=500',{headers:sbH});
+    var r = await fetch(SB_URL+'/rest/v1/clientes?select=id,nombre,dni,tel&order=nombre.asc&limit=500',{headers:sbH});
     _clientesGS = r.ok ? await r.json() : [];
   } catch(e){ _clientesGS = []; }
 }
-
 function filtrarClientesGS(inputId, dropId, dniId, q) {
-  const drop = document.getElementById(dropId);
+  var drop = document.getElementById(dropId);
   if(!drop) return;
-  const lista = _clientesGS.filter(c => !q || c.nombre.toLowerCase().includes(q.toLowerCase()) || (c.dni&&c.dni.includes(q))).slice(0,8);
+  var lista = _clientesGS.filter(function(c){ return !q || c.nombre.toLowerCase().includes(q.toLowerCase()) || (c.dni&&c.dni.includes(q)); }).slice(0,8);
   if(!lista.length){ drop.style.display='none'; return; }
-  drop.style.display = 'block';
-  drop.innerHTML = lista.map(c =>
-    '<div onclick="selClienteGS(\''+inputId+'\',\''+dropId+'\',\''+dniId+'\',\''+c.nombre.replace(/'/g,"&#39;")+'\',' + (c.dni?'\''+c.dni+'\'':"''") + ')" '+
-    'style="padding:9px 14px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid #f0ede4;" '+
-    'onmouseover="this.style.background=\'#f4f3ee\'" onmouseout="this.style.background=\'#fff\'">' +
-    '<span style="font-weight:500;">'+c.nombre+'</span>' +
-    (c.dni?'<span style="font-size:0.75rem;color:#9b9890;margin-left:8px;">'+c.dni+'</span>':'') +
-    (c.tel?'<span style="font-size:0.73rem;color:#9b9890;margin-left:8px;">'+c.tel+'</span>':'') +
-    '</div>'
-  ).join('');
+  drop.style.display='block';
+  drop.innerHTML = lista.map(function(c){
+    return '<div onclick="selClienteGS(\''+inputId+'\',\''+dropId+'\',\''+dniId+'\',\''+c.nombre.replace(/'/g,"&#39;")+'\','+(c.dni?'\''+c.dni+'\'':"\'\'")+')\" style="padding:9px 14px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid #f0ede4;" onmouseover="this.style.background=\'#f4f3ee\'" onmouseout="this.style.background=\'#fff\'">'+
+      '<span style="font-weight:500;">'+c.nombre+'</span>'+(c.dni?'<span style="font-size:0.75rem;color:#9b9890;margin-left:8px;">'+c.dni+'</span>':'')+
+      (c.tel?'<span style="font-size:0.73rem;color:#9b9890;margin-left:8px;">'+c.tel+'</span>':'')+'</div>';
+  }).join('');
 }
-
 function selClienteGS(inputId, dropId, dniId, nombre, dni) {
-  const inp = document.getElementById(inputId);
-  if(inp) inp.value = nombre;
-  if(dniId) { const d = document.getElementById(dniId); if(d && dni) d.value = dni; }
-  const drop = document.getElementById(dropId);
-  if(drop) drop.style.display = 'none';
+  var inp=document.getElementById(inputId); if(inp) inp.value=nombre;
+  if(dniId){var d=document.getElementById(dniId);if(d&&dni)d.value=dni;}
+  var drop=document.getElementById(dropId); if(drop) drop.style.display='none';
 }
 
+// ═══ PENDIENTES ════════════════════════════════════════════
+var SUB_COLOR = {'Pendiente a peritaje':'#991b1b','Peritaje aprobado':'#b45309','Juntando documentacion':'#1e40af','Documentacion lista':'#065f46'};
 
 async function cargarPendientes() {
   var autosRaw = await sbGet('vehiculos','select=*&estado=eq.A ingresar&order=created_at.asc');
@@ -1342,353 +1318,288 @@ async function cargarPendientes() {
   var legajosOcupados = legs.filter(function(l){return !l.libre;}).map(function(l){return l.auto&&l.auto.dominio;}).filter(Boolean);
   var sinLegajo = autos.filter(function(v){return v.dominio && !legajosOcupados.includes(v.dominio);});
   var conLegajo = autos.filter(function(v){return !v.dominio || legajosOcupados.includes(v.dominio);});
-  var trfsActivas = trfs.filter(function(t){return t.estado !== 'finalizada';});
+  var trfsActivas = trfs.filter(function(t){return t.estado!=='finalizada';});
   var opsActivas = [];
-  try { opsActivas = await sbGet('operaciones','select=*&estado=neq.Entregado&estado=neq.Cancelada&order=created_at.desc&limit=20'); } catch(e){}
+  try{ opsActivas = await sbGet('operaciones','select=*&estado=neq.Entregado&estado=neq.Cancelada&order=created_at.desc&limit=20'); }catch(e){}
 
-  // Badge
   var total = autos.length + trfsActivas.length + sinLegajo.length;
   var badge = document.getElementById('navPendCount');
-  if(badge){ if(total>0){badge.style.display='inline';badge.textContent=total;}else{badge.style.display='none';} }
+  if(badge){if(total>0){badge.style.display='inline';badge.textContent=total;}else{badge.style.display='none';}}
 
-  // Stats
   var stats = document.getElementById('statsPend');
-  if(stats) {
-    var mkStat = function(lbl,val,col){ return '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div><div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>'; };
-    stats.innerHTML = mkStat('Sin legajo',sinLegajo.length,'#991b1b') + mkStat('A documentar',conLegajo.length,'#1e40af') + mkStat('Transferencias',trfsActivas.length,'#b45309') + mkStat('Ops activas',opsActivas.length,'#7c3aed');
+  if(stats){
+    var mkStat=function(lbl,val,col){return '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div><div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>';};
+    stats.innerHTML=mkStat('Sin legajo',sinLegajo.length,'#991b1b')+mkStat('A documentar',conLegajo.length,'#1e40af')+mkStat('Transferencias',trfsActivas.length,'#b45309')+mkStat('Ops activas',opsActivas.length,'#7c3aed');
   }
 
-  var cs = 'background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
+  var cs='background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
 
   // Sin legajo
-  var listaSinLeg = document.getElementById('pendSinLegajoLista');
-  if(listaSinLeg) {
-    if(!sinLegajo.length) {
-      listaSinLeg.innerHTML = '<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de asignacion de legajo</div>';
-    } else {
-      var html1 = '<div style="display:flex;flex-direction:column;gap:10px;">';
+  var listaSinLeg=document.getElementById('pendSinLegajoLista');
+  if(listaSinLeg){
+    if(!sinLegajo.length){listaSinLeg.innerHTML='<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de asignacion de legajo</div>';}
+    else{
+      var html1='<div style="display:flex;flex-direction:column;gap:10px;">';
       sinLegajo.forEach(function(v){
-        var dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
-        html1 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">';
-        html1 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
-        html1 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' · Sin legajo asignado</div></div>';
-        html1 += '<button onclick="irALegajosConAuto('+v.id+',\''+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'\',\''+encodeURIComponent(v.dominio||'')+'\')'  + '" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
-        html1 += '</div>';
+        var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
+        html1+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">';
+        html1+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
+        html1+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' · Sin legajo asignado</div></div>';
+        html1+='<button onclick="irALegajosConAuto('+v.id+',\''+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||'')+'')+'\',\''+encodeURIComponent(v.dominio||'')+'\')\" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
+        html1+='</div>';
       });
-      html1 += '</div>';
-      listaSinLeg.innerHTML = html1;
+      html1+='</div>';
+      listaSinLeg.innerHTML=html1;
     }
   }
 
-  // Con legajo - autos a documentar
-  var listaAutos = document.getElementById('pendAutosLista');
-  if(listaAutos) {
-    if(!conLegajo.length) {
-      listaAutos.innerHTML = '<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentacion</div>';
-    } else {
-      var html2 = '<div style="display:flex;flex-direction:column;gap:10px;">';
+  // Con legajo
+  var listaAutos=document.getElementById('pendAutosLista');
+  if(listaAutos){
+    if(!conLegajo.length){listaAutos.innerHTML='<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentacion</div>';}
+    else{
+      var html2='<div style="display:flex;flex-direction:column;gap:10px;">';
       conLegajo.forEach(function(v){
-        var sub = v.sub_estado || 'Pendiente a peritaje';
-        var col = SUB_COLOR[sub] || '#555';
-        var idx = SUB_ESTADOS_ORD.indexOf(sub);
-        var siguiente = (idx >= 0 && idx < SUB_ESTADOS_ORD.length-1) ? SUB_ESTADOS_ORD[idx+1] : null;
-        var dias = v.created_at ? Math.floor((new Date()-new Date(v.created_at))/86400000) : 0;
-        html2 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
-        html2 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
-        html2 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' en sistema</div>';
-        if(v.obs) html2 += '<div style="font-size:0.76rem;color:var(--text3);margin-top:2px;font-style:italic;">'+v.obs+'</div>';
-        html2 += '</div>';
-        html2 += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
-        html2 += '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
-        if(siguiente) html2 += '<button onclick="avanzarSubEstadoGS('+v.id+', this)" data-sub="'+siguiente+'" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>';
-        if(sub==='Documentacion lista') html2 += '<button onclick="pasarADisponible('+v.id+')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>';
-        html2 += '</div></div>';
+        var sub=v.sub_estado||'Pendiente a peritaje';
+        var col=SUB_COLOR[sub]||'#555';
+        var idx2=SUB_ESTADOS_ORD.indexOf(sub);
+        var siguiente=(idx2>=0&&idx2<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx2+1]:null;
+        var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
+        html2+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+        html2+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
+        html2+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' en sistema</div>';
+        if(v.obs) html2+='<div style="font-size:0.76rem;color:var(--text3);font-style:italic;">'+v.obs+'</div>';
+        html2+='</div>';
+        html2+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html2+='<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
+        if(siguiente) html2+='<button data-vid="'+v.id+'" data-sub="'+siguiente+'" onclick="avanzarSubEstado(parseInt(this.dataset.vid),this.dataset.sub)" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>';
+        if(sub==='Documentacion lista') html2+='<button data-vid="'+v.id+'" onclick="pasarADisponible(parseInt(this.dataset.vid))" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>';
+        html2+='</div></div>';
       });
-      html2 += '</div>';
-      listaAutos.innerHTML = html2;
+      html2+='</div>';
+      listaAutos.innerHTML=html2;
     }
   }
 
-  // Transferencias activas
-  var listaTrfs = document.getElementById('pendTrfsLista');
-  if(listaTrfs) {
-    if(!trfsActivas.length) {
-      listaTrfs.innerHTML = '<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin transferencias activas</div>';
-    } else {
-      var html3 = '<div style="display:flex;flex-direction:column;gap:10px;">';
+  // Transferencias
+  var listaTrfs=document.getElementById('pendTrfsLista');
+  if(listaTrfs){
+    if(!trfsActivas.length){listaTrfs.innerHTML='<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin transferencias activas</div>';}
+    else{
+      var html3='<div style="display:flex;flex-direction:column;gap:10px;">';
       trfsActivas.forEach(function(t){
-        var colMap = {'prep-doc':'#b45309','en-escribania':'#1e40af','retirado':'#555','en-gestoria':'#7c3aed','para-entregar':'#065f46'};
-        var col2 = colMap[t.estado]||'#555';
-        var label = ELABELS[t.estado]||t.estado;
-        var dias = t.fecha ? Math.floor((new Date()-new Date(t.fecha))/86400000) : 0;
-        var opRel = opsActivas.find(function(o){return o.vehiculo_texto && t.dominio && o.vehiculo_texto.includes(t.dominio);});
-        html3 += '<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
-        html3 += '<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+t.id+' — '+t.dominio+'</div>';
-        html3 += '<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+t.vendedor+' → '+t.comprador+' · '+dias+' dia'+(dias!==1?'s':'')+' en curso</div></div>';
-        html3 += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
-        html3 += '<span style="background:'+col2+'18;color:'+col2+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+label+'</span>';
-        if(opRel) html3 += '<button onclick="abrirDetalleOp(\'' + opRel.id + '\')"; style="background:#f4f3ee;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver operacion</button>';
-        html3 += '<button onclick="gestVerDetTrf(event)" data-id="'+t.id+'" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>';
-        if(opRel) html3 += '<button onclick="abrirCancelarOpGest(' + JSON.stringify(opRel.id) + ',\''+encodeURIComponent(opRel.vehiculo_texto||'')+'\',' + '\'' + encodeURIComponent(opRel.cliente_nombre||'') + '\')" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Cancelar</button>';
-        html3 += '</div></div>';
+        var colMap={'prep-doc':'#b45309','en-escribania':'#1e40af','retirado':'#555','en-gestoria':'#7c3aed','para-entregar':'#065f46'};
+        var col2=colMap[t.estado]||'#555';
+        var label=ELABELS[t.estado]||t.estado;
+        var dias=t.fecha?Math.floor((new Date()-new Date(t.fecha))/86400000):0;
+        var opRel=opsActivas.find(function(o){return o.vehiculo_texto&&t.dominio&&o.vehiculo_texto.includes(t.dominio);});
+        html3+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+        html3+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+t.id+' — '+t.dominio+'</div>';
+        html3+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+t.vendedor+' → '+t.comprador+' · '+dias+' dia'+(dias!==1?'s':'')+' en curso</div></div>';
+        html3+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html3+='<span style="background:'+col2+'18;color:'+col2+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+label+'</span>';
+        if(opRel) html3+='<button data-opid="'+opRel.id+'" onclick="abrirDetalleOp(this.dataset.opid)" style="background:#f4f3ee;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver operacion</button>';
+        if(t.id) html3+='<button data-tid="'+t.id+'" onclick="abrirDetTrf(this.dataset.tid)" style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Ver detalle</button>';
+        if(opRel) html3+='<button data-opid="'+opRel.id+'" data-vtxt="'+encodeURIComponent(opRel.vehiculo_texto||'')+'" data-cnm="'+encodeURIComponent(opRel.cliente_nombre||'')+'" onclick="abrirCancelarOpGest(this.dataset.opid,this.dataset.vtxt,this.dataset.cnm)" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:6px 12px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Cancelar</button>';
+        html3+='</div></div>';
       });
-      html3 += '</div>';
-      listaTrfs.innerHTML = html3;
+      html3+='</div>';
+      listaTrfs.innerHTML=html3;
     }
   }
 }
 
-let _cancelarOpGestId = null;
-
-function gestVerDetTrf(e){ var id=e.currentTarget.getAttribute('data-id'); if(id) abrirDetTrf(id); }
-
-
-function irALegajosConAuto(vehiculoId, marcaModeloEnc, dominioEnc) {
-  var marcaModelo = decodeURIComponent(marcaModeloEnc);
-  var dominio = decodeURIComponent(dominioEnc);
-  var libres = legs.filter(function(l){ return l.libre; });
-  if(!libres.length) { alert('No hay legajos libres disponibles.'); return; }
-
-  var html = '<div style="padding:20px;">';
-  html += '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;">';
-  html += '<div style="font-weight:600;margin-bottom:2px;">Auto a asignar:</div>';
-  html += '<div>'+marcaModelo+(dominio?' · '+dominio:'')+'</div></div>';
-  html += '<div style="font-size:0.85rem;color:var(--text2);margin-bottom:12px;">Seleccioná el legajo:</div>';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;">';
-  libres.forEach(function(l) {
-    html += '<div onclick="seleccionarLegajoConAuto('+l.num+','+vehiculoId+',\''+encodeURIComponent(marcaModelo)+'\',\''+encodeURIComponent(dominio)+'\')" style="background:var(--green-bg);border:1.5px dashed var(--green-border);border-radius:8px;padding:14px 8px;text-align:center;cursor:pointer;" onmouseover="this.style.background=\'#c8edc9\'" onmouseout="this.style.background=\'var(--green-bg)\'">';
-    html += '<div style="font-size:1.1rem;font-weight:700;color:var(--green);">'+String(l.num).padStart(2,'0')+'</div>';
-    html += '<div style="font-size:0.7rem;color:var(--green);margin-top:2px;">Libre</div></div>';
-  });
-  html += '</div></div>';
-
-  var modal = document.getElementById('ovAsignarLegajo');
-  if(!modal) {
-    modal = document.createElement('div');
-    modal.id = 'ovAsignarLegajo';
-    modal.className = 'overlay';
-    modal.innerHTML = '<div class="modal" style="max-width:500px;"><div class="mh"><h3>Asignar legajo</h3><button class="mbtn" onclick="cerrar(\'ovAsignarLegajo\')">✕</button></div><div class="mb" id="ovAsignarLegajoBody"></div></div>';
-    document.body.appendChild(modal);
-    modal.addEventListener('click', function(e){ if(e.target===modal) cerrar('ovAsignarLegajo'); });
+async function avanzarSubEstado(vehiculoId, nuevoSub) {
+  if(!confirm('Avanzar a "'+nuevoSub+'"?')) return;
+  mostrarCargando('Actualizando...');
+  await sbUpdate('vehiculos','id',vehiculoId,{sub_estado:nuevoSub});
+  // Sincronizar con el legajo
+  try {
+    var vRaw=await sbGet('vehiculos','select=dominio&id=eq.'+vehiculoId);
+    if(vRaw&&vRaw.length&&vRaw[0].dominio){
+      var dom=vRaw[0].dominio;
+      var leg=legs.find(function(l){return l.auto&&l.auto.dominio===dom;});
+      if(leg){
+        if(!leg.auto.notas_hilo) leg.auto.notas_hilo=[];
+        leg.auto.notas_hilo.push({texto:'Estado: '+nuevoSub,ts:new Date().toISOString(),auto:true});
+        await saveLeg(leg);
+      }
+    }
+  } catch(e){console.error(e);}
+  // Si llega a Documentacion lista → avisar caja
+  if(nuevoSub==='Documentacion lista'){
+    var ordenes=await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&vehiculo_id=eq.'+vehiculoId+'&limit=1');
+    if(ordenes&&ordenes.length){
+      var o=ordenes[0];
+      var saldo=parseFloat(o.precio||0)-parseFloat(o.senia||0);
+      var fmtN=function(n,m){return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');};
+      await sbInsert('movimientos_pendientes',{tipo:'pago_total',concepto:'Saldo de compra — '+o.vehiculo_texto+' (doc OK)',monto:saldo>0?saldo:parseFloat(o.precio||0),moneda:o.moneda||'ARS',solicitado_por:'Gestoria',referencia_id:o.id,referencia_tipo:'orden_compra',precio_total:parseFloat(o.precio||0),estado:'pendiente',obs:'Documentacion aprobada por gestoria.'});
+      await sbInsert('notificaciones',{para:'caja',tipo:'doc_lista',leida:false,titulo:'Doc lista — proceder con pago',mensaje:o.vehiculo_texto+' listo. Saldo: '+fmtN(saldo>0?saldo:parseFloat(o.precio||0),o.moneda||'ARS')});
+    }
   }
-  document.getElementById('ovAsignarLegajoBody').innerHTML = html;
+  ocultarCargando();
+  cargarPendientes();
+}
+
+async function pasarADisponible(vehiculoId) {
+  if(!confirm('Pasar el auto a Disponible?')) return;
+  mostrarCargando('Actualizando...');
+  await sbUpdate('vehiculos','id',vehiculoId,{estado:'Disponible',sub_estado:'Propio'});
+  ocultarCargando();
+  cargarPendientes();
+  alert('Auto pasado a Disponible correctamente.');
+}
+
+function irALegajos() {
+  cambiarPag('legajos', g('navLeg'));
+}
+
+async function irALegajosConAuto(vehiculoId, marcaModeloEnc, dominioEnc) {
+  var marcaModelo=decodeURIComponent(marcaModeloEnc);
+  var dominio=decodeURIComponent(dominioEnc);
+  var libres=legs.filter(function(l){return l.libre;});
+  if(!libres.length){alert('No hay legajos libres disponibles.');return;}
+  var html='<div style="padding:20px;">';
+  html+='<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;"><div style="font-weight:600;margin-bottom:2px;">Auto a asignar:</div><div>'+marcaModelo+(dominio?' · '+dominio:'')+'</div></div>';
+  html+='<div style="font-size:0.85rem;color:var(--text2);margin-bottom:12px;">Selecciona el legajo:</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;">';
+  libres.forEach(function(l){
+    var n=String(l.num).padStart(2,'0');
+    html+='<div data-num="'+l.num+'" data-vid="'+vehiculoId+'" data-mm="'+encodeURIComponent(marcaModelo)+'" data-dom="'+encodeURIComponent(dominio)+'" onclick="seleccionarLegajoConAuto(parseInt(this.dataset.num),parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" style="background:var(--green-bg);border:1.5px dashed var(--green-border);border-radius:8px;padding:14px 8px;text-align:center;cursor:pointer;">';
+    html+='<div style="font-size:1.1rem;font-weight:700;color:var(--green);">'+n+'</div><div style="font-size:0.7rem;color:var(--green);margin-top:2px;">Libre</div></div>';
+  });
+  html+='</div></div>';
+  var modal=document.getElementById('ovAsignarLegajo');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='ovAsignarLegajo';
+    modal.className='overlay';
+    modal.innerHTML='<div class="modal" style="max-width:500px;"><div class="mh"><h3>Asignar legajo</h3><button class="mbtn" onclick="cerrar(\'ovAsignarLegajo\')">✕</button></div><div class="mb" id="ovAsignarLegajoBody"></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click',function(e){if(e.target===modal)cerrar('ovAsignarLegajo');});
+  }
+  document.getElementById('ovAsignarLegajoBody').innerHTML=html;
   modal.classList.remove('hidden');
 }
 
 async function seleccionarLegajoConAuto(num, vehiculoId, marcaModeloEnc, dominioEnc) {
   cerrar('ovAsignarLegajo');
-  var marcaModelo = decodeURIComponent(marcaModeloEnc);
-  var dominio = decodeURIComponent(dominioEnc);
-
-  // Buscar datos del titular (cliente_entrega_id)
-  var titular = null;
+  var marcaModelo=decodeURIComponent(marcaModeloEnc);
+  var dominio=decodeURIComponent(dominioEnc);
+  var titular=null;
   try {
-    var vRaw = await sbGet('vehiculos','select=cliente_entrega_id,cliente_entrega_nombre,obs&id=eq.'+vehiculoId);
-    if(vRaw && vRaw.length && vRaw[0].cliente_entrega_id) {
-      var cRaw = await sbGet('clientes','select=*&id=eq.'+vRaw[0].cliente_entrega_id);
-      if(cRaw && cRaw.length) titular = cRaw[0];
+    var vRaw=await sbGet('vehiculos','select=cliente_entrega_id&id=eq.'+vehiculoId);
+    if(vRaw&&vRaw.length&&vRaw[0].cliente_entrega_id){
+      var cRaw=await sbGet('clientes','select=*&id=eq.'+vRaw[0].cliente_entrega_id);
+      if(cRaw&&cRaw.length) titular=cRaw[0];
     }
-  } catch(e) { console.error(e); }
-
-  // Abrir modal de asignacion con datos precargados
-  abrirModalLeg(num, false);
-
-  setTimeout(function() {
-    sv('lVeh', marcaModelo);
-    sv('lDom', dominio);
-    // Precargar datos del titular si existen
-    if(titular) {
-      sv('lCli', titular.nombre || '');
-      sv('lDni', titular.dni || '');
+  }catch(e){console.error(e);}
+  abrirModalLeg(num,false);
+  setTimeout(function(){
+    sv('lVeh',marcaModelo);
+    sv('lDom',dominio);
+    if(titular){sv('lCli',titular.nombre||'');sv('lDni',titular.dni||'');}
+    document.getElementById('ovLeg').dataset.vehiculoId=vehiculoId;
+    var infoEl=document.getElementById('mLegTitularInfo');
+    if(!infoEl){
+      infoEl=document.createElement('div');
+      infoEl.id='mLegTitularInfo';
+      infoEl.style.cssText='background:#f0f4ff;border:1px solid #c7d7f4;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:0.84rem;';
+      var mb=document.querySelector('#ovLeg .mb');
+      if(mb)mb.insertBefore(infoEl,mb.firstChild);
     }
-    document.getElementById('ovLeg').dataset.vehiculoId = vehiculoId;
-    // Mostrar info del titular en el modal
-    var infoEl = document.getElementById('mLegTitularInfo');
-    if(!infoEl) {
-      infoEl = document.createElement('div');
-      infoEl.id = 'mLegTitularInfo';
-      infoEl.style.cssText = 'background:#f0f4ff;border:1px solid #c7d7f4;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:0.84rem;';
-      var mb = document.querySelector('#ovLeg .mb');
-      if(mb) mb.insertBefore(infoEl, mb.firstChild);
-    }
-    if(titular) {
-      var info = '<div style="font-weight:600;margin-bottom:6px;color:#1e40af;">👤 Titular actual del vehículo</div>';
-      info += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">';
-      if(titular.nombre) info += '<div><b>Nombre:</b> '+titular.nombre+'</div>';
-      if(titular.dni)    info += '<div><b>DNI:</b> '+titular.dni+'</div>';
-      if(titular.tel)    info += '<div><b>Tel:</b> '+titular.tel+'</div>';
-      if(titular.email)  info += '<div><b>Email:</b> '+titular.email+'</div>';
-      if(titular.dir)    info += '<div style="grid-column:1/-1"><b>Dirección:</b> '+titular.dir+'</div>';
-      info += '</div>';
-      infoEl.innerHTML = info;
-      infoEl.style.display = 'block';
+    if(titular){
+      var info='<div style="font-weight:600;margin-bottom:6px;color:#1e40af;">Titular del vehiculo</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">';
+      if(titular.nombre) info+='<div><b>Nombre:</b> '+titular.nombre+'</div>';
+      if(titular.dni)    info+='<div><b>DNI:</b> '+titular.dni+'</div>';
+      if(titular.tel)    info+='<div><b>Tel:</b> '+titular.tel+'</div>';
+      if(titular.email)  info+='<div><b>Email:</b> '+titular.email+'</div>';
+      info+='</div>';
+      infoEl.innerHTML=info;
+      infoEl.style.display='block';
     } else {
-      infoEl.style.display = 'none';
+      infoEl.style.display='none';
     }
-  }, 100);
+  },100);
+}
+
+async function cargarSubEstadoLegajo(num, dominio) {
+  if(!dominio) return;
+  try {
+    var vRaw=await sbGet('vehiculos','select=sub_estado&dominio=eq.'+encodeURIComponent(dominio)+'&limit=1');
+    if(!vRaw||!vRaw.length||!vRaw[0].sub_estado) return;
+    var el=document.getElementById('subEstadoBadge_'+num);
+    if(!el) return;
+    var col=SUB_COLOR[vRaw[0].sub_estado]||'#555';
+    el.innerHTML='<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:2px 10px;font-size:0.75rem;font-weight:600;">'+vRaw[0].sub_estado+'</span>';
+  }catch(e){console.error(e);}
 }
 
 async function cargarTitularLegajo(num, dominio) {
   if(!dominio) return;
   try {
-    var vRaw = await sbGet('vehiculos','select=cliente_entrega_id,procedencia&dominio=eq.'+encodeURIComponent(dominio)+'&limit=1');
-    if(!vRaw || !vRaw.length || !vRaw[0].cliente_entrega_id) return;
-    var cRaw = await sbGet('clientes','select=nombre,dni,tel,email,dir&id=eq.'+vRaw[0].cliente_entrega_id);
-    if(!cRaw || !cRaw.length) return;
-    var c = cRaw[0];
-    var el = document.getElementById('legTitularInfo_'+num);
+    var vRaw=await sbGet('vehiculos','select=cliente_entrega_id&dominio=eq.'+encodeURIComponent(dominio)+'&limit=1');
+    if(!vRaw||!vRaw.length||!vRaw[0].cliente_entrega_id) return;
+    var cRaw=await sbGet('clientes','select=nombre,dni,tel,email&id=eq.'+vRaw[0].cliente_entrega_id);
+    if(!cRaw||!cRaw.length) return;
+    var c=cRaw[0];
+    var el=document.getElementById('legTitularInfo_'+num);
     if(!el) return;
-    var html = '<div style="background:#f0f4ff;border:1px solid #c7d7f4;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:0.82rem;">';
-    html += '<div style="font-weight:600;color:#1e40af;margin-bottom:4px;">👤 Titular / Quien lo entregó</div>';
-    if(c.nombre) html += '<div class="fr2"><span class="fl">Nombre</span><span class="fv">'+c.nombre+'</span></div>';
-    if(c.dni)    html += '<div class="fr2"><span class="fl">DNI</span><span class="fv">'+c.dni+'</span></div>';
-    if(c.tel)    html += '<div class="fr2"><span class="fl">Tel</span><span class="fv">'+c.tel+'</span></div>';
-    if(c.email)  html += '<div class="fr2"><span class="fl">Email</span><span class="fv">'+c.email+'</span></div>';
-    html += '</div>';
-    el.innerHTML = html;
-  } catch(e) { console.error(e); }
+    var html='<div style="background:#f0f4ff;border:1px solid #c7d7f4;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:0.82rem;">';
+    html+='<div style="font-weight:600;color:#1e40af;margin-bottom:4px;">Titular / Quien lo entrego</div>';
+    if(c.nombre) html+='<div class="fr2"><span class="fl">Nombre</span><span class="fv">'+c.nombre+'</span></div>';
+    if(c.dni)    html+='<div class="fr2"><span class="fl">DNI</span><span class="fv">'+c.dni+'</span></div>';
+    if(c.tel)    html+='<div class="fr2"><span class="fl">Tel</span><span class="fv">'+c.tel+'</span></div>';
+    if(c.email)  html+='<div class="fr2"><span class="fl">Email</span><span class="fv">'+c.email+'</span></div>';
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){console.error(e);}
 }
 
-
-function irALegajos() {
-  // Mostrar modal con legajos libres
-  var libres = legs.filter(function(l){ return l.libre; });
-  if(!libres.length) { alert('No hay legajos libres disponibles.'); return; }
-
-  var html = '<div style="padding:20px;">';
-  html += '<div style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;">Selecciona el legajo a asignar:</div>';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;">';
-  libres.forEach(function(l) {
-    html += '<div onclick="seleccionarLegajoLibre('+l.num+')" style="background:var(--green-bg);border:1.5px dashed var(--green-border);border-radius:8px;padding:14px 8px;text-align:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background=\'#c8edc9\'" onmouseout="this.style.background=\'var(--green-bg)\'">';
-    html += '<div style="font-size:1.1rem;font-weight:700;color:var(--green);">'+String(l.num).padStart(2,'0')+'</div>';
-    html += '<div style="font-size:0.7rem;color:var(--green);margin-top:2px;">Libre</div>';
-    html += '</div>';
-  });
-  html += '</div></div>';
-
-  var modal = document.getElementById('ovAsignarLegajo');
-  if(!modal) {
-    modal = document.createElement('div');
-    modal.id = 'ovAsignarLegajo';
-    modal.className = 'overlay';
-    modal.innerHTML = '<div class="modal" style="max-width:500px;"><div class="mh"><h3>Asignar legajo</h3><button class="mbtn" onclick="cerrar(\'ovAsignarLegajo\')">✕</button></div><div class="mb" id="ovAsignarLegajoBody"></div></div>';
-    document.body.appendChild(modal);
-    modal.addEventListener('click', function(e){ if(e.target===modal) cerrar('ovAsignarLegajo'); });
-  }
-  document.getElementById('ovAsignarLegajoBody').innerHTML = html;
-  modal.classList.remove('hidden');
-}
-
-function seleccionarLegajoLibre(num) {
-  cerrar('ovAsignarLegajo');
-  // Abrir directamente el modal de asignación de legajo
-  abrirModalLeg(num, false);
-}
-
-function abrirCancelarOpGest(opId, vehiculoEnc, clienteEnc) {
-  _cancelarOpGestId = opId;
-  const vehiculo = decodeURIComponent(vehiculoEnc);
-  const cliente = decodeURIComponent(clienteEnc);
-  document.getElementById('cancelarOpGestInfo').innerHTML =
-    '<div style="font-weight:600;margin-bottom:4px;">'+vehiculo+'</div>'+
-    '<div style="font-size:0.82rem;color:#6b6960;">Cliente: '+cliente+'</div>';
-  document.getElementById('cancelarOpGestMotivo').value = '';
+var _cancelarOpGestId=null;
+function abrirCancelarOpGest(opId,vehiculoEnc,clienteEnc){
+  _cancelarOpGestId=opId;
+  document.getElementById('cancelarOpGestInfo').innerHTML='<div style="font-weight:600;margin-bottom:4px;">'+decodeURIComponent(vehiculoEnc)+'</div><div style="font-size:0.82rem;color:#6b6960;">Cliente: '+decodeURIComponent(clienteEnc)+'</div>';
+  document.getElementById('cancelarOpGestMotivo').value='';
   g('ovCancelarOp').classList.remove('hidden');
 }
-
-async function confirmarCancelarOpGest() {
-  const motivo = document.getElementById('cancelarOpGestMotivo').value.trim();
-  if(!motivo){ alert('Ingresa el motivo de cancelacion.'); return; }
-  mostrarCargando('Cancelando operacion...');
-
-  // Cancelar la operacion
-  await fetch(SB_URL+'/rest/v1/operaciones?id=eq.'+_cancelarOpGestId,{
-    method:'PATCH', headers:sbH,
-    body:JSON.stringify({estado:'Cancelada', notas:'CANCELADA POR GESTORIA: '+motivo})
-  });
-
-  // Buscar el auto de la operacion y volver a disponible
-  const ops = await sbGet('operaciones','select=vehiculo_id,permuta_marca,permuta_modelo&id=eq.'+_cancelarOpGestId);
-  if(ops && ops.length && ops[0].vehiculo_id) {
-    await sbUpdate('vehiculos','id',ops[0].vehiculo_id,{estado:'Disponible',sub_estado:'Propio'});
-    // Si tenia permuta, eliminar el auto que habia ingresado
-    if(ops[0].permuta_marca) {
-      const permAutoRaw = await sbGet('vehiculos','select=id&marca=eq.'+encodeURIComponent(ops[0].permuta_marca)+'&estado=eq.A ingresar&limit=1');
-      if(permAutoRaw && permAutoRaw.length) {
-        await fetch(SB_URL+'/rest/v1/vehiculos?id=eq.'+permAutoRaw[0].id,{method:'DELETE',headers:sbH});
-      }
-    }
-  }
-
-  // Notificar a todos
-  const msg = 'Operacion cancelada por gestoria. Motivo: '+motivo;
-  await sbInsert('notificaciones',{para:'caja',tipo:'op_cancelada',leida:false,titulo:'❌ Operacion cancelada',mensaje:msg});
-  await sbInsert('notificaciones',{para:'vendedor',tipo:'op_cancelada',leida:false,titulo:'❌ Operacion cancelada',mensaje:msg});
-  await sbInsert('notificaciones',{para:'admin',tipo:'op_cancelada',leida:false,titulo:'❌ Operacion cancelada',mensaje:msg});
-
+async function confirmarCancelarOpGest(){
+  var motivo=document.getElementById('cancelarOpGestMotivo').value.trim();
+  if(!motivo){alert('Ingresa el motivo.');return;}
+  mostrarCargando('Cancelando...');
+  await fetch(SB_URL+'/rest/v1/operaciones?id=eq.'+_cancelarOpGestId,{method:'PATCH',headers:sbH,body:JSON.stringify({estado:'Cancelada',notas:'CANCELADA POR GESTORIA: '+motivo})});
+  var ops=await sbGet('operaciones','select=vehiculo_id&id=eq.'+_cancelarOpGestId);
+  if(ops&&ops.length&&ops[0].vehiculo_id) await sbUpdate('vehiculos','id',ops[0].vehiculo_id,{estado:'Disponible',sub_estado:'Propio'});
+  var msg='Operacion cancelada por gestoria. Motivo: '+motivo;
+  await sbInsert('notificaciones',{para:'caja',tipo:'op_cancelada',leida:false,titulo:'Operacion cancelada',mensaje:msg});
+  await sbInsert('notificaciones',{para:'vendedor',tipo:'op_cancelada',leida:false,titulo:'Operacion cancelada',mensaje:msg});
+  await sbInsert('notificaciones',{para:'admin',tipo:'op_cancelada',leida:false,titulo:'Operacion cancelada',mensaje:msg});
   ocultarCargando();
   cerrar('ovCancelarOp');
   cargarPendientes();
   alert('Operacion cancelada.');
 }
 
-async function abrirDetalleOp(opId) {
-  mostrarCargando('Cargando datos...');
-  const ops = await sbGet('operaciones','select=*&id=eq.'+opId);
-  if(!ops || !ops.length){ ocultarCargando(); return; }
-  const op = ops[0];
-  const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
-  const fila = (l,v) => v ? '<div style="margin-bottom:8px;"><div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);">'+l+'</div><div style="font-weight:500;">'+v+'</div></div>' : '';
-
-  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
-  html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Vehiculo</div>';
-  html += fila('Auto', op.vehiculo_texto);
-  html += fila('Estado', op.estado);
-  html += fila('Fecha', op.fecha);
-  html += '</div>';
-  html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Cliente comprador</div>';
-  html += fila('Nombre', op.cliente_nombre);
-  // Buscar datos del cliente
-  let clienteData = null;
-  try {
-    const cli = await sbGet('clientes','select=*&id=eq.'+op.cliente_id);
-    if(cli && cli.length) clienteData = cli[0];
-  } catch(e){}
-  if(clienteData) {
-    html += fila('DNI', clienteData.dni);
-    html += fila('Tel', clienteData.tel);
-    html += fila('Email', clienteData.email);
-    html += fila('Direccion', clienteData.dir);
-  }
-  html += '</div>';
-  html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Condiciones</div>';
-  html += fila('Precio', fmtN(op.precio, op.moneda));
-  html += fila('Señia', op.senia > 0 ? fmtN(op.senia, op.moneda_senia||op.moneda) : 'Sin señia');
-  html += fila('Forma de pago', op.formas_pago ? op.formas_pago.join(', ') : '');
-  html += fila('Entrega pactada', op.fecha_entrega);
-  html += '</div>';
-  if(op.permuta_marca) {
-    html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:#7c3aed;margin-bottom:10px;">Auto en permuta</div>';
-    html += fila('Auto', op.permuta_marca+' '+op.permuta_modelo+' '+(op.permuta_anio||''));
-    html += fila('Km', op.permuta_km ? Number(op.permuta_km).toLocaleString('es-AR')+' km' : '');
-    html += fila('Valor', op.permuta_valor ? fmtN(op.permuta_valor, op.permuta_moneda||'ARS') : '');
-    html += '</div>';
-  }
-  if(op.credito_banco) {
-    html += '<div><div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:#1e40af;margin-bottom:10px;">Credito bancario</div>';
-    html += fila('Banco', op.credito_banco);
-    html += fila('Monto', fmtN(op.credito_monto, op.moneda));
-    html += fila('Cuotas', op.credito_cuotas+' cuotas de '+fmtN(op.credito_cuota_valor, op.moneda));
-    html += '</div>';
-  }
-  html += '</div>';
-  if(op.notas) html += '<div style="margin-top:14px;padding:12px;background:#f4f3ee;border-radius:8px;font-size:0.85rem;"><b>Notas:</b> '+op.notas+'</div>';
-
-  document.getElementById('detallePendBody').innerHTML = html;
+async function abrirDetalleOp(opId){
+  mostrarCargando('Cargando...');
+  var ops=await sbGet('operaciones','select=*&id=eq.'+opId);
+  if(!ops||!ops.length){ocultarCargando();return;}
+  var op=ops[0];
+  var fmtN=function(n,m){return (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');};
+  var fila=function(l,v){return v?'<div style="margin-bottom:8px;"><div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);">'+l+'</div><div style="font-weight:500;">'+v+'</div></div>':'';};
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
+  html+='<div>'+fila('Auto',op.vehiculo_texto)+fila('Estado',op.estado)+fila('Fecha',op.fecha)+'</div>';
+  var cli=null;
+  try{var cRaw=await sbGet('clientes','select=*&id=eq.'+op.cliente_id);if(cRaw&&cRaw.length)cli=cRaw[0];}catch(e){}
+  html+='<div>'+fila('Comprador',op.cliente_nombre)+(cli?fila('DNI',cli.dni)+fila('Tel',cli.tel)+fila('Email',cli.email):'')+'</div>';
+  html+='<div>'+fila('Precio',fmtN(op.precio,op.moneda))+fila('Senia',op.senia>0?fmtN(op.senia,op.moneda_senia||op.moneda):'Sin senia')+'</div>';
+  if(op.permuta_marca) html+='<div>'+fila('Permuta',op.permuta_marca+' '+op.permuta_modelo+' '+(op.permuta_anio||''))+fila('Valor permuta',op.permuta_valor?fmtN(op.permuta_valor,op.permuta_moneda||'ARS'):'')+'</div>';
+  html+='</div>';
+  if(op.notas) html+='<div style="margin-top:14px;padding:12px;background:#f4f3ee;border-radius:8px;font-size:0.85rem;"><b>Notas:</b> '+op.notas+'</div>';
+  document.getElementById('detallePendBody').innerHTML=html;
   ocultarCargando();
   g('ovDetallePend').classList.remove('hidden');
 }
-
 
 </script>
 <!-- MODAL NOTIFICACIONES -->
@@ -1701,7 +1612,7 @@ async function abrirDetalleOp(opId) {
         <button onclick="cerrarNotifs()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;">X</button>
       </div>
     </div>
-    <div id="notifsLista" style="padding:8px 0;"><div style="text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;">Cargando...</div></div>
+    <div id="notifsLista" style="padding:8px 0;"></div>
   </div>
 </div>
 <div id="toastNotif" style="display:none;position:fixed;bottom:24px;right:24px;background:#1a1917;color:#fff;border-radius:12px;padding:14px 18px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;">
@@ -1709,118 +1620,23 @@ async function abrirDetalleOp(opId) {
   <div style="font-size:0.8rem;color:rgba(255,255,255,.7);" id="toastMensaje"></div>
 </div>
 <script>
-
-
-
-async function confirmarDocOk(trfId) {
-  const t = trfs.find(x=>x.id===trfId);
-  if(!t||!t.legajoOrigen) return;
-  if(!confirm('Confirmar que la documentacion esta completa? Esto avisara a caja para que proceda con el pago total.')) return;
-  mostrarCargando('Notificando a caja...');
-  const raw = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&legajo_origen=eq.'+t.legajoOrigen+'&limit=1');
-  if(raw&&raw.length) {
-    const orden = raw[0];
-    await sbUpdate('ordenes_compra','id',orden.id,{doc_ok:true, doc_ok_fecha:new Date().toISOString()});
-    const saldo = parseFloat(orden.precio||0) - parseFloat(orden.senia||0);
-    const fmtN = function(n,m){ return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR'); };
-    await sbInsert('movimientos_pendientes',{
-      tipo:'pago_total',
-      concepto:'Saldo de compra — '+orden.vehiculo_texto+' (doc OK)',
-      monto:saldo, moneda:orden.moneda||'ARS',
-      solicitado_por:'Gestoria', referencia_id:orden.id,
-      referencia_tipo:'orden_compra', estado:'pendiente',
-      obs:'Documentacion aprobada por gestoria.'
-    });
-    await sbInsert('notificaciones',{para:'caja',tipo:'doc_ok',leida:false,
-      titulo:'Doc OK — nueva tarea pendiente',
-      mensaje:'La documentacion de '+orden.vehiculo_texto+' esta completa. Saldo: '+fmtN(saldo,orden.moneda||'ARS')
-    });
-    ocultarCargando();
-    cerrar('ovDetTrf');
-    alert('Caja fue notificada.');
-  } else {
-    ocultarCargando();
-    alert('No se encontro la orden de compra asociada.');
-  }
-}
-
-
 var _notifs=[];
 function getRolNotif(){return(window._session&&window._session.rol)||"gestoria";}
-async function cargarNotifs(){try{var r=await sbGet("notificaciones","select=*&para=eq."+getRolNotif()+"&order=created_at.desc&limit=50");_notifs=r||[];renderNotifs();actualizarCampanita();mostrarToastsSinLeer();}catch(e){console.error(e);}}
+async function cargarNotifs(){try{var r=await sbGet("notificaciones","select=*&para=eq."+getRolNotif()+"&order=created_at.desc&limit=50");_notifs=r||[];renderNotifs();actualizarCampanita();mostrarToastsSinLeer();}catch(e){}}
 function actualizarCampanita(){var n=_notifs.filter(function(x){return !x.leida;}).length,el=document.getElementById("bellCount");if(el){if(n>0){el.style.display="inline-block";el.textContent=n>9?"9+":String(n);}else{el.style.display="none";}}}
 function mostrarToastsSinLeer(){var nl=_notifs.filter(function(x){return !x.leida;});if(!nl.length)return;var n=nl[0],t=document.getElementById("toastNotif");if(!t)return;document.getElementById("toastTitulo").textContent=n.titulo;document.getElementById("toastMensaje").textContent=n.mensaje;t.style.display="block";setTimeout(function(){t.style.display="none";},5000);}
-function renderNotifs(){var lista=document.getElementById("notifsLista");if(!lista)return;if(!_notifs.length){lista.innerHTML="<div style='text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;'>Sin notificaciones</div>";return;}var html="";_notifs.forEach(function(n){var bg=n.leida?"#fff":"#f0f4ff",fw=n.leida?"400":"600",ts="";if(n.created_at){var d=new Date(n.created_at);ts=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}html+="<div onclick='marcarLeida("+n.id+")' style='padding:14px 20px;border-bottom:1px solid #f8f6f0;cursor:pointer;background:"+bg+";'><div style='display:flex;justify-content:space-between;'><div style='font-weight:"+fw+";font-size:0.85rem;'>"+n.titulo+"</div><div style='font-size:0.7rem;color:#9b9890;'>"+ts+"</div></div><div style='font-size:0.8rem;color:#6b6960;margin-top:4px;'>"+n.mensaje+"</div>"+(n.leida?"":"<div style='width:8px;height:8px;background:#2558a3;border-radius:50%;margin-top:6px;'></div>")+"</div>";});lista.innerHTML=html;}
+function renderNotifs(){var lista=document.getElementById("notifsLista");if(!lista)return;if(!_notifs.length){lista.innerHTML="<div style='text-align:center;padding:2rem;color:#9b9890;font-size:0.85rem;'>Sin notificaciones</div>";return;}var html="";_notifs.forEach(function(n){var bg=n.leida?"#fff":"#f0f4ff",fw=n.leida?"400":"600",ts="";if(n.created_at){var d=new Date(n.created_at);ts=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}html+="<div onclick='marcarLeida("+n.id+")' style='padding:14px 20px;border-bottom:1px solid #f8f6f0;cursor:pointer;background:"+bg+";'><div style='display:flex;justify-content:space-between;'><div style='font-weight:"+fw+";font-size:0.85rem;'>"+n.titulo+"</div><div style='font-size:0.7rem;color:#9b9890;'>"+ts+"</div></div><div style='font-size:0.8rem;color:#6b6960;margin-top:4px;'>"+n.mensaje+"</div></div>";});lista.innerHTML=html;}
 async function marcarLeida(id){await fetch(SB_URL+"/rest/v1/notificaciones?id=eq."+id,{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});var n=_notifs.find(function(x){return x.id===id;});if(n)n.leida=true;renderNotifs();actualizarCampanita();}
-async function marcarTodasLeidas(){var rol=getRolNotif();await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+rol+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
+async function marcarTodasLeidas(){await fetch(SB_URL+"/rest/v1/notificaciones?para=eq."+getRolNotif()+"&leida=eq.false",{method:"PATCH",headers:sbH,body:JSON.stringify({leida:true})});_notifs.forEach(function(n){n.leida=true;});renderNotifs();actualizarCampanita();}
 function abrirNotifs(){document.getElementById("modalNotifs").style.display="flex";cargarNotifs();}
 function cerrarNotifs(){document.getElementById("modalNotifs").style.display="none";}
 document.addEventListener("click",function(e){var m=document.getElementById("modalNotifs");if(m&&e.target===m)cerrarNotifs();});
 setInterval(cargarNotifs,10000);
-
-
-
-
-
-
-// ═══ PENDIENTES ═══════════════════════════════════════════
-const SUB_ESTADOS_ORD = ['Pendiente a peritaje','Peritaje aprobado','Juntando documentacion','Documentacion lista'];
-const SUB_COLOR = {
-  'Pendiente a peritaje':'#991b1b',
-  'Peritaje aprobado':'#b45309',
-  'Juntando documentacion':'#1e40af',
-  'Documentacion lista':'#065f46'
-};
-
-function avanzarSubEstadoGS(id, btn) { var sub = btn.getAttribute('data-sub'); avanzarSubEstado(id, sub); }
-
-async function avanzarSubEstado(vehiculoId, nuevoSub) {
-  if(!confirm('Avanzar a "'+nuevoSub+'"?')) return;
-  mostrarCargando('Actualizando...');
-  await sbUpdate('vehiculos','id',vehiculoId,{sub_estado:nuevoSub});
-
-  // Si llega a "Documentacion lista" → notificar a caja
-  if(nuevoSub === 'Documentacion lista') {
-    // Buscar la orden de compra asociada a este vehiculo
-    const ordenes = await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&vehiculo_id=eq.'+vehiculoId+'&limit=1');
-    if(ordenes && ordenes.length) {
-      const o = ordenes[0];
-      const saldo = parseFloat(o.precio||0) - parseFloat(o.senia||0);
-      const fmtN = function(n,m){ return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR'); };
-      // Crear movimiento pendiente en caja
-      await sbInsert('movimientos_pendientes',{
-        tipo:'pago_total',
-        concepto:'Saldo de compra — '+o.vehiculo_texto+' (doc OK)',
-        monto: saldo > 0 ? saldo : parseFloat(o.precio||0),
-        moneda: o.moneda||'ARS',
-        solicitado_por:'Gestoria',
-        referencia_id: o.id,
-        referencia_tipo:'orden_compra',
-        precio_total: parseFloat(o.precio||0),
-        estado:'pendiente',
-        obs:'Documentacion aprobada por gestoria.'
-      });
-      await sbInsert('notificaciones',{
-        para:'caja', tipo:'doc_lista', leida:false,
-        titulo:'✅ Documentacion lista — proceder con pago',
-        mensaje: o.vehiculo_texto+' listo. Saldo: '+fmtN(saldo > 0 ? saldo : parseFloat(o.precio||0), o.moneda||'ARS')
-      });
-    }
-  }
-  ocultarCargando();
-  cargarPendientes();
-}
-
-async function pasarADisponible(vehiculoId) {
-  if(!confirm('Pasar el auto a Disponible? Ya tenes toda la documentacion lista?')) return;
-  mostrarCargando('Actualizando...');
-  await sbUpdate('vehiculos','id',vehiculoId,{estado:'Disponible',sub_estado:'Propio'});
-  ocultarCargando();
-  cargarPendientes();
-  alert('Auto pasado a Disponible correctamente.');
-}
-
-
+cargarDatos().then(function(){
+  setTimeout(function(){cargarNotifs();},500);
+  setTimeout(function(){cargarPendientes();},800);
+  cargarClientesGS();
+});
 </script>
 
 </body>
