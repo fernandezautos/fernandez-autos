@@ -1316,22 +1316,49 @@ async function cargarClientesGS() {
     _clientesGS = r.ok ? await r.json() : [];
   } catch(e){ _clientesGS = []; }
 }
-function filtrarClientesGS(inputId, dropId, dniId, q) {
-  var drop = document.getElementById(dropId);
-  if(!drop) return;
-  var lista = _clientesGS.filter(function(c){ return !q || c.nombre.toLowerCase().includes(q.toLowerCase()) || (c.dni&&c.dni.includes(q)); }).slice(0,8);
-  if(!lista.length){ drop.style.display='none'; return; }
-  drop.style.display='block';
-  drop.innerHTML = lista.map(function(c){
-    return '<div onclick="selClienteGS(\''+inputId+'\',\''+dropId+'\',\''+dniId+'\',\''+c.nombre.replace(/'/g,"&#39;")+'\','+(c.dni?'\''+c.dni+'\'':"\'\'")+')\" style="padding:9px 14px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid #f0ede4;" onmouseover="this.style.background=\'#f4f3ee\'" onmouseout="this.style.background=\'#fff\'">'+
-      '<span style="font-weight:500;">'+c.nombre+'</span>'+(c.dni?'<span style="font-size:0.75rem;color:#9b9890;margin-left:8px;">'+c.dni+'</span>':'')+
-      (c.tel?'<span style="font-size:0.73rem;color:#9b9890;margin-left:8px;">'+c.tel+'</span>':'')+'</div>';
-  }).join('');
-}
+
 function selClienteGS(inputId, dropId, dniId, nombre, dni) {
   var inp=document.getElementById(inputId); if(inp) inp.value=nombre;
   if(dniId){var d=document.getElementById(dniId);if(d&&dni)d.value=dni;}
   var drop=document.getElementById(dropId); if(drop) drop.style.display='none';
+}
+
+async function selClienteGSFull(el) {
+  var cid = el.getAttribute('data-cid');
+  var inputId = el.getAttribute('data-input');
+  var dropId = el.getAttribute('data-drop');
+  var dniId = el.getAttribute('data-dni');
+  var drop = document.getElementById(dropId);
+  if(drop) drop.style.display='none';
+  // Find client in local cache first
+  var c = _clientesGS.find(function(x){ return String(x.id)===String(cid); });
+  if(c) {
+    var inp=document.getElementById(inputId); if(inp) inp.value=c.nombre;
+    if(dniId){var d=document.getElementById(dniId);if(d&&c.dni)d.value=c.dni;}
+  }
+  // Load full data from Supabase
+  try {
+    var raw = await sbGet('clientes','select=*&id=eq.'+cid);
+    if(!raw||!raw.length) return;
+    var cl = raw[0];
+    var inp=document.getElementById(inputId); if(inp) inp.value=cl.nombre||'';
+    // Map common field patterns
+    var fieldMap = {
+      // Legajo form
+      'lCli': {dni:'lDni'},
+      // Venta comprador
+      'vComp': {dni:'vDni', dir:'vDir', tel:'vTel', mail:'vMail'},
+      // Transferencia vendedor
+      'tVNom': {dni:'tVDni', dir:'tVDir', tel:'tVTel', mail:'tVMail'},
+      // Transferencia comprador
+      'tCNom': {dni:'tCDni', dir:'tCDir', tel:'tCTel', mail:'tCMail'},
+    };
+    var map = fieldMap[inputId] || {dni: dniId};
+    if(map.dni){var el2=document.getElementById(map.dni);if(el2)el2.value=cl.dni||'';}
+    if(map.dir){var el2=document.getElementById(map.dir);if(el2)el2.value=cl.dir||'';}
+    if(map.tel){var el2=document.getElementById(map.tel);if(el2)el2.value=cl.tel||'';}
+    if(map.mail){var el2=document.getElementById(map.mail);if(el2)el2.value=cl.email||'';}
+  } catch(e){ console.error(e); }
 }
 
 // ═══ PENDIENTES ════════════════════════════════════════════
