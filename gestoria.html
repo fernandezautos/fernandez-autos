@@ -794,12 +794,42 @@ function renderLegs() {
       '<div class="slot-dom">'+l.auto.dominio+'</div>'+
       '<div class="slot-veh">'+(l.auto.vehiculo||'-')+'</div>'+
       '<div class="slot-bar"><div class="slot-bar-fill '+barCls+'" style="width:'+st.pct+'%"></div></div>'+
-      '<div class="slot-footer"><span class="badge '+badgeCls+'">'+badgeTxt+'</span>'+vtvBadge+'<span class="slot-fecha">'+fmt(l.auto.fecha)+'</span></div>'+
+      '<div class="slot-footer"><span id="slotBadge_'+l.num+'" class="badge doc-inc">Cargando...</span>'+vtvBadge+'<span class="slot-fecha">'+fmt(l.auto.fecha)+'</span></div>'+
       '</div>';
   }).join('');
+  // Cargar sub-estados desde vehiculos en batch
+  cargarSubEstadosBatch(legsFilt.filter(function(l){return !l.libre;}));
 }
 
-// ═══ DETALLE LEGAJO ═══
+async function cargarSubEstadosBatch(legsOcupados) {
+  if(!legsOcupados.length) return;
+  var dominios = legsOcupados.map(function(l){return l.auto.dominio;}).filter(Boolean);
+  if(!dominios.length) return;
+  try {
+    var query = 'select=dominio,sub_estado,estado&dominio=in.('+dominios.map(function(d){return encodeURIComponent(d);}).join(',')+')';
+    var vRaw = await sbGet('vehiculos', query);
+    if(!vRaw) return;
+    var subMap = {};
+    vRaw.forEach(function(v){ if(v.dominio) subMap[v.dominio] = v.sub_estado||'Pendiente a peritaje'; });
+    var SUB_COL = {'Pendiente a peritaje':'#991b1b','Peritaje aprobado':'#b45309','Juntando documentacion':'#1e40af','Documentacion lista':'#065f46'};
+    legsOcupados.forEach(function(l){
+      var el = document.getElementById('slotBadge_'+l.num);
+      if(!el) return;
+      var sub = subMap[l.auto.dominio];
+      if(sub) {
+        var col = SUB_COL[sub]||'#555';
+        el.style.background = col+'18';
+        el.style.color = col;
+        el.textContent = sub;
+      } else {
+        el.style.background = '';
+        el.style.color = '';
+        el.textContent = 'Completando doc.';
+        el.className = 'badge doc-inc';
+      }
+    });
+  } catch(e){ console.error(e); }
+}
 function abrirDetLeg(num) {
   const l=legs.find(x=>x.num===num); if(!l||l.libre) return;
   const st=docSt(l), a=l.auto, n=String(num).padStart(2,'0');
