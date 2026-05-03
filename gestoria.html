@@ -1415,19 +1415,27 @@ async function avanzarSubEstado(vehiculoId, nuevoSub) {
   if(!confirm('Avanzar a "'+nuevoSub+'"?')) return;
   mostrarCargando('Actualizando...');
   await sbUpdate('vehiculos','id',vehiculoId,{sub_estado:nuevoSub});
-  // Sincronizar con el legajo
+  // Sincronizar con el legajo — buscar en Supabase directo
   try {
     var vRaw=await sbGet('vehiculos','select=dominio&id=eq.'+vehiculoId);
     if(vRaw&&vRaw.length&&vRaw[0].dominio){
       var dom=vRaw[0].dominio;
-      var leg=legs.find(function(l){return l.auto&&l.auto.dominio===dom;});
-      if(leg){
-        if(!leg.auto.notas_hilo) leg.auto.notas_hilo=[];
-        leg.auto.notas_hilo.push({texto:'Estado: '+nuevoSub,ts:new Date().toISOString(),auto:true});
-        await saveLeg(leg);
+      // Buscar legajo en Supabase por dominio
+      var legRaw=await sbGet('legajos','select=*&dominio=eq.'+encodeURIComponent(dom)+'&limit=1');
+      if(legRaw&&legRaw.length){
+        var legData=legRaw[0];
+        var notas_hilo=legData.notas_hilo||[];
+        notas_hilo.push({texto:'Estado: '+nuevoSub,ts:new Date().toISOString(),auto:true});
+        await fetch(SB_URL+'/rest/v1/legajos?numero=eq.'+legData.numero,{
+          method:'PATCH',headers:sbH,
+          body:JSON.stringify({notas_hilo:notas_hilo})
+        });
+        // Actualizar array local si existe
+        var legLocal=legs.find(function(l){return l.auto&&l.auto.dominio===dom;});
+        if(legLocal){if(!legLocal.auto.notas_hilo)legLocal.auto.notas_hilo=[];legLocal.auto.notas_hilo.push({texto:'Estado: '+nuevoSub,ts:new Date().toISOString(),auto:true});}
       }
     }
-  } catch(e){console.error(e);}
+  } catch(e){console.error('Error sync legajo:',e);}
   // Si llega a Documentacion lista → avisar caja
   if(nuevoSub==='Documentacion lista'){
     var ordenes=await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&vehiculo_id=eq.'+vehiculoId+'&limit=1');
