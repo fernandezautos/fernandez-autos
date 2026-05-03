@@ -1533,23 +1533,20 @@ async function abrirDetVehiculoSinLegajo(vehiculoId) {
   if(v.cliente_entrega_id) cargarTitularLegajo('SL', v.dominio);
   cargarSubEstadoLegajo('SL', v.dominio);
   // Inyectar botones de accion correctos para SL
-  setTimeout(function(){
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
     var sub = v.sub_estado||'Pendiente a peritaje';
     var _SU = ['Pendiente a peritaje','Peritaje aprobado','Juntando documentacion','Documentacion lista'];
+    var _SC = {'Pendiente a peritaje':'#991b1b','Peritaje aprobado':'#b45309','Juntando documentacion':'#1e40af','Documentacion lista':'#065f46'};
     var idx3 = _SU.indexOf(sub);
     var sig = (idx3>=0&&idx3<_SU.length-1)?_SU[idx3+1]:null;
     var acciones = document.getElementById('detLegAcciones_SL');
     if(acciones){
       var btns = '';
-      if(sig){
-        var col2 = SUB_COLOR[sig]||'#555';
-        btns += '<button data-vid="'+vehiculoId+'" data-sub="'+sig+'" onclick="avanzarSubEstadoYCerrar(this)" class="btn sm" style="background:'+col2+';color:#fff;border-color:'+col2+';">\u2192 '+sig+'</button>';
-      }
-      btns += '<button data-vid="'+vehiculoId+'" onclick="editarDocsSinLegajo(parseInt(this.dataset.vid))" class="btn sm">✏️ Editar docs</button>';
+      if(sig){ var col2=_SC[sig]||'#555'; btns += '<button data-vid="'+vehiculoId+'" data-sub="'+sig+'" onclick="avanzarSubEstadoYCerrar(this)" class="btn sm" style="background:'+col2+';color:#fff;border-color:'+col2+';">→ '+sig+'</button>'; }
       btns += '<button data-vid="'+vehiculoId+'" data-mm="'+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'" data-dom="'+encodeURIComponent(v.dominio||'')+'" onclick="irALegajosConAuto(parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" class="btn sm danger">Asignar legajo</button>';
       acciones.innerHTML = btns;
     }
-  }, 200);
+  }); });
 }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
