@@ -2813,6 +2813,7 @@ function renderPresupuestos() {
 }
 
 async function guardarPresupuesto() {
+  const vendedorNombre = (window._session&&window._session.nombre)||'Vendedor';
   const tipo    = document.getElementById('presTipo').value;
   const nombre  = document.getElementById('presCliNombre').value.trim();
   if(!nombre){ alert('Ingresá el nombre del cliente.'); return; }
