@@ -2865,8 +2865,12 @@ async function guardarPresupuesto() {
     const ultimo = presupuestos.length ? Math.max(...presupuestos.map(p=>parseInt(p.numero?.replace(/\D/g,'')||0))) : 0;
     data.numero = 'PRES-'+String(ultimo+1).padStart(4,'0');
     const nuevo = await sbInsert('presupuestos', data);
-    if(nuevo) presupuestos.unshift({...data, id:nuevo.id});
+    if(nuevo) presupuestos.unshift({...data, id:nuevo.id, numero:nuevo.numero||data.numero});
   }
+
+  // Recargar lista desde Supabase para asegurar consistencia
+  const presRaw = await sbGet('presupuestos','select=*&order=created_at.desc&limit=100');
+  if(presRaw) presupuestos = presRaw;
 
   ocultarCargando();
   limpiarFormPres();
