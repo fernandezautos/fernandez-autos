@@ -787,7 +787,7 @@ function renderLegs() {
     const vtvBadge=vtv&&vtv.cls!=='vtv-ok'?'<span class="badge '+vtv.cls+'">'+vtv.label+'</span>':'';
     return '<div class="slot '+cls+'" onclick="abrirDetLeg('+l.num+')">'+
       '<div class="slot-num">'+n+'</div>'+
-      '<div class="slot-cliente" style="font-family:var(--mono);font-size:12px;font-weight:600;">'+l.auto.dominio+'</div>'+
+      '<div class="slot-dom">'+l.auto.dominio+'</div>'+
       '<div class="slot-veh">'+(l.auto.vehiculo||'-')+'</div>'+
       '<div class="slot-bar"><div class="slot-bar-fill '+barCls+'" style="width:'+st.pct+'%"></div></div>'+
       '<div class="slot-footer"><span id="slotBadge_'+l.num+'" class="badge doc-inc">Cargando...</span>'+vtvBadge+'<span class="slot-fecha">'+fmt(l.auto.fecha)+'</span></div>'+
