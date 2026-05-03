@@ -2764,6 +2764,7 @@ function presAutoSelect() {
 }
 
 function renderPresupuestos() {
+  const fmt2 = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
   const tipo  = document.getElementById('presFiltroTipo')?.value||'';
   const estado= document.getElementById('presFiltroEstado')?.value||'';
   let lista = [...presupuestos];
