@@ -830,7 +830,9 @@ function abrirDetLeg(num) {
   const l=legs.find(x=>x.num===num); if(!l||l.libre) return;
   const st=docSt(l), a=l.auto, n=String(num).padStart(2,'0');
   const vtv=vtvEstado(a.vtv);
-  const docsHtml=(a.docs||[]).map(d=>'<div class="doc-item '+(d.ok?'ok':'falta')+'"><div style="display:flex;align-items:center"><span class="doc-dot '+(d.ok?'ok':'falta')+'"></span>'+d.n+'</div><span style="font-size:11px;font-weight:500;color:'+(d.ok?'var(--green)':'var(--red)')+';">'+(d.ok?'✓ Presente':'✗ Falta')+'</span></div>').join('');
+  const docsHtml=(a.docs||[]).map(d=>'<div class="doc-item '+(d.ok?'ok':'falta')+'"'+(num==='SL'?' data-vid="'+window._legajoSLVehiculoId+'" data-doc="'+d.n+'" onclick="toggleDocSL_vehiculo(parseInt(this.dataset.vid),this.dataset.doc,this)" style="cursor:pointer"':'')+'>'+
+    '<div style="display:flex;align-items:center"><span class="doc-dot '+(d.ok?'ok':'falta')+'"></span>'+d.n+'</div>'+
+    '<span style="font-size:11px;font-weight:500;color:'+(d.ok?'var(--green)':'var(--red)')+'">'+(d.ok?'✓ Presente':'✗ Falta')+'</span></div>').join('');
   const notasHtml=(a.notas_hilo||[]).length
     ? [...(a.notas_hilo||[])].reverse().map(nt=>'<div class="nota-item"><div class="nota-ts">'+fmtTs(nt.ts)+'</div><div class="nota-txt">'+nt.txt+'</div></div>').join('')
     : '<div style="color:var(--text3);font-size:13px">Sin notas.</div>';
@@ -872,11 +874,13 @@ function abrirDetLeg(num) {
         '<button class="btn sm primary" onclick="agregarNota('+num+')">+ Agregar</button>'+
       '</div>'+
     '</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)">'+
-      '<button class="btn sm" onclick="cerrar(\'ovDetLeg\');abrirModalLeg('+num+',true)">✏️ Editar</button>'+
-      '<button class="btn sm success" onclick="cerrar(\'ovDetLeg\');abrirVender('+num+')">🤝 Registrar venta</button>'+
-      '<button class="btn sm" onclick="exportarPdfLeg('+num+')">📄 Exportar PDF</button>'+
-      '<button class="btn sm danger" onclick="cerrar(\'ovDetLeg\');pedirElimLeg('+num+')">🗑 Liberar legajo</button>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)" id="detLegAcciones_'+num+'">'+
+      (num==='SL' ? '' :
+        '<button class="btn sm" onclick="cerrar(\'ovDetLeg\');abrirModalLeg('+num+',true)">✏️ Editar</button>'+
+        '<button class="btn sm success" onclick="cerrar(\'ovDetLeg\');abrirVender('+num+')">🤝 Registrar venta</button>'+
+        '<button class="btn sm" onclick="exportarPdfLeg('+num+')">📄 Exportar PDF</button>'+
+        '<button class="btn sm danger" onclick="cerrar(\'ovDetLeg\');pedirElimLeg('+num+')">🗑 Liberar legajo</button>'
+      )+
     '</div>';
   g('ovDetLeg').classList.remove('hidden');
   if(l.auto&&l.auto.dominio){cargarTitularLegajo(num,l.auto.dominio);cargarSubEstadoLegajo(num,l.auto.dominio);}
@@ -1464,6 +1468,38 @@ async function cargarPendientes() {
 
 function avanzarSubEstadoYCerrar(el){ avanzarSubEstado(parseInt(el.dataset.vid),el.dataset.sub); cerrar('ovDetLeg'); }
 
+async function editarDocsSinLegajo(vehiculoId) {
+  // Recargar datos frescos y volver a abrir la ventana para editar docs
+  cerrar('ovDetLeg');
+  await abrirDetVehiculoSinLegajo(vehiculoId);
+}
+
+// Sobreescribir toggleDoc para el caso SL — guarda en vehiculos en vez de legajos
+var _origToggleDoc = null;
+async function toggleDocSL_vehiculo(vehiculoId, docNombre, el) {
+  var vRaw = await sbGet('vehiculos','select=docs,notas_hilo&id=eq.'+vehiculoId);
+  if(!vRaw||!vRaw.length) return;
+  var docs = vRaw[0].docs||[];
+  var notas_hilo = vRaw[0].notas_hilo||[];
+  var idx4 = docs.findIndex(function(d){return d.n===docNombre;});
+  var nuevoOk;
+  if(idx4>=0){ nuevoOk=!docs[idx4].ok; docs[idx4].ok=nuevoOk; docs[idx4].fecha=nuevoOk?new Date().toISOString():null; }
+  else{ nuevoOk=true; docs.push({n:docNombre,ok:true,fecha:new Date().toISOString()}); }
+  notas_hilo.push({ts:new Date().toISOString(),txt:(nuevoOk?'Doc marcado: ':'Doc desmarcado: ')+docNombre});
+  await sbUpdate('vehiculos','id',vehiculoId,{docs:docs,notas_hilo:notas_hilo});
+  // Actualizar el legajo temporal en memoria
+  var leg = legs.find(function(l){return l.num==='SL';});
+  if(leg){ leg.auto.docs=docs; leg.docs=docs; leg.auto.notas_hilo=notas_hilo; }
+  // Actualizar UI del doc
+  if(el){
+    el.className='doc-item '+(nuevoOk?'ok':'falta');
+    var dot=el.querySelector('.doc-dot'); if(dot) dot.className='doc-dot '+(nuevoOk?'ok':'falta');
+    var span=el.querySelector('span:last-child'); if(span){ span.style.color=nuevoOk?'var(--green)':'var(--red)'; span.textContent=nuevoOk?'✓ Presente':'✗ Falta'; }
+  }
+}
+
+
+
 function abrirLegajoDesdePendiente(el) {
   var num = parseInt(el.getAttribute('data-legnum'));
   if(!num) return;
@@ -1496,25 +1532,23 @@ async function abrirDetVehiculoSinLegajo(vehiculoId) {
   abrirDetLeg('SL');
   if(v.cliente_entrega_id) cargarTitularLegajo('SL', v.dominio);
   cargarSubEstadoLegajo('SL', v.dominio);
-  // Reemplazar botones de accion
+  // Inyectar botones de accion correctos para SL
   setTimeout(function(){
     var sub = v.sub_estado||'Pendiente a peritaje';
     var idx3 = SUB_ESTADOS_ORD.indexOf(sub);
     var sig = (idx3>=0&&idx3<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx3+1]:null;
-    var body = document.getElementById('detLegBody');
-    // El div de acciones es el ultimo div directo del body
-    var divs = body ? body.children : [];
-    var acciones = divs.length ? divs[divs.length-1] : null;
+    var acciones = document.getElementById('detLegAcciones_SL');
     if(acciones){
       var btns = '';
       if(sig){
         var col2 = SUB_COLOR[sig]||'#555';
         btns += '<button data-vid="'+vehiculoId+'" data-sub="'+sig+'" onclick="avanzarSubEstadoYCerrar(this)" class="btn sm" style="background:'+col2+';color:#fff;border-color:'+col2+';">\u2192 '+sig+'</button>';
       }
+      btns += '<button data-vid="'+vehiculoId+'" onclick="editarDocsSinLegajo(parseInt(this.dataset.vid))" class="btn sm">✏️ Editar docs</button>';
       btns += '<button data-vid="'+vehiculoId+'" data-mm="'+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'" data-dom="'+encodeURIComponent(v.dominio||'')+'" onclick="irALegajosConAuto(parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" class="btn sm danger">Asignar legajo</button>';
       acciones.innerHTML = btns;
     }
-  }, 50);
+  }, 200);
 }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
