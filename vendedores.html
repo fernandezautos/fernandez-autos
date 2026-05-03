@@ -220,7 +220,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
   <div class="logo">
     <span style="font-family:'Comfortaa',cursive;font-weight:700;font-size:1.15rem;color:#fff;letter-spacing:0.5px;">Fernandez Autos</span>
   </div>
-  <nav id="mainNav">
+  <nav id="mainNav" style="overflow-x:auto;white-space:nowrap;flex-shrink:0;">
     <button class="active" onclick="show('dashboard')">Dashboard</button>
     <button onclick="show('stock')">Stock</button>
     <button onclick="show('clientes')">Clientes</button>
@@ -420,7 +420,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     
     <!-- Tipo -->
     <div style="margin-bottom:16px;">
-      <label class="flabel">Tipo de presupuesto *</label>
+      <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Tipo de presupuesto *</label>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-sm prestipoBtn active" data-tipo="venta" onclick="selTipoPresupuesto('venta')">🚗 Venta</button>
         <button class="btn btn-sm prestipoBtn" data-tipo="compra" onclick="selTipoPresupuesto('compra')">🛒 Compra</button>
@@ -430,63 +430,63 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     </div>
 
     <!-- Cliente -->
-    <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;">Datos del cliente</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;" style="margin-bottom:10px;">Datos del cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><label class="flabel">Nombre *</label><input id="presCliNombre" type="text" class="finput" placeholder="Apellido, Nombre"></div>
-        <div><label class="flabel">Teléfono</label><input id="presCliTel" type="text" class="finput" placeholder="223-..."></div>
-        <div><label class="flabel">Email</label><input id="presCliEmail" type="text" class="finput" placeholder="mail@..."></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Nombre *</label><input id="presCliNombre" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="Apellido, Nombre"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Teléfono</label><input id="presCliTel" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="223-..."></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Email</label><input id="presCliEmail" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="mail@..."></div>
       </div>
     </div>
 
     <!-- Auto de la agencia (venta/permuta) -->
-    <div id="presSecVenta" style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;">Auto de la agencia</div>
+    <div id="presSecVenta" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;" style="margin-bottom:10px;">Auto de la agencia</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div style="grid-column:1/-1;">
-          <label class="flabel">Seleccionar del stock *</label>
-          <select id="presVehiculoId" onchange="presAutoSelect()" class="finput">
+          <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Seleccionar del stock *</label>
+          <select id="presVehiculoId" onchange="presAutoSelect()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;">
             <option value="">-- Seleccionar --</option>
           </select>
         </div>
-        <div><label class="flabel">Precio venta *</label><input id="presPrecioVenta" type="number" class="finput" placeholder="0"></div>
-        <div><label class="flabel">Moneda</label>
-          <select id="presMonedaVenta" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Precio venta *</label><input id="presPrecioVenta" type="number" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="0"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Moneda</label>
+          <select id="presMonedaVenta" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
         </div>
       </div>
     </div>
 
     <!-- Auto del cliente (compra/permuta) -->
     <div id="presSecCompra" style="display:none;background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;">Auto del cliente</div>
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;" style="margin-bottom:10px;">Auto del cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><label class="flabel">Marca *</label><input id="presAutoMarca" type="text" class="finput" placeholder="Toyota"></div>
-        <div><label class="flabel">Modelo *</label><input id="presAutoModelo" type="text" class="finput" placeholder="Corolla"></div>
-        <div><label class="flabel">Año *</label><input id="presAutoAnio" type="number" class="finput" placeholder="2020"></div>
-        <div><label class="flabel">Dominio</label><input id="presAutoDominio" type="text" class="finput" placeholder="ABC123" style="text-transform:uppercase;"></div>
-        <div><label class="flabel">Km</label><input id="presAutoKm" type="number" class="finput" placeholder="50000"></div>
-        <div><label class="flabel">Precio ofrecido *</label><input id="presPrecioCompra" type="number" class="finput" placeholder="0"></div>
-        <div><label class="flabel">Moneda</label>
-          <select id="presMonedaCompra" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Marca *</label><input id="presAutoMarca" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="Toyota"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Modelo *</label><input id="presAutoModelo" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="Corolla"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Año *</label><input id="presAutoAnio" type="number" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="2020"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Dominio</label><input id="presAutoDominio" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="ABC123" style="text-transform:uppercase;"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Km</label><input id="presAutoKm" type="number" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="50000"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Precio ofrecido *</label><input id="presPrecioCompra" type="number" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="0"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Moneda</label>
+          <select id="presMonedaCompra" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
         </div>
       </div>
     </div>
 
     <!-- Diferencia (permuta) -->
     <div id="presSecDiff" style="display:none;background:#f0f4ff;border:1px solid #c7d7f4;border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;color:#1e40af;">Diferencia a pagar por el cliente</div>
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;" style="margin-bottom:10px;color:#1e40af;">Diferencia a pagar por el cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><label class="flabel">Diferencia *</label><input id="presDiferencia" type="number" class="finput" placeholder="0"></div>
-        <div><label class="flabel">Moneda</label>
-          <select id="presMonedaDiff" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Diferencia *</label><input id="presDiferencia" type="number" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="0"></div>
+        <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Moneda</label>
+          <select id="presMonedaDiff" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
         </div>
       </div>
     </div>
 
     <!-- Obs y validez -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      <div><label class="flabel">Validez (días)</label><input id="presValidez" type="number" class="finput" value="7"></div>
-      <div><label class="flabel">Observaciones</label><input id="presObs" type="text" class="finput" placeholder="Condiciones especiales..."></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Validez (días)</label><input id="presValidez" type="number" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" value="7"></div>
+      <div><label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">Observaciones</label><input id="presObs" type="text" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.88rem;background:#fff;outline:none;" placeholder="Condiciones especiales..."></div>
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -1387,7 +1387,7 @@ function show(id){
   if(id==='dashboard')renderDashboard();
   if(id==='stock')renderStock();
   if(id==='clientes')renderClientes();
-  if(id==='presupuestos'){renderPresupuestos();poblarStockSelectPres();}
+  if(id==='presupuestos'){renderPresupuestos();poblarStockSelectPres();showStab('presupuestos','presLista',document.querySelector('#presupuestos .stab'));}
   if(id==='operacion')poblarFormOp();
   if(id==='misventas')renderMisVentas();
 }
