@@ -398,14 +398,14 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
 
   <!-- LISTA -->
   <div id="presLista">
-    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-      <select id="presFiltroTipo" onchange="renderPresupuestos()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.84rem;background:#fff;">
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center;">
+      <select id="presFiltroTipo" onchange="renderPresupuestos()" style="padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-family:var(--sans);font-size:0.82rem;background:#fff;cursor:pointer;">
         <option value="">Todos los tipos</option>
-        <option value="venta">Venta</option>
-        <option value="compra">Compra</option>
-        <option value="permuta">Permuta</option>
+        <option value="venta">🚗 Venta</option>
+        <option value="compra">🛒 Compra</option>
+        <option value="permuta">🔄 Permuta</option>
       </select>
-      <select id="presFiltroEstado" onchange="renderPresupuestos()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.84rem;background:#fff;">
+      <select id="presFiltroEstado" onchange="renderPresupuestos()" style="padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-family:var(--sans);font-size:0.82rem;background:#fff;cursor:pointer;">
         <option value="">Todos los estados</option>
         <option value="borrador">Borrador</option>
         <option value="enviado">Enviado</option>
@@ -418,7 +418,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
   </div>
 
   <!-- NUEVO / EDITAR -->
-  <div id="presNuevo" style="display:none;max-width:680px;">
+  <div id="presNuevo" style="display:none;max-width:700px;">
     <h3 id="presTitulo" style="margin-bottom:16px;">Nuevo presupuesto</h3>
     <input type="hidden" id="presId">
     
@@ -426,7 +426,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     <div style="margin-bottom:16px;">
       <label class="flabel">Tipo de presupuesto *</label>
       <div style="display:flex;gap:10px;">
-        <button class="btn btn-sm prestipoBtn active" data-tipo="venta" onclick="selTipoPresupuesto('venta')">🚗 Venta</button>
+        <button class="btn btn-sm prestipoBtn active" data-tipo="venta" onclick="selTipoPresupuesto('venta')" style="background:var(--accent-mid);color:#fff;border-color:var(--accent-mid);">🚗 Venta</button>
         <button class="btn btn-sm prestipoBtn" data-tipo="compra" onclick="selTipoPresupuesto('compra')">🛒 Compra</button>
         <button class="btn btn-sm prestipoBtn" data-tipo="permuta" onclick="selTipoPresupuesto('permuta')">🔄 Permuta</button>
       </div>
@@ -434,8 +434,8 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     </div>
 
     <!-- Cliente -->
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;">Datos del cliente</div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent-mid);margin-bottom:14px;">Datos del cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div><label class="flabel">Nombre *</label><input id="presCliNombre" type="text" class="finput" placeholder="Apellido, Nombre"></div>
         <div><label class="flabel">Teléfono</label><input id="presCliTel" type="text" class="finput" placeholder="223-..."></div>
@@ -444,8 +444,8 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     </div>
 
     <!-- Auto de la agencia (venta/permuta) -->
-    <div id="presSecVenta" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;">Auto de la agencia</div>
+    <div id="presSecVenta" style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent-mid);margin-bottom:14px;">Auto de la agencia</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div style="grid-column:1/-1;">
           <label class="flabel">Seleccionar del stock *</label>
@@ -462,7 +462,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
 
     <!-- Auto del cliente (compra/permuta) -->
     <div id="presSecCompra" style="display:none;background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
-      <div class="flabel" style="margin-bottom:10px;">Auto del cliente</div>
+      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent-mid);margin-bottom:14px;">Auto del cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div><label class="flabel">Marca *</label><input id="presAutoMarca" type="text" class="finput" placeholder="Toyota"></div>
         <div><label class="flabel">Modelo *</label><input id="presAutoModelo" type="text" class="finput" placeholder="Corolla"></div>
@@ -477,7 +477,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     </div>
 
     <!-- Diferencia (permuta) -->
-    <div id="presSecDiff" style="display:none;background:#f0f4ff;border:1px solid #c7d7f4;border-radius:10px;padding:16px;margin-bottom:14px;">
+    <div id="presSecDiff" style="display:none;background:#f0f4ff;border:1px solid #c7d7f4;border-radius:12px;padding:18px;margin-bottom:14px;">
       <div class="flabel" style="margin-bottom:10px;color:#1e40af;">Diferencia a pagar por el cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div><label class="flabel">Diferencia *</label><input id="presDiferencia" type="number" class="finput" placeholder="0"></div>
@@ -493,9 +493,9 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
       <div><label class="flabel">Observaciones</label><input id="presObs" type="text" class="finput" placeholder="Condiciones especiales..."></div>
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="showStab('presupuestos','presLista',document.querySelector('#presupuestos .stab'))">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+      <button class="btn" onclick="showStab('presupuestos','presLista',document.querySelector('#presupuestos .stab'))">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPresupuesto()">💾 Guardar presupuesto</button>
     </div>
   </div>
 </section>
@@ -2743,8 +2743,10 @@ function poblarStockSelectPres() {
 function selTipoPresupuesto(tipo) {
   document.getElementById('presTipo').value = tipo;
   document.querySelectorAll('.prestipoBtn').forEach(b=>{
-    b.classList.toggle('btn-primary', b.dataset.tipo===tipo);
-    b.classList.toggle('active', b.dataset.tipo===tipo);
+    const isActive = b.dataset.tipo===tipo;
+    b.style.background = isActive ? 'var(--accent-mid)' : '';
+    b.style.color = isActive ? '#fff' : '';
+    b.style.borderColor = isActive ? 'var(--accent-mid)' : '';
   });
   document.getElementById('presSecVenta').style.display  = (tipo==='venta'||tipo==='permuta') ? '' : 'none';
   document.getElementById('presSecCompra').style.display = (tipo==='compra'||tipo==='permuta') ? '' : 'none';
