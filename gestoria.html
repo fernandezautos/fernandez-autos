@@ -1414,11 +1414,15 @@ async function cargarPendientes() {
       var html1='<div style="display:flex;flex-direction:column;gap:10px;">';
       sinLegajo.forEach(function(v){
         var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
-        html1+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;">';
+        var sub=v.sub_estado||'Pendiente a peritaje';
+        var col=SUB_COLOR[sub]||'#991b1b';
+        html1+='<div data-vid="'+v.id+'" onclick="abrirDetVehiculoSinLegajo(parseInt(this.dataset.vid))" style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;cursor:pointer;">';
         html1+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
         html1+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' · Sin legajo asignado</div></div>';
-        html1+='<button onclick="irALegajosConAuto('+v.id+',\''+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||'')+'')+'\',\''+encodeURIComponent(v.dominio||'')+'\')\" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
-        html1+='</div>';
+        html1+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+        html1+='<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
+        html1+='<button data-vid="'+v.id+'" data-mm="'+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'" data-dom="'+encodeURIComponent(v.dominio||'')+'" onclick="event.stopPropagation();irALegajosConAuto(parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
+        html1+='</div></div>';
       });
       html1+='</div>';
       listaSinLeg.innerHTML=html1;
@@ -1462,6 +1466,158 @@ function abrirLegajoDesdePendiente(el) {
   var num = parseInt(el.getAttribute('data-legnum'));
   if(!num) return;
   abrirDetLeg(num);
+}
+
+
+async function abrirDetVehiculoSinLegajo(vehiculoId) {
+  mostrarCargando('Cargando...');
+  var vRaw = await sbGet('vehiculos','select=*&id=eq.'+vehiculoId);
+  if(!vRaw||!vRaw.length){ocultarCargando();return;}
+  var v = vRaw[0];
+  // Build a fake legajo object to reuse abrirDetLeg logic
+  // Store vehicle data temporarily
+  window._vehSinLegajo = v;
+  ocultarCargando();
+  // Build and show the detail modal directly
+  var num = 'SL'; // Sin Legajo
+  var DOCS_BASE_LOCAL = typeof DOCS_BASE !== 'undefined' ? DOCS_BASE : [];
+  var docs = v.docs || [];
+  var st = {ok:0,total:DOCS_BASE_LOCAL.length,pct:0,full:false};
+  docs.forEach(function(d){if(d.ok)st.ok++;});
+  st.pct = st.total>0?Math.round(st.ok/st.total*100):0;
+  st.full = st.ok===st.total&&st.total>0;
+
+  var sub = v.sub_estado||'Pendiente a peritaje';
+  var colMap = {'Pendiente a peritaje':'#991b1b','Peritaje aprobado':'#b45309','Juntando documentacion':'#1e40af','Documentacion lista':'#065f46'};
+  var col = colMap[sub]||'#555';
+
+  var html = '<div class="det-header">';
+  html += '<div class="det-num" style="color:#991b1b;">SL</div>';
+  html += '<div class="det-info"><div class="det-nombre">'+(v.cliente_entrega_nombre||'Sin titular asignado')+'</div>';
+  html += '<div class="det-sub">'+v.dominio+' · '+v.marca+' '+v.modelo+' '+(v.anio||'')+'</div></div>';
+  html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
+  html += '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.8rem;font-weight:600;">'+sub+'</span>';
+  html += '<span style="font-size:11px;color:var(--text3);">'+st.ok+'/'+st.total+' docs</span>';
+  html += '</div></div>';
+
+  html += '<div id="detSLTitularInfo"></div>';
+
+  html += '<div class="det-cols">';
+  // Left col - vehicle data
+  html += '<div><div class="section-label" style="margin-bottom:10px">Datos del vehiculo</div>';
+  var fr2=function(l,v2){return '<div class="fr2"><span class="fl">'+l+'</span><span class="fv">'+(v2||'-')+'</span></div>';};
+  html += fr2('Dominio',v.dominio);
+  html += fr2('Vehiculo',v.marca+' '+v.modelo+' '+(v.anio||''));
+  html += fr2('Color',v.color);
+  html += fr2('Km',v.km?Number(v.km).toLocaleString('es-AR')+' km':'');
+  html += fr2('Procedencia',v.procedencia);
+  if(v.obs) html += fr2('Obs',v.obs);
+  html += '</div>';
+
+  // Right col - docs
+  if(DOCS_BASE_LOCAL.length){
+    var docsMap={};
+    docs.forEach(function(d){docsMap[d.n]=d;});
+    html += '<div><div class="section-label">Documentacion &bull; '+st.ok+'/'+st.total+'</div><div class="doc-list">';
+    DOCS_BASE_LOCAL.forEach(function(dn){
+      var d=docsMap[dn]||{n:dn,ok:false};
+      html += '<div class="doc-item" data-vid="'+vehiculoId+'" data-doc="'+dn+'" onclick="toggleDocSL(parseInt(this.dataset.vid),this.dataset.doc,this)">';
+      html += '<span class="doc-status '+(d.ok?'ok':'miss')+'"></span>';
+      html += '<span class="doc-name">'+dn+'</span>';
+      html += '<span class="doc-action">'+(d.ok?'X Quitar':'+ Marcar')+'</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+  html += '</div>';
+
+  // Notas
+  html += '<div class="section-label" style="margin-top:16px;">Notas y seguimiento</div>';
+  var notas_hilo = v.notas_hilo||[];
+  html += '<div class="notas-hilo">';
+  notas_hilo.forEach(function(n){
+    var ts=''; if(n.ts){var d2=new Date(n.ts);ts=d2.toLocaleDateString('es-AR');}
+    html += '<div class="nota-item'+(n.auto?' nota-auto':'')+'"><span class="nota-ts">'+ts+'</span><span class="nota-txt">'+n.texto+'</span></div>';
+  });
+  html += '</div>';
+  html += '<div class="nota-input-row">';
+  html += '<input id="notaSLInput_'+vehiculoId+'" type="text" placeholder="Agregar nota..." style="flex:1;padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:0.85rem;outline:none;">';
+  html += '<button data-vid="'+vehiculoId+'" onclick="agregarNotaSL(parseInt(this.dataset.vid))" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:var(--sans);font-size:0.85rem;cursor:pointer;">+ Nota</button>';
+  html += '</div>';
+
+  html += '<div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">';
+  html += '<button data-vid="'+vehiculoId+'" data-mm="'+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'" data-dom="'+encodeURIComponent(v.dominio||'')+'" onclick="irALegajosConAuto(parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:var(--sans);font-size:0.85rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
+  html += '</div>';
+
+  g('detLegBody').innerHTML = html;
+  g('ovDetLeg').classList.remove('hidden');
+
+  // Load titular async
+  if(v.cliente_entrega_id) cargarTitularEnEl('detSLTitularInfo', v.cliente_entrega_id);
+  // Avanzar sub-estado
+  if(sub !== 'Documentacion lista') {
+    var idx3 = SUB_ESTADOS_ORD.indexOf(sub);
+    var sig = idx3>=0&&idx3<SUB_ESTADOS_ORD.length-1?SUB_ESTADOS_ORD[idx3+1]:null;
+    if(sig) {
+      var btnSub = document.createElement('button');
+      btnSub.textContent = '→ '+sig;
+      btnSub.dataset.vid = vehiculoId;
+      btnSub.dataset.sub = sig;
+      btnSub.onclick = function(){ avanzarSubEstado(parseInt(this.dataset.vid),this.dataset.sub); cerrar('ovDetLeg'); };
+      btnSub.style.cssText = 'background:'+col+';color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:var(--sans);font-size:0.85rem;font-weight:600;cursor:pointer;';
+      var footer = g('detLegBody').querySelector('div[style*="justify-content:flex-end"]');
+      if(footer) footer.insertBefore(btnSub, footer.firstChild);
+    }
+  }
+}
+
+async function cargarTitularEnEl(elId, clienteId) {
+  try {
+    var cRaw = await sbGet('clientes','select=nombre,dni,tel,email&id=eq.'+clienteId);
+    if(!cRaw||!cRaw.length) return;
+    var c = cRaw[0];
+    var el = document.getElementById(elId);
+    if(!el) return;
+    var html = '<div style="background:#f0f4ff;border:1px solid #c7d7f4;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:0.82rem;">';
+    html += '<div style="font-weight:600;color:#1e40af;margin-bottom:4px;">Titular / Quien lo entrego</div>';
+    if(c.nombre) html += '<div class="fr2"><span class="fl">Nombre</span><span class="fv">'+c.nombre+'</span></div>';
+    if(c.dni)    html += '<div class="fr2"><span class="fl">DNI</span><span class="fv">'+c.dni+'</span></div>';
+    if(c.tel)    html += '<div class="fr2"><span class="fl">Tel</span><span class="fv">'+c.tel+'</span></div>';
+    if(c.email)  html += '<div class="fr2"><span class="fl">Email</span><span class="fv">'+c.email+'</span></div>';
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e){ console.error(e); }
+}
+
+async function toggleDocSL(vehiculoId, docNombre, el) {
+  var vRaw = await sbGet('vehiculos','select=docs,notas_hilo&id=eq.'+vehiculoId);
+  if(!vRaw||!vRaw.length) return;
+  var docs = vRaw[0].docs||[];
+  var notas_hilo = vRaw[0].notas_hilo||[];
+  var idx4 = docs.findIndex(function(d){return d.n===docNombre;});
+  var nuevoOk;
+  if(idx4>=0){ nuevoOk=!docs[idx4].ok; docs[idx4].ok=nuevoOk; docs[idx4].fecha=nuevoOk?new Date().toISOString():null; }
+  else{ nuevoOk=true; docs.push({n:docNombre,ok:true,fecha:new Date().toISOString()}); }
+  notas_hilo.push({texto:(nuevoOk?'Doc. marcado: ':'Doc. desmarcado: ')+docNombre,ts:new Date().toISOString(),auto:true});
+  await sbUpdate('vehiculos','id',vehiculoId,{docs:docs,notas_hilo:notas_hilo});
+  // Update UI
+  var status = el.querySelector('.doc-status');
+  var action = el.querySelector('.doc-action');
+  if(status) status.className='doc-status '+(nuevoOk?'ok':'miss');
+  if(action) action.textContent = nuevoOk?'X Quitar':'+ Marcar';
+}
+
+async function agregarNotaSL(vehiculoId) {
+  var inp = document.getElementById('notaSLInput_'+vehiculoId);
+  if(!inp||!inp.value.trim()) return;
+  var txt = inp.value.trim();
+  var vRaw = await sbGet('vehiculos','select=notas_hilo&id=eq.'+vehiculoId);
+  var notas_hilo = (vRaw&&vRaw.length?vRaw[0].notas_hilo:null)||[];
+  notas_hilo.push({texto:txt,ts:new Date().toISOString(),auto:false});
+  await sbUpdate('vehiculos','id',vehiculoId,{notas_hilo:notas_hilo});
+  inp.value='';
+  // Refresh
+  abrirDetVehiculoSinLegajo(vehiculoId);
 }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
