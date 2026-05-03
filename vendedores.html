@@ -224,6 +224,7 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
     <button class="active" onclick="show('dashboard')">Dashboard</button>
     <button onclick="show('stock')">Stock</button>
     <button onclick="show('clientes')">Clientes</button>
+    <button onclick="show('presupuestos')">Presupuestos</button>
     <button onclick="show('operacion')">Nueva Operación</button>
     <button onclick="show('compra')">Orden de Compra</button>
     <button onclick="show('consignacion')">Consignación</button>
@@ -381,6 +382,120 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
 </section>
 
 <!-- CLIENTES -->
+<section id="presupuestos" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <h2 style="margin:0;">Presupuestos</h2>
+    <button class="btn btn-primary" onclick="showStab('presupuestos','presNuevo',document.querySelector('#presupuestos .stab:last-child'))">+ Nuevo presupuesto</button>
+  </div>
+  <div style="display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:18px;">
+    <button class="stab active" onclick="showStab('presupuestos','presLista',this)">Lista</button>
+    <button class="stab" onclick="showStab('presupuestos','presNuevo',this)">Nuevo</button>
+  </div>
+
+  <!-- LISTA -->
+  <div id="presLista">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <select id="presFiltroTipo" onchange="renderPresupuestos()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.84rem;background:#fff;">
+        <option value="">Todos los tipos</option>
+        <option value="venta">Venta</option>
+        <option value="compra">Compra</option>
+        <option value="permuta">Permuta</option>
+      </select>
+      <select id="presFiltroEstado" onchange="renderPresupuestos()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:0.84rem;background:#fff;">
+        <option value="">Todos los estados</option>
+        <option value="borrador">Borrador</option>
+        <option value="enviado">Enviado</option>
+        <option value="aceptado">Aceptado</option>
+        <option value="rechazado">Rechazado</option>
+        <option value="convertido">Convertido</option>
+      </select>
+    </div>
+    <div id="presListaBody"><div class="empty">Sin presupuestos</div></div>
+  </div>
+
+  <!-- NUEVO / EDITAR -->
+  <div id="presNuevo" style="display:none;max-width:680px;">
+    <h3 id="presTitulo" style="margin-bottom:16px;">Nuevo presupuesto</h3>
+    <input type="hidden" id="presId">
+    
+    <!-- Tipo -->
+    <div style="margin-bottom:16px;">
+      <label class="flabel">Tipo de presupuesto *</label>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-sm prestipoBtn active" data-tipo="venta" onclick="selTipoPresupuesto('venta')">🚗 Venta</button>
+        <button class="btn btn-sm prestipoBtn" data-tipo="compra" onclick="selTipoPresupuesto('compra')">🛒 Compra</button>
+        <button class="btn btn-sm prestipoBtn" data-tipo="permuta" onclick="selTipoPresupuesto('permuta')">🔄 Permuta</button>
+      </div>
+      <input type="hidden" id="presTipo" value="venta">
+    </div>
+
+    <!-- Cliente -->
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div class="flabel" style="margin-bottom:10px;">Datos del cliente</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="flabel">Nombre *</label><input id="presCliNombre" type="text" class="finput" placeholder="Apellido, Nombre"></div>
+        <div><label class="flabel">Teléfono</label><input id="presCliTel" type="text" class="finput" placeholder="223-..."></div>
+        <div><label class="flabel">Email</label><input id="presCliEmail" type="text" class="finput" placeholder="mail@..."></div>
+      </div>
+    </div>
+
+    <!-- Auto de la agencia (venta/permuta) -->
+    <div id="presSecVenta" style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div class="flabel" style="margin-bottom:10px;">Auto de la agencia</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="grid-column:1/-1;">
+          <label class="flabel">Seleccionar del stock *</label>
+          <select id="presVehiculoId" onchange="presAutoSelect()" class="finput">
+            <option value="">-- Seleccionar --</option>
+          </select>
+        </div>
+        <div><label class="flabel">Precio venta *</label><input id="presPrecioVenta" type="number" class="finput" placeholder="0"></div>
+        <div><label class="flabel">Moneda</label>
+          <select id="presMonedaVenta" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto del cliente (compra/permuta) -->
+    <div id="presSecCompra" style="display:none;background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div class="flabel" style="margin-bottom:10px;">Auto del cliente</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="flabel">Marca *</label><input id="presAutoMarca" type="text" class="finput" placeholder="Toyota"></div>
+        <div><label class="flabel">Modelo *</label><input id="presAutoModelo" type="text" class="finput" placeholder="Corolla"></div>
+        <div><label class="flabel">Año *</label><input id="presAutoAnio" type="number" class="finput" placeholder="2020"></div>
+        <div><label class="flabel">Dominio</label><input id="presAutoDominio" type="text" class="finput" placeholder="ABC123" style="text-transform:uppercase;"></div>
+        <div><label class="flabel">Km</label><input id="presAutoKm" type="number" class="finput" placeholder="50000"></div>
+        <div><label class="flabel">Precio ofrecido *</label><input id="presPrecioCompra" type="number" class="finput" placeholder="0"></div>
+        <div><label class="flabel">Moneda</label>
+          <select id="presMonedaCompra" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diferencia (permuta) -->
+    <div id="presSecDiff" style="display:none;background:#f0f4ff;border:1px solid #c7d7f4;border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div class="flabel" style="margin-bottom:10px;color:#1e40af;">Diferencia a pagar por el cliente</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="flabel">Diferencia *</label><input id="presDiferencia" type="number" class="finput" placeholder="0"></div>
+        <div><label class="flabel">Moneda</label>
+          <select id="presMonedaDiff" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Obs y validez -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div><label class="flabel">Validez (días)</label><input id="presValidez" type="number" class="finput" value="7"></div>
+      <div><label class="flabel">Observaciones</label><input id="presObs" type="text" class="finput" placeholder="Condiciones especiales..."></div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="showStab('presupuestos','presLista',document.querySelector('#presupuestos .stab'))">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
+    </div>
+  </div>
+</section>
+
 <section id="clientes" class="section">
   <div class="stabs">
     <button class="stab active" onclick="showStab('clientes','clientesLista',this)">Clientes</button>
@@ -1133,7 +1248,7 @@ let VENDEDOR = { nombre:'Cargando...', iniciales:'...' };
 // ═══ STATE ════════════════════════════════════════════════
 let opMoneda='ARS';
 let stockFiltroEstado='Disponible', stockFiltroTipo='', vehiculoModalId=null, clienteModalId=null;
-let stock=[], clientes=[], operaciones=[], prospectos=[], prospectosCerrados=[];
+let stock=[], clientes=[], operaciones=[], prospectos=[], prospectosCerrados=[], presupuestos=[];
 let dragId=null, cierreProspectoId=null, prospectoDetalleId=null;
 
 async function cargarTodo(){
@@ -1189,6 +1304,10 @@ async function cargarTodo(){
       historial:(p.prospecto_historial||[]).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(h=>({tipo:h.tipo,texto:h.texto,fecha:h.fecha}))
     }));
     prospectosCerrados = pRaw.filter(p=>p.cerrado).map(p=>({...p,motivo:p.motivo_cierre,fechaCierre:p.fecha_cierre}));
+
+    // Presupuestos
+    const presRaw = await sbGet('presupuestos','select=*&order=created_at.desc&limit=100');
+    presupuestos = presRaw || [];
 
   } catch(err){ console.error('Error cargando datos:',err); alert('Error al conectar con la base de datos.'); }
   ocultarCargando();
@@ -1262,16 +1381,18 @@ function show(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('#mainNav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const idx=['dashboard','stock','clientes','operacion','misventas'].indexOf(id);
-  document.querySelectorAll('#mainNav button')[idx].classList.add('active');
+  const navItems=['dashboard','stock','clientes','presupuestos','operacion','compra','consignacion','misventas'];
+  const idx=navItems.indexOf(id);
+  if(idx>=0) document.querySelectorAll('#mainNav button')[idx].classList.add('active');
   if(id==='dashboard')renderDashboard();
   if(id==='stock')renderStock();
   if(id==='clientes')renderClientes();
+  if(id==='presupuestos'){renderPresupuestos();poblarStockSelectPres();}
   if(id==='operacion')poblarFormOp();
   if(id==='misventas')renderMisVentas();
 }
 function showStab(sec,id,btn){
-  const m={stock:['stockLista','stockNuevo'],clientes:['clientesLista','clientesNuevo']};
+  const m={stock:['stockLista','stockNuevo'],clientes:['clientesLista','clientesNuevo'],presupuestos:['presLista','presNuevo']};
   m[sec].forEach(s=>{const e=document.getElementById(s);if(e)e.style.display='none';});
   document.getElementById(id).style.display='block';
   document.querySelectorAll(`#${sec} .stab`).forEach(b=>b.classList.remove('active'));
@@ -1911,7 +2032,7 @@ body{font-family:Arial,sans-serif;background:#f2f1ed;color:#1a1917;min-height:10
     <div class="footer-contacto">Consultanos por este vehículo</div>
   </div>
 </div>
-<script>window.onload=()=>window.print();<\/script>
+<${"scr"}ipt>window.onload=()=>window.print();</${"scr"}ipt>
 </body>
 </html>`;
   const blob=new Blob([html],{type:'text/html'});
@@ -2598,6 +2719,330 @@ async function cargarOrdenesCompra() {
       '<td><span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:2px 10px;font-size:0.75rem;font-weight:600;">'+o.estado+'</span></td>'+
     '</tr>';
   }).join('');
+}
+
+// ═══ PRESUPUESTOS ══════════════════════════════════════════
+function poblarStockSelectPres() {
+  const sel = document.getElementById('presVehiculoId');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">-- Seleccionar auto --</option>';
+  stock.filter(v=>v.estado==='Disponible').forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.marca+' '+v.modelo+' '+v.anio+(v.dominio?' ('+v.dominio+')':'');
+    sel.appendChild(opt);
+  });
+  if(current) sel.value = current;
+}
+
+function selTipoPresupuesto(tipo) {
+  document.getElementById('presTipo').value = tipo;
+  document.querySelectorAll('.prestipoBtn').forEach(b=>{
+    b.classList.toggle('btn-primary', b.dataset.tipo===tipo);
+    b.classList.toggle('active', b.dataset.tipo===tipo);
+  });
+  document.getElementById('presSecVenta').style.display  = (tipo==='venta'||tipo==='permuta') ? '' : 'none';
+  document.getElementById('presSecCompra').style.display = (tipo==='compra'||tipo==='permuta') ? '' : 'none';
+  document.getElementById('presSecDiff').style.display   = tipo==='permuta' ? '' : 'none';
+}
+
+function presAutoSelect() {
+  const vid = document.getElementById('presVehiculoId').value;
+  if(!vid) return;
+  const v = stock.find(x=>x.id==vid);
+  if(v && !document.getElementById('presPrecioVenta').value) {
+    document.getElementById('presPrecioVenta').value = v.precio||'';
+    document.getElementById('presMonedaVenta').value = v.moneda||'ARS';
+  }
+}
+
+function renderPresupuestos() {
+  const tipo  = document.getElementById('presFiltroTipo')?.value||'';
+  const estado= document.getElementById('presFiltroEstado')?.value||'';
+  let lista = [...presupuestos];
+  if(tipo)   lista = lista.filter(p=>p.tipo===tipo);
+  if(estado) lista = lista.filter(p=>p.estado===estado);
+
+  const colores = {borrador:'#6b7280',enviado:'#1e40af',aceptado:'#065f46',rechazado:'#991b1b',convertido:'#7c3aed'};
+  const etiquetas = {borrador:'Borrador',enviado:'Enviado',aceptado:'Aceptado',rechazado:'Rechazado',convertido:'Convertido'};
+  const tipoLabel = {venta:'Venta',compra:'Compra',permuta:'Permuta'};
+  const tipoIcon  = {venta:'🚗',compra:'🛒',permuta:'🔄'};
+
+  const body = document.getElementById('presListaBody');
+  if(!lista.length){ body.innerHTML='<div class="empty" style="padding:30px">Sin presupuestos</div>'; return; }
+
+  body.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;">' +
+    lista.map(p=>{
+      const col = colores[p.estado]||'#555';
+      const resumen = p.tipo==='venta'  ? fmt2(p.precio_venta,p.moneda_venta)
+                    : p.tipo==='compra' ? fmt2(p.precio_compra,p.moneda_compra)
+                    : 'Diff: '+fmt2(p.diferencia,p.moneda_diferencia);
+      return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'+
+        '<div style="flex:1;">'+
+          '<div style="font-weight:600;font-size:0.92rem;">'+tipoIcon[p.tipo]+' '+tipoLabel[p.tipo]+' — '+p.cliente_nombre+'</div>'+
+          '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">'+
+            (p.vehiculo_texto||((p.auto_cliente_marca||'')+(p.auto_cliente_modelo?' '+p.auto_cliente_modelo:'')+
+            (p.auto_cliente_anio?' '+p.auto_cliente_anio:'')))+
+            ' · '+fmtFecha(p.fecha)+
+            (p.vendedor_nombre?' · '+p.vendedor_nombre:'')+
+          '</div>'+
+          '<div style="font-size:0.82rem;font-weight:600;margin-top:4px;">'+resumen+'</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+          '<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:3px 10px;font-size:0.76rem;font-weight:600;">'+etiquetas[p.estado]+'</span>'+
+          '<button data-pid="'+p.id+'" onclick="editarPresupuesto(this.dataset.pid)" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">Editar</button>'+
+          '<button data-pid="'+p.id+'" onclick="imprimirPresupuesto(this.dataset.pid)" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-family:var(--sans);font-size:0.78rem;cursor:pointer;">🖨 PDF</button>'+
+          (p.cliente_tel?'<a href="https://wa.me/549'+p.cliente_tel.replace(/\D/g,'')+'" target="_blank" style="background:#25d366;color:#fff;border-radius:7px;padding:5px 12px;font-family:var(--sans);font-size:0.78rem;text-decoration:none;cursor:pointer;">WhatsApp</a>':'')+
+          (p.estado==='aceptado'?'<button data-pid="'+p.id+'" onclick="convertirPresupuesto(this.dataset.pid)" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Convertir →</button>':'')+
+          (p.estado!=='convertido'&&p.estado!=='rechazado'?
+            '<select data-pid="'+p.id+'" onchange="cambiarEstadoPres(this.dataset.pid,this.value)" style="padding:5px 8px;border:1px solid var(--border);border-radius:7px;font-family:var(--sans);font-size:0.76rem;background:#fff;">'+
+            '<option value="">Cambiar estado</option>'+
+            '<option value="borrador">Borrador</option><option value="enviado">Enviado</option>'+
+            '<option value="aceptado">Aceptado</option><option value="rechazado">Rechazado</option>'+
+            '</select>':'')+
+        '</div>'+
+      '</div>';
+    }).join('') + '</div>';
+}
+
+async function guardarPresupuesto() {
+  const tipo    = document.getElementById('presTipo').value;
+  const nombre  = document.getElementById('presCliNombre').value.trim();
+  if(!nombre){ alert('Ingresá el nombre del cliente.'); return; }
+
+  if((tipo==='venta'||tipo==='permuta') && !document.getElementById('presVehiculoId').value){
+    alert('Seleccioná el auto de la agencia.'); return;
+  }
+  if((tipo==='compra'||tipo==='permuta') && (!document.getElementById('presAutoMarca').value||!document.getElementById('presAutoModelo').value)){
+    alert('Completá los datos del auto del cliente.'); return;
+  }
+
+  const vid = document.getElementById('presVehiculoId').value;
+  const vAuto = vid ? stock.find(v=>v.id==vid) : null;
+
+  const data = {
+    tipo,
+    fecha: hoy(),
+    estado: 'borrador',
+    vendedor_nombre: vendedorNombre,
+    cliente_nombre: nombre,
+    cliente_tel: document.getElementById('presCliTel').value.trim(),
+    cliente_email: document.getElementById('presCliEmail').value.trim(),
+    vehiculo_id: vid||null,
+    vehiculo_texto: vAuto ? vAuto.marca+' '+vAuto.modelo+' '+vAuto.anio : null,
+    precio_venta: parseFloat(document.getElementById('presPrecioVenta').value)||null,
+    moneda_venta: document.getElementById('presMonedaVenta').value,
+    auto_cliente_marca: document.getElementById('presAutoMarca').value.trim()||null,
+    auto_cliente_modelo: document.getElementById('presAutoModelo').value.trim()||null,
+    auto_cliente_anio: parseInt(document.getElementById('presAutoAnio').value)||null,
+    auto_cliente_dominio: document.getElementById('presAutoDominio').value.trim().toUpperCase()||null,
+    auto_cliente_km: parseInt(document.getElementById('presAutoKm').value)||null,
+    precio_compra: parseFloat(document.getElementById('presPrecioCompra').value)||null,
+    moneda_compra: document.getElementById('presMonedaCompra').value,
+    diferencia: parseFloat(document.getElementById('presDiferencia').value)||null,
+    moneda_diferencia: document.getElementById('presMonedaDiff').value,
+    obs: document.getElementById('presObs').value.trim(),
+    validez_dias: parseInt(document.getElementById('presValidez').value)||7,
+  };
+
+  const presId = document.getElementById('presId').value;
+  mostrarCargando('Guardando presupuesto...');
+
+  if(presId) {
+    await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${presId}`,{method:'PATCH',headers:sbHeaders,body:JSON.stringify(data)});
+    const idx = presupuestos.findIndex(p=>p.id==presId);
+    if(idx>=0) presupuestos[idx] = {...presupuestos[idx],...data};
+  } else {
+    // Generar número
+    const ultimo = presupuestos.length ? Math.max(...presupuestos.map(p=>parseInt(p.numero?.replace(/\D/g,'')||0))) : 0;
+    data.numero = 'PRES-'+String(ultimo+1).padStart(4,'0');
+    const nuevo = await sbInsert('presupuestos', data);
+    if(nuevo) presupuestos.unshift({...data, id:nuevo.id});
+  }
+
+  ocultarCargando();
+  limpiarFormPres();
+  showStab('presupuestos','presLista',document.querySelector('#presupuestos .stab'));
+  renderPresupuestos();
+  alert('Presupuesto guardado correctamente.');
+}
+
+function limpiarFormPres() {
+  ['presId','presCliNombre','presCliTel','presCliEmail','presVehiculoId',
+   'presPrecioVenta','presAutoMarca','presAutoModelo','presAutoAnio',
+   'presAutoDominio','presAutoKm','presPrecioCompra','presDiferencia','presObs'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('presValidez').value='7';
+  selTipoPresupuesto('venta');
+}
+
+function editarPresupuesto(pid) {
+  const p = presupuestos.find(x=>x.id==pid);
+  if(!p) return;
+  document.getElementById('presId').value = p.id;
+  document.getElementById('presTitulo').textContent = 'Editar presupuesto '+p.numero;
+  document.getElementById('presCliNombre').value = p.cliente_nombre||'';
+  document.getElementById('presCliTel').value    = p.cliente_tel||'';
+  document.getElementById('presCliEmail').value  = p.cliente_email||'';
+  poblarStockSelectPres();
+  document.getElementById('presVehiculoId').value = p.vehiculo_id||'';
+  document.getElementById('presPrecioVenta').value = p.precio_venta||'';
+  document.getElementById('presMonedaVenta').value = p.moneda_venta||'ARS';
+  document.getElementById('presAutoMarca').value   = p.auto_cliente_marca||'';
+  document.getElementById('presAutoModelo').value  = p.auto_cliente_modelo||'';
+  document.getElementById('presAutoAnio').value    = p.auto_cliente_anio||'';
+  document.getElementById('presAutoDominio').value = p.auto_cliente_dominio||'';
+  document.getElementById('presAutoKm').value      = p.auto_cliente_km||'';
+  document.getElementById('presPrecioCompra').value= p.precio_compra||'';
+  document.getElementById('presMonedaCompra').value= p.moneda_compra||'ARS';
+  document.getElementById('presDiferencia').value  = p.diferencia||'';
+  document.getElementById('presMonedaDiff').value  = p.moneda_diferencia||'ARS';
+  document.getElementById('presObs').value         = p.obs||'';
+  document.getElementById('presValidez').value     = p.validez_dias||7;
+  selTipoPresupuesto(p.tipo);
+  showStab('presupuestos','presNuevo',document.querySelectorAll('#presupuestos .stab')[1]);
+}
+
+async function cambiarEstadoPres(pid, nuevoEstado) {
+  if(!nuevoEstado) return;
+  await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${pid}`,{method:'PATCH',headers:sbHeaders,body:JSON.stringify({estado:nuevoEstado})});
+  const p = presupuestos.find(x=>x.id==pid);
+  if(p) p.estado = nuevoEstado;
+  renderPresupuestos();
+}
+
+async function convertirPresupuesto(pid) {
+  const p = presupuestos.find(x=>x.id==pid);
+  if(!p) return;
+  if(p.tipo==='compra') {
+    // Pre-cargar formulario de orden de compra
+    show('compra');
+    setTimeout(()=>precargarOrdenDesdePresupuesto(p), 200);
+  } else {
+    // Pre-cargar formulario de operación (venta/permuta)
+    show('operacion');
+    setTimeout(()=>precargarOpDesdePresupuesto(p), 200);
+  }
+}
+
+function precargarOpDesdePresupuesto(p) {
+  // Cliente
+  const cliInput = document.getElementById('opClienteNombre');
+  if(cliInput) cliInput.value = p.cliente_nombre||'';
+  const cliTel = document.getElementById('opClienteTel');
+  if(cliTel) cliTel.value = p.cliente_tel||'';
+  // Auto
+  if(p.vehiculo_id) {
+    const autoSel = document.getElementById('opAuto');
+    if(autoSel) autoSel.value = p.vehiculo_id;
+  }
+  // Precio
+  const precioInput = document.getElementById('opPrecio');
+  if(precioInput && p.precio_venta) precioInput.value = p.precio_venta;
+  // Guardar referencia al presupuesto
+  window._presupuestoOrigen = p.id;
+  alert('Formulario precargado desde presupuesto '+p.numero+'. Completá los datos que faltan y guardá la operación.');
+}
+
+function precargarOrdenDesdePresupuesto(p) {
+  const campos = {
+    ocCliente: p.cliente_nombre||'',
+    ocMarca: p.auto_cliente_marca||'',
+    ocModelo: p.auto_cliente_modelo||'',
+    ocAnio: p.auto_cliente_anio||'',
+    ocDominio: p.auto_cliente_dominio||'',
+    ocKm: p.auto_cliente_km||'',
+    ocPrecio: p.precio_compra||'',
+  };
+  Object.entries(campos).forEach(([id,val])=>{
+    const el=document.getElementById(id); if(el) el.value=val;
+  });
+  window._presupuestoOrigen = p.id;
+  alert('Formulario precargado desde presupuesto '+p.numero+'. Completá los datos que faltan y guardá la orden.');
+}
+
+function imprimirPresupuesto(pid) {
+  const p = presupuestos.find(x=>x.id==pid);
+  if(!p) return;
+  const fmt2 = (n,m)=>(m==='USD'?'U$D ':'$ ')+Number(n||0).toLocaleString('es-AR');
+  const tipoLabel={venta:'Presupuesto de Venta',compra:'Presupuesto de Compra',permuta:'Presupuesto de Permuta'};
+  const vencimiento = new Date(p.fecha);
+  vencimiento.setDate(vencimiento.getDate()+(p.validez_dias||7));
+  const vencStr = vencimiento.toLocaleDateString('es-AR');
+
+  let detalle = '';
+  if(p.tipo==='venta'||p.tipo==='permuta') {
+    detalle += '<div class="pres-section"><h3>Vehículo ofrecido</h3>'+
+      '<p><strong>'+p.vehiculo_texto+'</strong></p>'+
+      '<p>Precio de venta: <strong>'+fmt2(p.precio_venta,p.moneda_venta)+'</strong></p></div>';
+  }
+  if(p.tipo==='compra'||p.tipo==='permuta') {
+    detalle += '<div class="pres-section"><h3>'+(p.tipo==='permuta'?'Vehículo entregado en permuta':'Vehículo a comprar')+'</h3>'+
+      '<table class="pres-table">'+
+      '<tr><td>Marca/Modelo</td><td>'+p.auto_cliente_marca+' '+p.auto_cliente_modelo+' '+(p.auto_cliente_anio||'')+'</td></tr>'+
+      (p.auto_cliente_dominio?'<tr><td>Dominio</td><td>'+p.auto_cliente_dominio+'</td></tr>':'')+
+      (p.auto_cliente_km?'<tr><td>Kilómetros</td><td>'+Number(p.auto_cliente_km).toLocaleString('es-AR')+' km</td></tr>':'')+
+      '<tr><td>Valor ofrecido</td><td><strong>'+fmt2(p.precio_compra,p.moneda_compra)+'</strong></td></tr>'+
+      '</table></div>';
+  }
+  if(p.tipo==='permuta') {
+    detalle += '<div class="pres-section pres-diff"><h3>Diferencia a pagar</h3>'+
+      '<p class="pres-total">'+fmt2(p.diferencia,p.moneda_diferencia)+'</p></div>';
+  }
+  if(p.obs) detalle += '<div class="pres-section"><h3>Observaciones</h3><p>'+p.obs+'</p></div>';
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>Presupuesto ${p.numero}</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:0;padding:30px;color:#1a1917;font-size:14px;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #1a1917;}
+  .logo{font-size:1.4rem;font-weight:700;}
+  .presnum{font-size:1.1rem;font-weight:700;color:#7c3aed;}
+  .tipo{font-size:1rem;color:#555;margin-bottom:4px;}
+  .cliente-box{background:#f4f3ee;border-radius:8px;padding:14px;margin-bottom:20px;}
+  .pres-section{margin-bottom:18px;}
+  .pres-section h3{font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;color:#6b6960;margin-bottom:8px;border-bottom:1px solid #e0ddd4;padding-bottom:4px;}
+  .pres-table{width:100%;border-collapse:collapse;}
+  .pres-table td{padding:6px 8px;border-bottom:1px solid #f0ede4;}
+  .pres-table td:first-child{color:#6b6960;width:40%;}
+  .pres-diff{background:#f0f4ff;border-radius:8px;padding:14px;text-align:center;}
+  .pres-total{font-size:1.6rem;font-weight:700;color:#1e40af;margin:0;}
+  .footer{margin-top:30px;padding-top:14px;border-top:1px solid #e0ddd4;font-size:0.78rem;color:#9b9890;display:flex;justify-content:space-between;}
+  @media print{body{padding:15px;}}
+</style></head><body>
+<div class="header">
+  <div><div class="logo">Fernandez Autos</div><div style="font-size:0.78rem;color:#9b9890;">Mar del Plata, Buenos Aires</div></div>
+  <div style="text-align:right;">
+    <div class="presnum">${p.numero}</div>
+    <div class="tipo">${tipoLabel[p.tipo]}</div>
+    <div style="font-size:0.78rem;color:#9b9890;">Fecha: ${fmtFecha(p.fecha)} · Válido hasta: ${vencStr}</div>
+  </div>
+</div>
+<div class="cliente-box">
+  <strong>Cliente:</strong> ${p.cliente_nombre}
+  ${p.cliente_tel?'&nbsp;&nbsp;·&nbsp;&nbsp;<strong>Tel:</strong> '+p.cliente_tel:''}
+  ${p.cliente_email?'&nbsp;&nbsp;·&nbsp;&nbsp;<strong>Email:</strong> '+p.cliente_email:''}
+</div>
+${detalle}
+<div class="footer">
+  <div>Vendedor: ${p.vendedor_nombre||'—'}</div>
+  <div>Este presupuesto tiene validez de ${p.validez_dias||7} días desde la fecha de emisión.</div>
+</div>
+<scr`+'ipt>window.onload=function(){window.print();}<\/scr'+'ipt></body></html>';
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+// Marcar presupuesto como convertido cuando se guarda operacion/orden
+async function marcarPresupuestoConvertido(presId, tipo, id) {
+  if(!presId) return;
+  await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${presId}`,{method:'PATCH',headers:sbHeaders,body:JSON.stringify({estado:'convertido',convertido_en:tipo,convertido_id:id})});
+  const p = presupuestos.find(x=>x.id==presId);
+  if(p){p.estado='convertido';p.convertido_en=tipo;p.convertido_id=id;}
 }
 
 // ═══ CONSIGNACIÓN ══════════════════════════════════════════
