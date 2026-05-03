@@ -1415,8 +1415,7 @@ async function cargarPendientes() {
 function abrirLegajoDesdePendiente(el) {
   var num = parseInt(el.getAttribute('data-legnum'));
   if(!num) return;
-  cambiarPag('legajos', g('navLeg'));
-  setTimeout(function(){ abrirDetLeg(num); }, 150);
+  abrirDetLeg(num);
 }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
