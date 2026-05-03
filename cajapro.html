@@ -922,18 +922,36 @@ async function renderOpsEnCurso() {
     html += '<span style="font-size:0.75rem;color:var(--muted);">'+dias+' día'+(dias!==1?'s':'')+' en curso</span>';
     html += '</div></div>';
 
+    // Calcular cobros parciales
+    const cobrosParciales = op.cobros_parciales || [];
+    const totalCobrado = cobrosParciales.reduce((s,c) => s + parseFloat(c.monto||0), 0) + senia;
+    const saldoReal = precio - totalCobrado;
+
     // Montos
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">';
     html += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;">';
     html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:3px;">Precio total</div>';
     html += '<div style="font-weight:600;font-size:0.92rem;">'+fmtN(precio,moneda)+'</div></div>';
     html += '<div style="background:#d1fae518;border:1px solid #d1fae5;border-radius:8px;padding:10px 12px;">';
-    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#065f46;margin-bottom:3px;">Seña cobrada</div>';
-    html += '<div style="font-weight:600;font-size:0.92rem;color:#065f46;">'+fmtN(senia,op.moneda_senia||moneda)+'</div></div>';
+    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#065f46;margin-bottom:3px;">Total cobrado</div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;color:#065f46;">'+fmtN(totalCobrado,moneda)+'</div>';
     html += '<div style="background:#fef2f218;border:1px solid #fee2e2;border-radius:8px;padding:10px 12px;">';
     html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#991b1b;margin-bottom:3px;">Saldo pendiente</div>';
-    html += '<div style="font-weight:600;font-size:0.92rem;color:#991b1b;">'+fmtN(saldo,moneda)+'</div></div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;color:#991b1b;">'+fmtN(saldoReal,moneda)+'</div></div>';
     html += '</div>';
+
+    // Detalle cobros parciales si hay
+    if(cobrosParciales.length) {
+      html += '<div style="background:#f4f3ee;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.8rem;">';
+      html += '<div style="font-weight:600;color:var(--muted);margin-bottom:6px;font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;">Cobros a cuenta</div>';
+      cobrosParciales.forEach(c => {
+        html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #e0ddd4;">';
+        html += '<span>'+c.fecha+' · '+c.metodo+'</span>';
+        html += '<span style="font-weight:600;color:#065f46;">'+fmtN(c.monto,moneda)+'</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
 
     // Formas de pago y fecha entrega
     html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:0.8rem;color:var(--muted);">';
@@ -948,9 +966,12 @@ async function renderOpsEnCurso() {
     }
     html += '</div>';
 
-    // Botón registrar movimiento
+    // Botones accion
     html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">';
-    html += '<button onclick="registrarMovDesdeOp(\''+op.id+'\',\''+encodeURIComponent(op.cliente_nombre||'')+'\',\''+encodeURIComponent(op.vehiculo_texto||'')+'\','+saldo+',\''+moneda+'\')" style="background:var(--ing);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">+ Registrar cobro</button>';
+    if(saldoReal > 0) {
+      html += '<button data-opid="'+op.id+'" data-cliente="'+encodeURIComponent(op.cliente_nombre||'')+'" data-auto="'+encodeURIComponent(op.vehiculo_texto||'')+'" data-saldo="'+saldoReal+'" data-moneda="'+moneda+'" onclick="abrirCobroParcial(this)" style="background:var(--ing);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">+ Cobro parcial</button>';
+    }
+    html += '<button onclick="registrarMovDesdeOp(\''+op.id+'\',\''+encodeURIComponent(op.cliente_nombre||'')+'\',\''+encodeURIComponent(op.vehiculo_texto||'')+'\','+saldoReal+',\''+moneda+'\')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;cursor:pointer;">+ Registrar ingreso</button>';
     if(op.estado !== 'Entregado') {
       html += '<button onclick="marcarEntregada(\''+op.id+'\')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">✓ Marcar como entregada</button>';
     }
@@ -1815,7 +1836,7 @@ function exportarCierreMes(){
   ${[...data].sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(m=>`<tr><td>${fmtF(m.fecha)}</td><td>${m.tipo==='ingreso'?'↑ Ingreso':'↓ Egreso'}</td><td>${m.moneda||'ARS'}</td><td>${m.catNombre||'—'}${m.subcat?' / '+m.subcat:''}</td><td>${m.cliente||'—'}</td><td class="tr" style="color:${m.tipo==='ingreso'?'#16a34a':'#dc2626'}">${f2(m.monto,m.moneda)}</td></tr>`).join('')}
   </tbody></table>
   <div class="footer">${emp.nombre||'CajaPro'} — Reporte generado automáticamente</div>
-  <script>window.onload=function(){window.print();}<\/script></body></html>`);
+  <scr'+'ipt>window.onload=function(){window.print();}<\/scr'+'ipt></body></html>`);
   v.document.close();
 }
 
@@ -2070,6 +2091,77 @@ function cerrarModalMovPendiente() {
 
 let _movPendienteActivo = null;
 
+// ═══ COBROS PARCIALES ════════════════════════════════════
+let _cobroParcialActivo = null;
+
+function abrirCobroParcial(btn) {
+  const opId   = btn.dataset.opid;
+  const cliente= decodeURIComponent(btn.dataset.cliente);
+  const auto   = decodeURIComponent(btn.dataset.auto);
+  const saldo  = parseFloat(btn.dataset.saldo)||0;
+  const moneda = btn.dataset.moneda||'ARS';
+  const fmtN   = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
+  _cobroParcialActivo = {opId, cliente, auto, saldo, moneda};
+  document.getElementById('cpInfo').textContent = auto+' — '+cliente;
+  document.getElementById('cpSaldoLabel').textContent = fmtN(saldo, moneda);
+  document.getElementById('cpMonto').value = '';
+  document.getElementById('cpMetodo').value = 'Efectivo';
+  document.getElementById('cpObs').value = '';
+  document.getElementById('modalCobroParcial').style.display = 'flex';
+}
+
+function cerrarCobroParcial() {
+  document.getElementById('modalCobroParcial').style.display = 'none';
+  _cobroParcialActivo = null;
+}
+
+async function confirmarCobroParcial() {
+  const monto = parseFloat(document.getElementById('cpMonto').value)||0;
+  if(!monto || monto <= 0) { alert('Ingresá el monto cobrado.'); return; }
+  const metodo = document.getElementById('cpMetodo').value;
+  const obs    = document.getElementById('cpObs').value.trim();
+  const p      = _cobroParcialActivo;
+
+  if(monto > p.saldo) {
+    if(!confirm('El monto ('+monto+') supera el saldo pendiente ('+p.saldo+'). ¿Continuar igual?')) return;
+  }
+
+  mostrarCargando('Registrando cobro...');
+
+  // 1. Registrar ingreso en movimientos
+  await sbInsert('movimientos', {
+    fecha: hoy(), monto, tipo: 'ingreso', moneda: p.moneda,
+    obs: 'Cobro parcial — '+p.auto+(obs?' — '+obs:''),
+    categoria: 'Venta de vehículo', metodo
+  });
+
+  // 2. Actualizar cobros_parciales en la operacion
+  const opRaw = await sbGet('operaciones','select=cobros_parciales&id=eq.'+p.opId);
+  const cobros = (opRaw&&opRaw.length ? opRaw[0].cobros_parciales : null) || [];
+  cobros.push({ fecha: hoy(), monto, metodo, obs });
+  await fetch(`${SB_URL}/rest/v1/operaciones?id=eq.${p.opId}`, {
+    method: 'PATCH', headers: sbHeaders,
+    body: JSON.stringify({ cobros_parciales: cobros })
+  });
+
+  // 3. Actualizar agenda — buscar item de cobro para esta operacion y reducir monto
+  const agendaRaw = await sbGet('agenda','select=*&estado=eq.pendiente&tipo=eq.cobro&cliente=eq.'+encodeURIComponent(p.auto)+'&limit=1');
+  if(agendaRaw && agendaRaw.length) {
+    const item = agendaRaw[0];
+    const nuevoMonto = Math.max(0, (parseFloat(item.monto)||0) - monto);
+    await fetch(`${SB_URL}/rest/v1/agenda?id=eq.${item.id}`, {
+      method: 'PATCH', headers: sbHeaders,
+      body: JSON.stringify({ monto: nuevoMonto, obs: (item.obs||'')+' [Abono: '+monto+']' })
+    });
+  }
+
+  ocultarCargando();
+  cerrarCobroParcial();
+  renderOpsEnCurso();
+  renderDash();
+  alert('✓ Cobro de '+monto.toLocaleString('es-AR')+' registrado correctamente.');
+}
+
 init();
 </script>
 <!-- MODAL NOTIFICACIONES -->
@@ -2119,6 +2211,41 @@ init();
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="cerrarModalMovPendiente()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
       <button onclick="confirmarMovPendiente()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar pago</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COBRO PARCIAL -->
+<div id="modalCobroParcial" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-size:1rem;font-weight:600;color:var(--ing);">+ Cobro parcial</div>
+      <button onclick="cerrarCobroParcial()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div id="cpInfo" style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;"></div>
+    <div style="background:#fef9ee;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:0.78rem;color:#92400e;">Saldo pendiente</span>
+      <span id="cpSaldoLabel" style="font-weight:700;color:#92400e;font-size:1rem;"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Monto cobrado *</label>
+        <input type="number" id="cpMonto" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Método</label>
+        <select id="cpMetodo" style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;background:#fff;">
+          <option>Efectivo</option><option>Transferencia</option><option>Cheque</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:#6b6960;font-weight:600;display:block;margin-bottom:5px;">Observaciones</label>
+      <input type="text" id="cpObs" placeholder="Opcional..." style="width:100%;padding:9px 12px;border:1.5px solid #e0ddd4;border-radius:8px;font-family:Arial,sans-serif;font-size:0.9rem;outline:none;">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="cerrarCobroParcial()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmarCobroParcial()" style="background:var(--ing);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar cobro</button>
     </div>
   </div>
 </div>
