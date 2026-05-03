@@ -3196,11 +3196,27 @@ async function enviarNotificacion(para, tipo, titulo, mensaje, operacionId) {
 async function enviarNotifNuevaOperacion(op, v, c, formas) {
   try {
     var precio = fmt(op.precio, op.moneda);
-    var senia  = op.senia>0 ? ' · Seña: '+fmt(op.senia,op.monedaSenia) : '';
+    var senia  = op.senia>0 ? ' · Seña: '+fmt(op.senia,op.moneda_senia||op.moneda) : '';
     var msg    = v.marca+' '+v.modelo+' '+v.anio+' — '+c.nombre+'. '+formas.join(', ')+'. '+precio+senia;
     await enviarNotificacion('caja',    'nueva_operacion','🚗 Nueva operación registrada',msg,op.id);
     await enviarNotificacion('gestoria','nueva_operacion','🚗 Nueva operación registrada',msg,op.id);
     await enviarNotificacion('admin',   'nueva_operacion','🚗 Nueva operación registrada',msg,op.id);
+
+    // Crear movimiento pendiente en caja para cobro de seña si hay seña
+    if(op.senia > 0) {
+      await sbInsert('movimientos_pendientes',{
+        tipo: 'cobro_senia',
+        concepto: 'Seña de venta — '+v.marca+' '+v.modelo+' '+v.anio+(v.dominio?' ('+v.dominio+')':'')+' — '+c.nombre,
+        monto: op.senia,
+        moneda: op.moneda_senia||op.moneda,
+        precio_total: op.precio,
+        solicitado_por: VENDEDOR.nombre,
+        referencia_id: op.id,
+        referencia_tipo: 'operacion',
+        estado: 'pendiente',
+        obs: 'Saldo: '+fmt(op.precio - op.senia, op.moneda)+'. Entrega pactada: '+(op.fecha_entrega||'a coordinar')
+      });
+    }
   } catch(e){ console.error('Error enviarNotif:', e); }
 }
 
