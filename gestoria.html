@@ -1441,6 +1441,25 @@ async function cargarPendientes() {
 }
 
 async function avanzarSubEstado(vehiculoId, nuevoSub) {
+  // Si quiere pasar a Documentacion lista, verificar que todos los docs esten ok
+  if(nuevoSub === 'Documentacion lista') {
+    var vRaw2 = await sbGet('vehiculos','select=dominio&id=eq.'+vehiculoId);
+    if(vRaw2 && vRaw2.length && vRaw2[0].dominio) {
+      var legLocal = legs.find(function(l){ return l.auto && l.auto.dominio === vRaw2[0].dominio; });
+      if(legLocal) {
+        var docs = legLocal.auto.docs || [];
+        var faltantes = docs.filter(function(d){ return !d.ok; }).map(function(d){ return d.n; });
+        if(faltantes.length > 0) {
+          alert('No se puede marcar como Documentacion lista.\n\nFaltan los siguientes documentos:\n\n• ' + faltantes.join('\n• ') + '\n\nMarcalos como presentes en el legajo primero.');
+          return;
+        }
+        if(docs.length === 0) {
+          alert('No se puede marcar como Documentacion lista.\n\nEl legajo no tiene documentos cargados todavia.');
+          return;
+        }
+      }
+    }
+  }
   if(!confirm('Avanzar a "'+nuevoSub+'"?')) return;
   mostrarCargando('Actualizando...');
   await sbUpdate('vehiculos','id',vehiculoId,{sub_estado:nuevoSub});
