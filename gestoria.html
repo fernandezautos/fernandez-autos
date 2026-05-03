@@ -397,6 +397,24 @@ select.filter:focus{border-color:var(--accent)}
 
 </div>
 
+<!-- MODAL CONFIRMAR FECHA ENTREGA -->
+<div class="overlay hidden" id="ovConfirmarFecha">
+<div class="modal" style="max-width:440px;">
+  <div class="mh"><h3>Confirmar fecha de entrega</h3><button class="mbtn" onclick="cerrar('ovConfirmarFecha')">✕</button></div>
+  <div class="mb">
+    <div id="confirmarFechaInfo" style="background:#f4f3ee;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;"></div>
+    <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px;">Fecha de entrega *</label>
+    <input type="date" id="confirmarFechaFecha" style="width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:0.9rem;outline:none;margin-bottom:12px;">
+    <label style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px;">Mensaje (opcional)</label>
+    <input type="text" id="confirmarFechaMensaje" placeholder="Ej: Traer toda la documentación..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:0.9rem;outline:none;margin-bottom:16px;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn" onclick="cerrar('ovConfirmarFecha')">Cancelar</button>
+      <button class="btn success" onclick="confirmarFechaEntrega()">Confirmar y notificar</button>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- MODAL CANCELAR OPERACION GESTORIA -->
 <div class="overlay hidden" id="ovCancelarOp">
 <div class="modal"><div class="mh"><h3>Cancelar operacion</h3><button class="mbtn" onclick="cerrar('ovCancelarOp')">✕</button></div>
@@ -878,6 +896,7 @@ function abrirDetLeg(num) {
       (num==='SL' ? '' :
         '<button class="btn sm" onclick="cerrar(\'ovDetLeg\');abrirModalLeg('+num+',true)">✏️ Editar</button>'+
         '<button class="btn sm success" onclick="cerrar(\'ovDetLeg\');abrirVender('+num+')">🤝 Registrar venta</button>'+
+        '<button class="btn sm" onclick="abrirConfirmarFechaEntrega('+num+')">📅 Confirmar fecha entrega</button>'+
         '<button class="btn sm" onclick="exportarPdfLeg('+num+')">📄 Exportar PDF</button>'+
         '<button class="btn sm danger" onclick="cerrar(\'ovDetLeg\');pedirElimLeg('+num+')">🗑 Liberar legajo</button>'
       )+
@@ -1598,13 +1617,19 @@ async function avanzarSubEstado(vehiculoId, nuevoSub) {
     var ordenes=await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia,aprobacion_estado&vehiculo_id=eq.'+vehiculoId+'&limit=1');
     if(ordenes&&ordenes.length){
       var o=ordenes[0];
-      // Solo crear movimiento si la orden está activa (no ya procesada)
       if(o.aprobacion_estado !== 'rechazada' && o.aprobacion_estado !== 'completada') {
         var saldo=parseFloat(o.precio||0)-parseFloat(o.senia||0);
         var fmtN=function(n,m){return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');};
         await sbInsert('movimientos_pendientes',{tipo:'pago_total',concepto:'Saldo de compra — '+o.vehiculo_texto+' (doc OK)',monto:saldo>0?saldo:parseFloat(o.precio||0),moneda:o.moneda||'ARS',solicitado_por:'Gestoria',referencia_id:o.id,referencia_tipo:'orden_compra',precio_total:parseFloat(o.precio||0),estado:'pendiente',obs:'Documentacion aprobada por gestoria.'});
         await sbInsert('notificaciones',{para:'caja',tipo:'doc_lista',leida:false,titulo:'Doc lista — proceder con pago',mensaje:o.vehiculo_texto+' listo. Saldo: '+fmtN(saldo>0?saldo:parseFloat(o.precio||0),o.moneda||'ARS')});
+        // Notificar también al vendedor
+        await sbInsert('notificaciones',{para:'vendedor',tipo:'doc_lista',leida:false,titulo:'📋 Documentacion lista — '+o.vehiculo_texto,mensaje:'La documentacion esta completa. Coordinar fecha de entrega con el cliente.'});
       }
+    }
+    // Buscar si hay operación de venta asociada y notificar al vendedor
+    var ops=await sbGet('operaciones','select=id,vehiculo_texto,cliente_nombre&vehiculo_id=eq.'+vehiculoId+'&estado=neq.Entregado&limit=1');
+    if(ops&&ops.length){
+      await sbInsert('notificaciones',{para:'vendedor',tipo:'doc_lista',leida:false,titulo:'📋 Documentacion lista — '+ops[0].vehiculo_texto,mensaje:'La documentacion de '+ops[0].cliente_nombre+' esta lista. Coordinar fecha de entrega.'});
     }
   }
   ocultarCargando();
@@ -1726,7 +1751,37 @@ async function cargarTitularLegajo(num, dominio) {
   }catch(e){console.error(e);}
 }
 
-var _cancelarOpGestId=null;
+var _confirmarFechaLegNum = null;
+
+async function abrirConfirmarFechaEntrega(num) {
+  _confirmarFechaLegNum = num;
+  const l = legs.find(x=>x.num===num);
+  const info = l&&l.auto ? (l.auto.dominio||'')+(l.auto.dominio?' — ':'')+( l.auto.vehiculo||'')+(l.auto.cliente?' · '+l.auto.cliente:'') : 'Legajo '+num;
+  document.getElementById('confirmarFechaInfo').textContent = info;
+  document.getElementById('confirmarFechaFecha').value = '';
+  document.getElementById('confirmarFechaMensaje').value = '';
+  g('ovConfirmarFecha').classList.remove('hidden');
+}
+
+async function confirmarFechaEntrega() {
+  const fecha = document.getElementById('confirmarFechaFecha').value;
+  const mensaje = document.getElementById('confirmarFechaMensaje').value.trim();
+  if(!fecha){ alert('Seleccioná la fecha de entrega.'); return; }
+  const num = _confirmarFechaLegNum;
+  const l = legs.find(x=>x.num===num);
+  const autoInfo = l&&l.auto ? (l.auto.dominio||l.auto.vehiculo||'Legajo '+num) : 'Legajo '+num;
+  const fechaStr = fecha.split('-').reverse().join('/');
+  const msgBase = autoInfo+' — Fecha de entrega confirmada: '+fechaStr+(mensaje?' · '+mensaje:'');
+
+  mostrarCargando('Notificando...');
+  await sbInsert('notificaciones',{para:'caja',tipo:'fecha_entrega',leida:false,titulo:'📅 Fecha de entrega confirmada',mensaje:msgBase});
+  await sbInsert('notificaciones',{para:'vendedor',tipo:'fecha_entrega',leida:false,titulo:'📅 Fecha de entrega confirmada',mensaje:msgBase});
+  ocultarCargando();
+  cerrar('ovConfirmarFecha');
+  alert('✓ Caja y vendedor notificados de la fecha de entrega: '+fechaStr);
+}
+
+
 function abrirCancelarOpGest(opId,vehiculoEnc,clienteEnc){
   _cancelarOpGestId=opId;
   document.getElementById('cancelarOpGestInfo').innerHTML='<div style="font-weight:600;margin-bottom:4px;">'+decodeURIComponent(vehiculoEnc)+'</div><div style="font-size:0.82rem;color:#6b6960;">Cliente: '+decodeURIComponent(clienteEnc)+'</div>';

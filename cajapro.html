@@ -2008,28 +2008,35 @@ async function cargarMovPendientes() {
         '</div>' +
         (p.obs ? '<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;font-style:italic;">' + p.obs + '</div>' : '') +
       '</div>' +
-      '<button onclick="abrirProcesarPendiente('+p.id+',\''+encodeURIComponent(p.concepto)+'\','+( parseFloat(p.monto)||0)+',\''+( p.moneda||'ARS')+'\','+(esCompra?'true':'false')+','+(p.referencia_id||0)+','+(parseFloat(p.precio_total)||0)+')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Procesar</button>' +
+      '<button onclick="abrirProcesarPendiente('+p.id+',\''+encodeURIComponent(p.concepto)+'\','+( parseFloat(p.monto)||0)+',\''+( p.moneda||'ARS')+'\','+(esCompra?'true':'false')+','+(p.referencia_id||0)+','+(parseFloat(p.precio_total)||0)+',\''+( p.referencia_tipo||'')+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Procesar</button>' +
     '</div>';
   }).join('');
 }
 
-function abrirProcesarPendiente(id, conceptoEnc, monto, moneda, esCompra, referenciaId, precioTotal) {
+function abrirProcesarPendiente(id, conceptoEnc, monto, moneda, esCompra, referenciaId, precioTotal, referenciaTipo) {
   const saldo = (precioTotal > 0 && monto > 0) ? precioTotal - monto : 0;
-  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra, referenciaId: referenciaId||0, precioTotal: precioTotal||0, saldo};
+  const esVenta = referenciaTipo === 'operacion';
+  _movPendienteActivo = {id, concepto: decodeURIComponent(conceptoEnc), monto, moneda, esCompra, esVenta, referenciaId: referenciaId||0, precioTotal: precioTotal||0, saldo, referencia_tipo: referenciaTipo||'', referencia_id: referenciaId||0};
   document.getElementById('mpConcepto').textContent = decodeURIComponent(conceptoEnc);
   document.getElementById('mpMonto').value = monto > 0 ? monto : '';
   document.getElementById('mpMoneda').value = moneda;
   document.getElementById('mpMetodo').value = 'Efectivo';
   document.getElementById('mpFechaAgenda').value = '';
   document.getElementById('mpObs').value = '';
-  // Mostrar saldo calculado si es compra con seña
+  const fechaLabel = document.getElementById('mpFechaAgendaLabel');
+  if(fechaLabel) {
+    if(esVenta) fechaLabel.textContent = 'Fecha de entrega pactada *';
+    else if(esCompra) fechaLabel.textContent = 'Fecha estimada pago total *';
+    else fechaLabel.textContent = 'Fecha agenda (opcional)';
+  }
   const saldoWrap = document.getElementById('mpSaldoWrap');
   const saldoValor = document.getElementById('mpSaldoValor');
   if(saldoWrap) {
-    if(esCompra && saldo > 0) {
+    if((esCompra||esVenta) && saldo > 0) {
       saldoWrap.style.display = 'block';
       const fmtN = (n,m) => (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');
       saldoValor.textContent = fmtN(saldo, moneda);
+      saldoWrap.querySelector('div').textContent = esVenta ? 'Saldo a cobrar (precio − seña)' : 'Saldo a agendar (precio total − seña)';
     } else {
       saldoWrap.style.display = 'none';
     }
@@ -2050,25 +2057,44 @@ async function confirmarMovPendiente() {
 
   mostrarCargando('Procesando...');
 
-  // Registrar el movimiento de egreso
+  const esVenta = p.referencia_tipo === 'operacion';
+  const esCompra = p.referencia_tipo === 'orden_compra';
+
+  // Registrar movimiento — ingreso si es venta, egreso si es compra
   await sbInsert('movimientos',{
-    fecha: hoy(), monto, tipo: 'egreso', moneda,
+    fecha: hoy(), monto,
+    tipo: esVenta ? 'ingreso' : 'egreso',
+    moneda,
     obs: p.concepto + (obs ? ' — ' + obs : ''),
-    categoria: 'Compra de vehículo', metodo
+    categoria: esVenta ? 'Venta de vehículo' : 'Compra de vehículo',
+    metodo
   });
 
-  // Si hay fecha de agenda, crear ítem para el pago total
+  // Agendar saldo si hay fecha
   if(fechaAgenda) {
-    const montoAgenda = p.saldo > 0 ? p.saldo : monto;
+    const montoAgenda = p.saldo > 0 ? p.saldo : (p.precioTotal > 0 ? p.precioTotal - monto : monto);
     await sbInsert('agenda',{
-      tipo: 'pago',
+      tipo: esVenta ? 'cobro' : 'pago',
       cliente: p.concepto,
       fecha: fechaAgenda,
-      monto: montoAgenda,
+      monto: montoAgenda > 0 ? montoAgenda : null,
       moneda,
-      obs: 'Pago total coordinado — saldo pendiente',
+      obs: esVenta ? 'Cobro de saldo — fecha de entrega pactada' : 'Pago total coordinado — saldo pendiente',
       estado: 'pendiente'
     });
+
+    // Si es venta, notificar al vendedor de la fecha de entrega
+    if(esVenta && p.referencia_id) {
+      const opRaw = await sbGet('operaciones','select=vehiculo_texto,cliente_nombre,vendedor_id&id=eq.'+p.referencia_id);
+      if(opRaw && opRaw.length) {
+        const op = opRaw[0];
+        await sbInsert('notificaciones',{
+          para:'vendedor', tipo:'fecha_entrega', leida:false,
+          titulo:'📅 Fecha de entrega confirmada',
+          mensaje: op.vehiculo_texto+' — '+op.cliente_nombre+'. Entrega pactada: '+fechaAgenda.split('-').reverse().join('/')+'. Saldo: '+fmt(montoAgenda, moneda)+'.'
+        });
+      }
+    }
   }
 
   // Marcar como procesado
@@ -2083,6 +2109,7 @@ async function confirmarMovPendiente() {
   renderDash();
   alert('Movimiento procesado correctamente');
 }
+
 
 function cerrarModalMovPendiente() {
   document.getElementById('modalMovPendiente').style.display = 'none';
