@@ -1595,13 +1595,16 @@ async function avanzarSubEstado(vehiculoId, nuevoSub) {
   } catch(e){console.error('Error sync legajo:',e);}
   // Si llega a Documentacion lista → avisar caja
   if(nuevoSub==='Documentacion lista'){
-    var ordenes=await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia&vehiculo_id=eq.'+vehiculoId+'&limit=1');
+    var ordenes=await sbGet('ordenes_compra','select=id,vehiculo_texto,precio,moneda,senia,aprobacion_estado&vehiculo_id=eq.'+vehiculoId+'&limit=1');
     if(ordenes&&ordenes.length){
       var o=ordenes[0];
-      var saldo=parseFloat(o.precio||0)-parseFloat(o.senia||0);
-      var fmtN=function(n,m){return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');};
-      await sbInsert('movimientos_pendientes',{tipo:'pago_total',concepto:'Saldo de compra — '+o.vehiculo_texto+' (doc OK)',monto:saldo>0?saldo:parseFloat(o.precio||0),moneda:o.moneda||'ARS',solicitado_por:'Gestoria',referencia_id:o.id,referencia_tipo:'orden_compra',precio_total:parseFloat(o.precio||0),estado:'pendiente',obs:'Documentacion aprobada por gestoria.'});
-      await sbInsert('notificaciones',{para:'caja',tipo:'doc_lista',leida:false,titulo:'Doc lista — proceder con pago',mensaje:o.vehiculo_texto+' listo. Saldo: '+fmtN(saldo>0?saldo:parseFloat(o.precio||0),o.moneda||'ARS')});
+      // Solo crear movimiento si la orden está activa (no ya procesada)
+      if(o.aprobacion_estado !== 'rechazada' && o.aprobacion_estado !== 'completada') {
+        var saldo=parseFloat(o.precio||0)-parseFloat(o.senia||0);
+        var fmtN=function(n,m){return (m==='USD'?'U$D ':'$ ')+Number(n).toLocaleString('es-AR');};
+        await sbInsert('movimientos_pendientes',{tipo:'pago_total',concepto:'Saldo de compra — '+o.vehiculo_texto+' (doc OK)',monto:saldo>0?saldo:parseFloat(o.precio||0),moneda:o.moneda||'ARS',solicitado_por:'Gestoria',referencia_id:o.id,referencia_tipo:'orden_compra',precio_total:parseFloat(o.precio||0),estado:'pendiente',obs:'Documentacion aprobada por gestoria.'});
+        await sbInsert('notificaciones',{para:'caja',tipo:'doc_lista',leida:false,titulo:'Doc lista — proceder con pago',mensaje:o.vehiculo_texto+' listo. Saldo: '+fmtN(saldo>0?saldo:parseFloat(o.precio||0),o.moneda||'ARS')});
+      }
     }
   }
   ocultarCargando();
