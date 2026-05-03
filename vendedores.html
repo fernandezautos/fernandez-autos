@@ -2400,6 +2400,28 @@ async function ejecutarGuardadoOperacion(vidVal, cidVal, formas, c){
         await enviarNotificacion('gestoria','permuta','🔄 Permuta — dos trámites requeridos',msgGestPermuta,nuevaOp.id);
       }
     }
+    // Crear transferencia automáticamente en gestoría
+    const trfId = 'TRF-'+String(Date.now()).slice(-6);
+    const vTextoTrf = v.marca+' '+v.modelo+' '+v.anio+(v.dominio?' · '+v.dominio:'');
+    await sbInsert('transferencias',{
+      id: trfId,
+      vendedor: VENDEDOR.nombre,
+      vendedor_data: {nombre:VENDEDOR.nombre},
+      comprador: c.nombre,
+      comprador_data: {nombre:c.nombre, tel:c.tel||'', email:c.email||''},
+      dominio: v.dominio||'',
+      vehiculo: vTextoTrf,
+      estado: 'prep-doc',
+      fecha: hoy(),
+      precio: precioVenta,
+      honorario: null,
+      honorario_est: 'pendiente-cobro',
+      notas: 'Transferencia generada automáticamente al registrar venta.',
+      historial: [{estado:'prep-doc',label:'Preparando documentación',ts:new Date().toISOString(),nota:'Generada automáticamente al registrar venta.'}],
+      docs: []
+    });
+    await enviarNotificacion('gestoria','nueva_venta','📋 Nueva transferencia — '+vTextoTrf,'Se registró una venta de '+vTextoTrf+' a '+c.nombre+'. Transferencia '+trfId+' creada.',nuevaOp.id);
+
     quitarProspectoDelKanban(c.id);
     const msg=document.getElementById('opMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',3500);
     limpiarOperacion(true);
