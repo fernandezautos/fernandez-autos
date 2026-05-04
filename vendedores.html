@@ -1194,7 +1194,46 @@ tbody td{padding:12px 16px;font-size:0.85rem;}
         <div id="moTimeline" style="overflow-y:auto;max-height:380px;padding-right:4px;border-top:1px solid var(--border);padding-top:12px;"></div>
       </div>
     </div>
-    <div class="modal-actions"><button class="btn btn-g" onclick="cerrarModal('modalOp')">Cerrar</button></div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalOp')">Cerrar</button>
+      <button class="btn btn-sm" onclick="abrirModalPeritaje(opDetalleId,'operacion')" style="background:#b45309;color:#fff;border-color:#b45309;">🔍 Registrar peritaje</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERITAJE -->
+<div class="moverlay" id="modalPeritaje">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">Resultado del peritaje</div>
+    <input type="hidden" id="peritajeId">
+    <input type="hidden" id="peritajeTipo">
+    <div class="fg">
+      <div class="fgi" style="grid-column:1/-1;">
+        <label>Resultado *</label>
+        <select id="peritajeResultado" class="finput" onchange="togglePeritajeAjuste()">
+          <option value="">-- Seleccionar --</option>
+          <option value="aprobado">✅ Aprobado sin cambios</option>
+          <option value="aprobado_con_cambios">⚠️ Aprobado con ajuste de precio</option>
+          <option value="rechazado">❌ Rechazado</option>
+        </select>
+      </div>
+      <div id="peritajeAjusteWrap" style="display:none;grid-column:1/-1;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fgi"><label>Precio ajustado *</label><input type="number" id="peritajePrecio" class="finput" placeholder="0"></div>
+          <div class="fgi"><label>Moneda</label>
+            <select id="peritajeMoneda" class="finput"><option value="ARS">$ ARS</option><option value="USD">U$D USD</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="fgi" style="grid-column:1/-1;">
+        <label>Observaciones</label>
+        <textarea id="peritajeObs" class="finput" style="min-height:70px;resize:vertical;" placeholder="Detalle del peritaje, condiciones del vehículo..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="cerrarModal('modalPeritaje')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarPeritaje()">Guardar peritaje</button>
+    </div>
   </div>
 </div>
 
@@ -2880,7 +2919,7 @@ async function guardarPresupuesto() {
   mostrarCargando('Guardando presupuesto...');
 
   if(presId) {
-    await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${presId}`,{method:'PATCH',headers:sbHeaders,body:JSON.stringify(data)});
+    await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${presId}`,{method:'PATCH',headers:sbH,body:JSON.stringify(data)});
     const idx = presupuestos.findIndex(p=>p.id==presId);
     if(idx>=0) presupuestos[idx] = {...presupuestos[idx],...data};
   } else {
@@ -2941,7 +2980,7 @@ function editarPresupuesto(pid) {
 
 async function cambiarEstadoPres(pid, nuevoEstado) {
   if(!nuevoEstado) return;
-  await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${pid}`,{method:'PATCH',headers:sbHeaders,body:JSON.stringify({estado:nuevoEstado})});
+  await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${pid}`,{method:'PATCH',headers:sbH,body:JSON.stringify({estado:nuevoEstado})});
   const p = presupuestos.find(x=>x.id==pid);
   if(p) p.estado = nuevoEstado;
   renderPresupuestos();
@@ -2962,22 +3001,42 @@ async function convertirPresupuesto(pid) {
 }
 
 function precargarOpDesdePresupuesto(p) {
-  // Cliente
-  const cliInput = document.getElementById('opClienteNombre');
-  if(cliInput) cliInput.value = p.cliente_nombre||'';
-  const cliTel = document.getElementById('opClienteTel');
-  if(cliTel) cliTel.value = p.cliente_tel||'';
-  // Auto
-  if(p.vehiculo_id) {
-    const autoSel = document.getElementById('opAuto');
-    if(autoSel) autoSel.value = p.vehiculo_id;
-  }
-  // Precio
-  const precioInput = document.getElementById('opPrecio');
-  if(precioInput && p.precio_venta) precioInput.value = p.precio_venta;
-  // Guardar referencia al presupuesto
-  window._presupuestoOrigen = p.id;
-  alert('Formulario precargado desde presupuesto '+p.numero+'. Completá los datos que faltan y guardá la operación.');
+  poblarFormOp();
+  setTimeout(function(){
+    // Auto de la agencia
+    if(p.vehiculo_id) {
+      const sel = document.getElementById('opVehiculo');
+      if(sel) { sel.value = p.vehiculo_id; autocompletarPrecio(); }
+    }
+    // Precio
+    if(p.precio_venta) {
+      const pr = document.getElementById('opPrecio');
+      if(pr) pr.value = p.precio_venta;
+    }
+    // Cliente — buscar por nombre en el select
+    if(p.cliente_nombre) {
+      const cliSel = document.getElementById('opCliente');
+      if(cliSel) {
+        const opt = Array.from(cliSel.options).find(o=>o.text.includes(p.cliente_nombre));
+        if(opt) cliSel.value = opt.value;
+      }
+    }
+    // Si es permuta, precargar datos del auto del cliente
+    if(p.tipo === 'permuta') {
+      const permCheck = document.getElementById('pagoPermuta');
+      if(permCheck){ permCheck.checked=true; permCheck.dispatchEvent(new Event('change')); }
+      setTimeout(function(){
+        if(p.auto_cliente_marca) { const el=document.getElementById('prmMarca'); if(el) el.value=p.auto_cliente_marca; }
+        if(p.auto_cliente_modelo){ const el=document.getElementById('prmModelo'); if(el) el.value=p.auto_cliente_modelo; }
+        if(p.auto_cliente_anio)  { const el=document.getElementById('prmAnio'); if(el) el.value=p.auto_cliente_anio; }
+        if(p.auto_cliente_dominio){const el=document.getElementById('prmDominio'); if(el) el.value=p.auto_cliente_dominio; }
+        if(p.auto_cliente_km)    { const el=document.getElementById('prmKm'); if(el) el.value=p.auto_cliente_km; }
+        if(p.precio_compra)      { const el=document.getElementById('prmValor'); if(el) el.value=p.precio_compra; }
+      }, 100);
+    }
+    window._presupuestoOrigen = p.id;
+    alert('Formulario cargado desde presupuesto '+p.numero+'. Completá los datos faltantes y guardá la operación.');
+  }, 300);
 }
 
 function precargarOrdenDesdePresupuesto(p) {
@@ -3074,9 +3133,66 @@ ${detalle}
 // Marcar presupuesto como convertido cuando se guarda operacion/orden
 async function marcarPresupuestoConvertido(presId, tipo, id) {
   if(!presId) return;
-  await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${presId}`,{method:'PATCH',headers:sbHeaders,body:JSON.stringify({estado:'convertido',convertido_en:tipo,convertido_id:id})});
+  await fetch(`${SB_URL}/rest/v1/presupuestos?id=eq.${presId}`,{method:'PATCH',headers:sbH,body:JSON.stringify({estado:'convertido',convertido_en:tipo,convertido_id:id})});
   const p = presupuestos.find(x=>x.id==presId);
   if(p){p.estado='convertido';p.convertido_en=tipo;p.convertido_id=id;}
+}
+
+// ═══ PERITAJE ══════════════════════════════════════════════
+function abrirModalPeritaje(id, tipo) {
+  document.getElementById('peritajeId').value = id;
+  document.getElementById('peritajeTipo').value = tipo;
+  document.getElementById('peritajeResultado').value = '';
+  document.getElementById('peritajePrecio').value = '';
+  document.getElementById('peritajeObs').value = '';
+  document.getElementById('peritajeAjusteWrap').style.display = 'none';
+  cerrarModal('modalOp');
+  document.getElementById('modalPeritaje').classList.add('open');
+}
+
+function togglePeritajeAjuste() {
+  const r = document.getElementById('peritajeResultado').value;
+  document.getElementById('peritajeAjusteWrap').style.display = r === 'aprobado_con_cambios' ? 'grid' : 'none';
+}
+
+async function guardarPeritaje() {
+  const id       = document.getElementById('peritajeId').value;
+  const tipo     = document.getElementById('peritajeTipo').value;
+  const resultado= document.getElementById('peritajeResultado').value;
+  const obs      = document.getElementById('peritajeObs').value.trim();
+  const precio   = parseFloat(document.getElementById('peritajePrecio').value)||null;
+  const moneda   = document.getElementById('peritajeMoneda').value;
+
+  if(!resultado){ alert('Seleccioná el resultado del peritaje.'); return; }
+  if(resultado === 'aprobado_con_cambios' && !precio){ alert('Ingresá el precio ajustado.'); return; }
+
+  mostrarCargando('Guardando peritaje...');
+
+  const tabla = tipo === 'operacion' ? 'operaciones' : 'ordenes_compra';
+  const data  = { peritaje_resultado: resultado, peritaje_obs: obs };
+  if(precio) data.peritaje_precio_final = precio;
+
+  await fetch(`${SB_URL}/rest/v1/${tabla}?id=eq.${id}`,{
+    method:'PATCH', headers:sbH, body:JSON.stringify(data)
+  });
+
+  // Si hubo ajuste de precio, actualizar el precio en la orden/operación
+  if(resultado === 'aprobado_con_cambios' && precio) {
+    const campoP = tipo === 'operacion' ? 'precio' : 'precio';
+    await fetch(`${SB_URL}/rest/v1/${tabla}?id=eq.${id}`,{
+      method:'PATCH', headers:sbH,
+      body:JSON.stringify({[campoP]: precio})
+    });
+  }
+
+  // Notificar al admin del resultado
+  const resultadoLabel = {aprobado:'Aprobado',aprobado_con_cambios:'Aprobado con ajuste',rechazado:'Rechazado'}[resultado];
+  await enviarNotificacion('admin','peritaje','🔍 Resultado de peritaje — '+resultadoLabel,
+    'Operación ID '+id+'. '+(obs||'')+( precio?' Precio ajustado: '+precio:''),null);
+
+  ocultarCargando();
+  cerrarModal('modalPeritaje');
+  alert('✓ Peritaje registrado correctamente'+(resultado==='aprobado_con_cambios'?' — Precio actualizado a '+precio:'')+'.');
 }
 
 // ═══ CONSIGNACIÓN ══════════════════════════════════════════
