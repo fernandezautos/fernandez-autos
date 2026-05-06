@@ -242,9 +242,12 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
     <button onclick="show('sistemas',this)">Sistemas</button>
   </nav>
   <div class="header-right">
-    <button onclick="cerrarSesion()" style="background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-family:Arial, sans-serif;font-size:0.72rem;padding:5px 13px;border-radius:20px;cursor:pointer;" >Salir</button>
+    <button onclick="cerrarSesion()" style="background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-family:Arial, sans-serif;font-size:0.72rem;padding:5px 13px;border-radius:20px;cursor:pointer;">Salir</button>
     <div class="fecha-header" id="fechaH"></div>
-    <div class="admin-chip">Admin</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="admin-chip">Admin</div>
+      <span id="headerUsuario" style="color:rgba(255,255,255,.8);font-size:0.82rem;font-weight:500;"></span>
+    </div>
   </div>
 </header>
 
