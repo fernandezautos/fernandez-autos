@@ -961,8 +961,9 @@ async function renderOpsEnCurso() {
     html += '</div>';
 
     // Buscar transferencia asociada por dominio
-    const dominio = (op.vehiculo_texto||'').match(/·\s*([A-Z0-9]+)/)?.[1] || op.dominio || '';
-    const trf = trfsRaw ? trfsRaw.find(t => t.dominio && dominio && t.dominio.toUpperCase() === dominio.toUpperCase()) : null;
+    const vTexto = op.vehiculo_texto || '';
+    const dominioRaw = vTexto.includes('·') ? vTexto.split('·').pop().trim() : '';
+    const trf = (trfsRaw && dominioRaw) ? trfsRaw.find(t => t.dominio && t.dominio.trim().toUpperCase() === dominioRaw.toUpperCase()) : null;
 
     // Formas de pago y fecha entrega
     html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:0.8rem;color:var(--muted);">';
