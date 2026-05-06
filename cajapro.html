@@ -1149,6 +1149,8 @@ function renderMovs(){
   tb.innerHTML=''; emp.style.display=data.length?'none':'';
   data.forEach(m=>{
     const tr=document.createElement('tr');
+    tr.style.cursor='pointer'; tr.dataset.movid=m.id;
+    tr.onclick=function(e){ if(!e.target.closest('button')) abrirDetMov(this.dataset.movid); };
     const color=m.tipo==='ingreso'?'var(--ing)':'var(--eg)';
     tr.innerHTML=`<td>${fmtF(m.fecha)}</td><td><span class="badge ${m.tipo==='ingreso'?'bi':'be'}">${m.tipo==='ingreso'?'↑ Ing':'↓ Eg'}</span></td>
       <td>${m.moneda==='USD'?'<span class="badge busd">USD</span>':'<span class="badge bstock">ARS</span>'}</td>
@@ -1810,7 +1812,7 @@ function renderDash(){
   const tb=document.getElementById('dashMovs'); const empEl=document.getElementById('dashMovsEmpty');
   tb.innerHTML=''; empEl.style.display=movs.length?'none':'';
   movs.slice(0,8).forEach(m=>{
-    const tr=document.createElement('tr'); const color=m.tipo==='ingreso'?'var(--ing)':'var(--eg)';
+    const tr=document.createElement('tr'); tr.style.cursor='pointer'; tr.dataset.movid=m.id; tr.onclick=function(e){if(!e.target.closest('button'))abrirDetMov(this.dataset.movid);};
     tr.innerHTML=`<td>${fmtF(m.fecha)}</td><td><span class="badge ${m.tipo==='ingreso'?'bi':'be'}">${m.tipo==='ingreso'?'↑ Ing':'↓ Eg'}</span></td>
       <td>${m.moneda==='USD'?'<span class="badge busd">USD</span>':'<span class="badge bstock">ARS</span>'}</td>
       <td>${m.catNombre||'—'}${m.subcat?' / <span style="color:var(--muted)">'+m.subcat+'</span>':''}</td>
@@ -2253,6 +2255,52 @@ async function cobrarHonorarioTrf(btn) {
   renderDash();
 }
 
+function abrirDetMov(movId) {
+  const m = movs.find(x=>String(x.id)===String(movId));
+  if(!m){ alert('Movimiento no encontrado.'); return; }
+  const color = m.tipo==='ingreso'?'var(--ing)':'var(--eg)';
+  const fr = (l,v) => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f4f3ee;font-size:0.85rem;"><span style="color:var(--muted);">${l}</span><span style="font-weight:500;">${v||'—'}</span></div>`;
+
+  let html = '';
+
+  // Monto destacado
+  html += `<div style="text-align:center;padding:18px;background:${m.tipo==='ingreso'?'#f0fdf4':'#fef2f2'};border-radius:10px;margin-bottom:16px;">
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:${color};margin-bottom:6px;">${m.tipo==='ingreso'?'↑ Ingreso':'↓ Egreso'}</div>
+    <div style="font-size:1.8rem;font-weight:700;color:${color};">${fmt(m.monto,m.moneda||'ARS')}</div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">${fmtF(m.fecha)}</div>
+  </div>`;
+
+  // Detalle
+  html += fr('Categoría', m.catNombre||'—');
+  if(m.subcat) html += fr('Subcategoría', m.subcat);
+  html += fr('Método', m.metodo||'—');
+  html += fr('Cliente / Proveedor', m.cliente||'—');
+  if(m.autoId) html += fr('Auto', autoNombre(m.autoId));
+  if(m.obs||m.concepto) html += fr('Concepto / Detalle', m.obs||m.concepto||'—');
+
+  // Recibo asociado
+  const rec = recibos.find(r => {
+    if(r.monto === m.monto && r.fecha === m.fecha) return true;
+    if(m.obs && r.concepto && r.concepto === m.obs) return true;
+    return false;
+  });
+  if(rec){
+    html += `<div style="margin-top:16px;background:#f4f3ee;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;margin-bottom:8px;">Recibo asociado</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:600;font-size:0.88rem;">N° ${String(rec.nro).padStart(5,'0')} · ${fmtF(rec.fecha)}</div>
+          <div style="font-size:0.78rem;color:var(--muted);">${rec.concepto||'—'}</div>
+        </div>
+        <button data-recid="${rec.id}" onclick="mostrarReciboById(this.dataset.recid)" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-family:Arial,sans-serif;font-size:0.82rem;cursor:pointer;">Ver recibo</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('modalDetMovBody').innerHTML = html;
+  document.getElementById('modalDetMov').style.display = 'flex';
+}
+
 // ═══ DETALLE OPERACION ════════════════════════════════════
 async function abrirDetOp(opId) {
   document.getElementById('modalDetOpBody').innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">Cargando...</div>';
@@ -2449,6 +2497,17 @@ init();
       <button onclick="cerrarModalMovPendiente()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
       <button onclick="confirmarMovPendiente()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar pago</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE MOVIMIENTO -->
+<div id="modalDetMov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;">
+      <div style="font-size:1rem;font-weight:700;">Detalle del movimiento</div>
+      <button onclick="document.getElementById('modalDetMov').style.display='none'" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div id="modalDetMovBody" style="padding:20px 24px 24px;"></div>
   </div>
 </div>
 
