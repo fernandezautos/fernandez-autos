@@ -184,7 +184,7 @@ tbody td{padding:11px 14px;font-size:0.85rem;}
   </div>
 
   <!-- Tab: Operaciones en curso -->
-  <div id="dtab-content-operaciones" style="display:none;">
+  <div id="dtab-content-operaciones" style="display:none;margin-top:28px;">
     <div id="opsEnCursoLista"></div>
   </div>
 
@@ -1022,6 +1022,38 @@ async function marcarEntregada(opId) {
   if(!confirm('¿Marcar esta operación como entregada?')) return;
   mostrarCargando('Actualizando...');
   await sbUpdate('operaciones', opId, { estado: 'Entregado' });
+
+  // Si hay permuta, avanzar el auto a Alistamiento
+  const opRaw = await sbGet('operaciones','select=permuta_marca,permuta_modelo,permuta_anio,vehiculo_id&id=eq.'+opId);
+  if(opRaw && opRaw.length && opRaw[0].permuta_marca) {
+    const op = opRaw[0];
+    // Buscar el auto de permuta en stock por marca+modelo+anio con estado A ingresar
+    const permRaw = await sbGet('vehiculos',
+      'select=id&marca=eq.'+encodeURIComponent(op.permuta_marca)+
+      '&modelo=eq.'+encodeURIComponent(op.permuta_modelo)+
+      '&estado=eq.A ingresar&limit=1');
+    if(permRaw && permRaw.length) {
+      await fetch(`${SB_URL}/rest/v1/vehiculos?id=eq.${permRaw[0].id}`,{
+        method:'PATCH', headers:sbHeaders,
+        body:JSON.stringify({sub_estado:'Alistamiento'})
+      });
+    }
+    // Marcar el auto vendido como Vendido
+    if(op.vehiculo_id) {
+      await fetch(`${SB_URL}/rest/v1/vehiculos?id=eq.${op.vehiculo_id}`,{
+        method:'PATCH', headers:sbHeaders,
+        body:JSON.stringify({estado:'No disponible',sub_estado:'Vendido'})
+      });
+    }
+  }
+
+  // Notificar al vendedor
+  await sbInsert('notificaciones',{
+    para:'vendedor', tipo:'entregado', leida:false,
+    titulo:'✅ Operación marcada como entregada',
+    mensaje:'La operación fue cerrada por caja.'
+  });
+
   ocultarCargando();
   renderOpsEnCurso();
   actualizarBadgeOps();
@@ -2285,5 +2317,5 @@ init();
   </div>
 </div>
 </body>
-</html>// ═══ MOVIMIENTOS PENDIENTES ═══════════════════════════════════
+</html>
 
