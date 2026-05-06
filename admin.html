@@ -1443,16 +1443,16 @@ function renderVendedores({stock, clientes, ops, reservados}) {
       }).join('');
     }
   }
-}
-// Tabla tiempo en stock
-  const badge = $('v-stock-badge');
-  const tabla = $('v-stock-tabla');
-  if(badge) badge.textContent = vendidosConFechas.length + ' vehículo' + (vendidosConFechas.length!==1?'s':'') + ' vendido' + (vendidosConFechas.length!==1?'s':'');
-  if(tabla) {
+
+  // Tabla tiempo en stock
+  const badgeStock = $('v-stock-badge');
+  const tablaStock = $('v-stock-tabla');
+  if(badgeStock) badgeStock.textContent = vendidosConFechas.length + ' vehículo' + (vendidosConFechas.length!==1?'s':'') + ' vendido' + (vendidosConFechas.length!==1?'s':'');
+  if(tablaStock) {
     if(vendidosConFechas.length === 0) {
-      tabla.innerHTML = '<tr class="empty-row"><td colspan="4">No hay vehículos vendidos con fechas de ingreso registradas.</td></tr>';
+      tablaStock.innerHTML = '<tr class="empty-row"><td colspan="4">No hay vehículos vendidos con fechas de ingreso registradas.</td></tr>';
     } else {
-      tabla.innerHTML = [...vendidosConFechas].sort((a,b)=>{
+      tablaStock.innerHTML = [...vendidosConFechas].sort((a,b)=>{
         const da = diffDias(a.fechaIngreso,a.fechaVenta);
         const db = diffDias(b.fechaIngreso,b.fechaVenta);
         return da - db;
@@ -1467,6 +1467,8 @@ function renderVendedores({stock, clientes, ops, reservados}) {
       }).join('');
     }
   }
+
+}
 
 // ═══════════════════════════════════════════════════════════
 //  CAJA
