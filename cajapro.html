@@ -1813,6 +1813,7 @@ function renderDash(){
   tb.innerHTML=''; empEl.style.display=movs.length?'none':'';
   movs.slice(0,8).forEach(m=>{
     const tr=document.createElement('tr'); tr.style.cursor='pointer'; tr.dataset.movid=m.id; tr.onclick=function(e){if(!e.target.closest('button'))abrirDetMov(this.dataset.movid);};
+    const color=m.tipo==='ingreso'?'var(--ing)':'var(--eg)';
     tr.innerHTML=`<td>${fmtF(m.fecha)}</td><td><span class="badge ${m.tipo==='ingreso'?'bi':'be'}">${m.tipo==='ingreso'?'↑ Ing':'↓ Eg'}</span></td>
       <td>${m.moneda==='USD'?'<span class="badge busd">USD</span>':'<span class="badge bstock">ARS</span>'}</td>
       <td>${m.catNombre||'—'}${m.subcat?' / <span style="color:var(--muted)">'+m.subcat+'</span>':''}</td>
