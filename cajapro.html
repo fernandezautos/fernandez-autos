@@ -923,8 +923,8 @@ async function renderOpsEnCurso() {
 
     html += '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);">';
 
-    // Header
-    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">';
+    // Header — clickeable para abrir detalle
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;cursor:pointer;" onclick="abrirDetOp(\''+op.id+'\')">​';
     html += '<div>';
     html += '<div style="font-weight:600;font-size:0.95rem;color:var(--text);">'+(op.vehiculo_texto||'Vehículo')+'</div>';
     html += '<div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">Cliente: <b>'+(op.cliente_nombre||'—')+'</b></div>';
@@ -1150,9 +1150,7 @@ function renderMovs(){
   data.forEach(m=>{
     const tr=document.createElement('tr');
     const color=m.tipo==='ingreso'?'var(--ing)':'var(--eg)';
-    tr.innerHTML=`
-      <td>${fmtF(m.fecha)}</td>
-      <td><span class="badge ${m.tipo==='ingreso'?'bi':'be'}">${m.tipo==='ingreso'?'↑ Ing':'↓ Eg'}</span></td>
+    tr.innerHTML=`<td>${fmtF(m.fecha)}</td><td><span class="badge ${m.tipo==='ingreso'?'bi':'be'}">${m.tipo==='ingreso'?'↑ Ing':'↓ Eg'}</span></td>
       <td>${m.moneda==='USD'?'<span class="badge busd">USD</span>':'<span class="badge bstock">ARS</span>'}</td>
       <td>${m.catNombre||'—'}${m.subcat?'<br><span style="font-size:0.74rem;color:var(--muted)">'+m.subcat+'</span>':''}</td>
       <td>${m.autoId?'<span style="font-size:0.78rem;color:var(--muted)">'+autoNombre(m.autoId)+'</span>':'—'}</td>
@@ -1160,7 +1158,7 @@ function renderMovs(){
       <td style="font-size:0.78rem;color:var(--muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.obs||m.concepto||'—'}</td>
       <td><span style="font-size:0.78rem;background:var(--surface2);padding:2px 8px;border-radius:20px;">${m.metodo||'—'}</span></td>
       <td style="text-align:right;color:${color}" class="mono">${fmt(m.monto,m.moneda)}</td>
-      <td>${esAdmin()?'<button class="btn btn-g btn-sm" onclick="eliminarMov('+JSON.stringify(m.id)+')">✕</button>':''}</td>`;
+      <td>${m.referencia_id&&m.referencia_tipo==='operacion'?'<button onclick="abrirDetOp(\''+m.referencia_id+'\')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:Arial,sans-serif;font-size:0.75rem;cursor:pointer;">Ver op.</button>':''}${esAdmin()?'<button class="btn btn-g btn-sm" onclick="eliminarMov('+JSON.stringify(m.id)+')">✕</button>':''}</td>`;
     tb.appendChild(tr);
   });
 }
@@ -2255,6 +2253,73 @@ async function cobrarHonorarioTrf(btn) {
   renderDash();
 }
 
+// ═══ DETALLE OPERACION ════════════════════════════════════
+async function abrirDetOp(opId) {
+  document.getElementById('modalDetOpBody').innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">Cargando...</div>';
+  document.getElementById('modalDetOp').style.display = 'flex';
+  const raw = await sbGet('operaciones','select=*&id=eq.'+opId);
+  if(!raw||!raw.length){ document.getElementById('modalDetOpBody').innerHTML='<div style="color:var(--muted)">No se encontró la operación.</div>'; return; }
+  const op = raw[0];
+  const precio = parseFloat(op.precio||0);
+  const senia = parseFloat(op.senia||0);
+  const valorTransf = parseFloat(op.valor_transf||0);
+  const valorPermuta = parseFloat(op.permuta_valor||op.valor_permuta||0);
+  const cobrosParciales = op.cobros_parciales||[];
+  const totalCobrado = senia+valorTransf+valorPermuta+cobrosParciales.reduce((s,c)=>s+parseFloat(c.monto||0),0);
+  const saldoReal = precio-totalCobrado;
+  const moneda = op.moneda||'ARS';
+  const fr = (l,v) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f4f3ee;font-size:0.85rem;"><span style="color:var(--muted);">${l}</span><span style="font-weight:500;">${v||'—'}</span></div>`;
+  let html = '';
+  html += `<div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px;">
+    <div style="font-weight:700;font-size:1rem;">${op.vehiculo_texto||'—'}</div>
+    <div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">Cliente: <strong>${op.cliente_nombre||'—'}</strong>${op.vendedor_nombre?' · Vendedor: '+op.vendedor_nombre:''}</div></div>`;
+  html += `<div style="margin-bottom:16px;">`;
+  html += fr('Estado', op.estado||'—');
+  html += fr('Fecha', op.fecha?op.fecha.split('-').reverse().join('/'):'—');
+  html += fr('Entrega pactada', op.fecha_entrega?op.fecha_entrega.split('-').reverse().join('/'):'—');
+  html += fr('Formas de pago', op.formas_pago?op.formas_pago.join(', '):'—');
+  if(op.obs) html += fr('Observaciones', op.obs);
+  html += `</div>`;
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div style="background:#f4f3ee;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:0.68rem;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Precio total</div><div style="font-weight:700;">${fmt(precio,moneda)}</div></div>
+    <div style="background:#d1fae518;border:1px solid #d1fae5;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:0.68rem;text-transform:uppercase;color:#065f46;margin-bottom:4px;">Total cobrado</div><div style="font-weight:700;color:#065f46;">${fmt(totalCobrado,moneda)}</div></div>
+    <div style="background:#fef2f218;border:1px solid #fee2e2;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:0.68rem;text-transform:uppercase;color:#991b1b;margin-bottom:4px;">Saldo pendiente</div><div style="font-weight:700;color:#991b1b;">${fmt(saldoReal,moneda)}</div></div>
+  </div>`;
+  if(senia>0||valorTransf>0||valorPermuta>0||cobrosParciales.length){
+    html += `<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;margin-bottom:8px;">Desglose de cobros</div><div style="background:#f4f3ee;border-radius:8px;padding:10px 14px;margin-bottom:16px;">`;
+    if(senia>0) html += fr('Seña', fmt(senia,moneda));
+    if(valorTransf>0) html += fr('Transferencia bancaria', fmt(valorTransf,moneda));
+    if(valorPermuta>0) html += fr('Permuta', fmt(valorPermuta,moneda));
+    cobrosParciales.forEach(c=>{ html += fr('Abono '+c.fecha+' ('+c.metodo+')', fmt(parseFloat(c.monto),moneda)); });
+    html += `</div>`;
+  }
+  if(op.permuta_marca){
+    html += `<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;margin-bottom:8px;">Auto en permuta</div>
+    <div style="background:#f0f4ff;border:1px solid #c7d7f4;border-radius:8px;padding:10px 14px;margin-bottom:16px;">`;
+    html += fr('Vehículo', op.permuta_marca+' '+op.permuta_modelo+' '+(op.permuta_anio||''));
+    if(op.permuta_dominio) html += fr('Dominio', op.permuta_dominio);
+    if(valorPermuta>0) html += fr('Valor acordado', fmt(valorPermuta,moneda));
+    html += `</div>`;
+  }
+  // Recibos asociados
+  const vTextoBase = op.vehiculo_texto ? op.vehiculo_texto.split('·')[0].trim() : '';
+  const recsOp = recibos.filter(r => r.concepto && vTextoBase && r.concepto.includes(vTextoBase));
+  if(recsOp.length){
+    html += `<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;margin-bottom:8px;">Recibos emitidos</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">`;
+    recsOp.forEach(r=>{
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;background:#f4f3ee;border-radius:8px;padding:8px 12px;">
+        <div><div style="font-weight:600;font-size:0.85rem;">N° ${String(r.nro).padStart(5,'0')} · ${fmtF(r.fecha)}</div>
+        <div style="font-size:0.78rem;color:var(--muted);">${r.concepto||'—'}</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-weight:700;color:var(--ing);">${fmt(r.monto,r.moneda||'ARS')}</span>
+          <button onclick="mostrarReciboById(${r.id})" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-family:Arial,sans-serif;font-size:0.78rem;cursor:pointer;">Ver recibo</button>
+        </div></div>`;
+    });
+    html += `</div>`;
+  }
+  document.getElementById('modalDetOpBody').innerHTML = html;
+}
+
 let _cobroParcialActivo = null;
 
 function abrirCobroParcial(btn) {
@@ -2384,6 +2449,17 @@ init();
       <button onclick="cerrarModalMovPendiente()" style="background:#f4f3ee;border:none;border-radius:8px;padding:9px 18px;font-family:Arial,sans-serif;font-size:0.85rem;cursor:pointer;">Cancelar</button>
       <button onclick="confirmarMovPendiente()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:Arial,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Confirmar pago</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE OPERACION -->
+<div id="modalDetOp" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:620px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;">
+      <div style="font-size:1rem;font-weight:700;">Detalle de operación</div>
+      <button onclick="document.getElementById('modalDetOp').style.display='none'" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9b9890;">✕</button>
+    </div>
+    <div id="modalDetOpBody" style="padding:20px 24px 24px;"></div>
   </div>
 </div>
 
