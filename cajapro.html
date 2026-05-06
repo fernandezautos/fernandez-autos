@@ -1469,7 +1469,14 @@ function renderRecibos(){
   });
 }
 
-function mostrarReciboById(id){ const r=recibos.find(r=>r.id===id); if(r) mostrarRecibo(r); }
+async function mostrarReciboById(id){ 
+  let r = recibos.find(r=>String(r.id)===String(id)); 
+  if(!r) {
+    const raw = await sbGet('recibos','select=*&id=eq.'+id);
+    if(raw && raw.length) r = raw[0];
+  }
+  if(r) mostrarRecibo(r); 
+}
 
 const RSTYLES=`*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:white;color:#111;}.pagina{width:100%;display:flex;flex-direction:column;}.copia{width:100%;padding:18px 28px;height:50vh;display:flex;flex-direction:column;justify-content:center;}.copia:first-child{border-bottom:2px dashed #aaa;}.clbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:12px;text-align:right;}.rh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #111;}.rempresa{font-weight:700;font-size:1.2rem;}.n{font-family:monospace;font-size:1.1rem;font-weight:600;}.rrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:0.84rem;}.rlbl{color:#666;font-size:0.72rem;text-transform:uppercase;}.rtotal{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:10px 14px;background:#f5f5f5;border-radius:6px;}.tl{font-weight:600;font-size:0.85rem;}.tv{font-family:monospace;font-size:1.2rem;font-weight:700;}.rfooter{margin-top:10px;text-align:center;font-size:0.68rem;color:#999;border-top:1px solid #eee;padding-top:10px;}@media print{body{margin:0;}.copia{height:148mm;}}`;
 
