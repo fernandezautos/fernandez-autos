@@ -924,7 +924,7 @@ async function renderOpsEnCurso() {
     html += '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);">';
 
     // Header — clickeable para abrir detalle
-    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;cursor:pointer;" onclick="abrirDetOp(\''+op.id+'\')">​';
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;cursor:pointer;" onclick="abrirDetOp(\''+op.id+'\')">';
     html += '<div>';
     html += '<div style="font-weight:600;font-size:0.95rem;color:var(--text);">'+(op.vehiculo_texto||'Vehículo')+'</div>';
     html += '<div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">Cliente: <b>'+(op.cliente_nombre||'—')+'</b></div>';
