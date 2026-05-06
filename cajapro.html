@@ -1739,14 +1739,37 @@ function renderDash(){
   const egFutARS=agenda.filter(a=>a.tipo==='pago'&&a.estado==='pendiente'&&a.fecha>=hoyStr&&a.fecha<=mesStr+'-31'&&a.moneda==='ARS').reduce((s,a)=>s+(parseFloat(a.monto)||0),0);
   const rentEstARS=saldoARS+ingFutARS-egFutARS;
   document.getElementById('dashCards').innerHTML=`
-    <div class="card"><div class="card-label">Saldo ARS</div><div class="card-value ${saldoARS>=0?'neu':'neg'}">${fmt(saldoARS,'ARS')}</div><div class="card-sub">Caja pesos</div></div>
-    <div class="card"><div class="card-label">Saldo USD</div><div class="card-value usd">${fmt(saldoUSD,'USD')}</div><div class="card-sub">Caja dólares</div></div>
-    <div class="card"><div class="card-label">Ingresos ARS mes</div><div class="card-value pos">${fmt(ingMesARS,'ARS')}</div></div>
-    <div class="card"><div class="card-label">Egresos ARS mes</div><div class="card-value neg">${fmt(egMesARS,'ARS')}</div></div>
-    <div class="card"><div class="card-label">Ingresos futuros ARS</div><div class="card-value pos">${fmt(ingFutARS,'ARS')}</div><div class="card-sub">Cobros agendados este mes</div></div>
-    <div class="card"><div class="card-label">Egresos futuros ARS</div><div class="card-value neg">${fmt(egFutARS,'ARS')}</div><div class="card-sub">Pagos agendados este mes</div></div>
-    <div class="card"><div class="card-label">Rentabilidad estimada</div><div class="card-value ${rentEstARS>=0?'pos':'neg'}">${fmt(rentEstARS,'ARS')}</div><div class="card-sub">Saldo + futuros este mes</div></div>
-    <div class="card"><div class="card-label">Autos en stock</div><div class="card-value neu">${enStock}</div></div>`;
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- Bloque 1: Saldos actuales -->
+      <div>
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:8px;">Saldos actuales</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="card"><div class="card-label">Saldo ARS</div><div class="card-value ${saldoARS>=0?'neu':'neg'}">${fmt(saldoARS,'ARS')}</div><div class="card-sub">Caja pesos</div></div>
+          <div class="card"><div class="card-label">Saldo USD</div><div class="card-value usd">${fmt(saldoUSD,'USD')}</div><div class="card-sub">Caja dólares</div></div>
+        </div>
+      </div>
+
+      <!-- Bloque 2: Movimientos del mes -->
+      <div>
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:8px;">Movimientos del mes</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="card"><div class="card-label">Ingresos</div><div class="card-value pos">${fmt(ingMesARS,'ARS')}</div><div class="card-sub">Este mes</div></div>
+          <div class="card"><div class="card-label">Egresos</div><div class="card-value neg">${fmt(egMesARS,'ARS')}</div><div class="card-sub">Este mes</div></div>
+          <div class="card"><div class="card-label">Rentabilidad estimada</div><div class="card-value ${rentEstARS>=0?'pos':'neg'}">${fmt(rentEstARS,'ARS')}</div><div class="card-sub">Saldo + futuros</div></div>
+        </div>
+      </div>
+
+      <!-- Bloque 3: Proyección -->
+      <div>
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:8px;">Proyección del mes</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="card"><div class="card-label">Ingresos futuros</div><div class="card-value pos">${fmt(ingFutARS,'ARS')}</div><div class="card-sub">Cobros agendados</div></div>
+          <div class="card"><div class="card-label">Egresos futuros</div><div class="card-value neg">${fmt(egFutARS,'ARS')}</div><div class="card-sub">Pagos agendados</div></div>
+        </div>
+      </div>
+
+    </div>`;
 
   // Cuotas vencidas
   const vencidas=[];
