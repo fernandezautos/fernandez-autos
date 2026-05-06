@@ -924,7 +924,8 @@ async function renderOpsEnCurso() {
 
     // Calcular cobros parciales
     const cobrosParciales = op.cobros_parciales || [];
-    const totalCobrado = cobrosParciales.reduce((s,c) => s + parseFloat(c.monto||0), 0) + senia;
+    const valorTransf = parseFloat(op.valor_transf||0);
+    const totalCobrado = cobrosParciales.reduce((s,c) => s + parseFloat(c.monto||0), 0) + senia + valorTransf;
     const saldoReal = precio - totalCobrado;
 
     // Montos — 3 cards en fila
