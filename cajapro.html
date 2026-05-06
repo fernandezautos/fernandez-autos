@@ -985,6 +985,9 @@ async function renderOpsEnCurso() {
       html += '<span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;color:'+(cobrado?'#065f46':'#92400e')+';font-weight:600;">Honorario transferencia</span>';
       html += '<span style="font-weight:700;font-size:0.88rem;color:'+(cobrado?'#065f46':'#92400e')+';">'+fmtN(parseFloat(trf.honorario),'ARS')+'</span>';
       html += '<span style="font-size:0.75rem;font-weight:600;color:'+(cobrado?'#065f46':'#92400e')+';background:'+(cobrado?'#dcfce7':'#fef9c3')+';border-radius:20px;padding:2px 9px;">'+(cobrado?'✓ Cobrado':'⏳ Pendiente')+'</span>';
+      if(!cobrado) {
+        html += '<button data-trfid="'+trf.id+'" data-monto="'+trf.honorario+'" data-dom="'+dominioRaw+'" onclick="cobrarHonorarioTrf(this)" style="background:#065f46;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-family:Arial,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Cobrar</button>';
+      }
       html += '</div>';
     }
 
@@ -2174,6 +2177,30 @@ function cerrarModalMovPendiente() {
 }
 
 let _movPendienteActivo = null;
+
+async function cobrarHonorarioTrf(btn) {
+  const trfId = btn.dataset.trfid;
+  const monto = parseFloat(btn.dataset.monto)||0;
+  const dom   = btn.dataset.dom;
+  if(!confirm('¿Confirmar cobro de honorario de transferencia por '+fmtARS(monto)+'?')) return;
+  mostrarCargando('Registrando cobro...');
+  await sbInsert('movimientos',{
+    fecha: hoy(), monto, tipo:'ingreso', moneda:'ARS',
+    obs: 'Honorario de transferencia — '+dom,
+    categoria: 'Transferencia', metodo: 'Efectivo'
+  });
+  await fetch(`${SB_URL}/rest/v1/transferencias?id=eq.${trfId}`,{
+    method:'PATCH', headers:sbHeaders,
+    body:JSON.stringify({honorario_est:'cobrado'})
+  });
+  await crearYMostrarRecibo({
+    cliente: dom, monto, moneda:'ARS', fecha:hoy(),
+    concepto:'Honorario de transferencia — '+dom, metodo:'Efectivo'
+  });
+  ocultarCargando();
+  renderOpsEnCurso();
+  renderDash();
+}
 
 let _cobroParcialActivo = null;
 
