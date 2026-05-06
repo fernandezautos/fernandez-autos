@@ -927,31 +927,35 @@ async function renderOpsEnCurso() {
     const totalCobrado = cobrosParciales.reduce((s,c) => s + parseFloat(c.monto||0), 0) + senia;
     const saldoReal = precio - totalCobrado;
 
-    // Montos
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">';
+    // Montos — 3 cards en fila
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">';
+    // Card 1: Precio total
     html += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;">';
     html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:3px;">Precio total</div>';
-    html += '<div style="font-weight:600;font-size:0.92rem;">'+fmtN(precio,moneda)+'</div></div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;">'+fmtN(precio,moneda)+'</div>';
+    html += '</div>';
+    // Card 2: Total cobrado + saldo
     html += '<div style="background:#d1fae518;border:1px solid #d1fae5;border-radius:8px;padding:10px 12px;">';
     html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#065f46;margin-bottom:3px;">Total cobrado</div>';
     html += '<div style="font-weight:600;font-size:0.92rem;color:#065f46;">'+fmtN(totalCobrado,moneda)+'</div>';
-    html += '<div style="background:#fef2f218;border:1px solid #fee2e2;border-radius:8px;padding:10px 12px;">';
-    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#991b1b;margin-bottom:3px;">Saldo pendiente</div>';
-    html += '<div style="font-weight:600;font-size:0.92rem;color:#991b1b;">'+fmtN(saldoReal,moneda)+'</div></div>';
+    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:#991b1b;margin-top:6px;margin-bottom:3px;">Saldo pendiente</div>';
+    html += '<div style="font-weight:600;font-size:0.92rem;color:#991b1b;">'+fmtN(saldoReal,moneda)+'</div>';
     html += '</div>';
-
-    // Detalle cobros parciales si hay
+    // Card 3: Cobros a cuenta
+    html += '<div style="background:#f4f3ee;border-radius:8px;padding:10px 12px;">';
+    html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:6px;">Cobros a cuenta</div>';
     if(cobrosParciales.length) {
-      html += '<div style="background:#f4f3ee;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.8rem;">';
-      html += '<div style="font-weight:600;color:var(--muted);margin-bottom:6px;font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;">Cobros a cuenta</div>';
       cobrosParciales.forEach(c => {
-        html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #e0ddd4;">';
+        html += '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #e0ddd4;font-size:0.78rem;">';
         html += '<span>'+c.fecha+' · '+c.metodo+'</span>';
         html += '<span style="font-weight:600;color:#065f46;">'+fmtN(c.monto,moneda)+'</span>';
         html += '</div>';
       });
-      html += '</div>';
+    } else {
+      html += '<div style="font-size:0.78rem;color:var(--muted);">Sin cobros parciales</div>';
     }
+    html += '</div>';
+    html += '</div>';
 
     // Formas de pago y fecha entrega
     html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:0.8rem;color:var(--muted);">';
@@ -966,14 +970,14 @@ async function renderOpsEnCurso() {
     }
     html += '</div>';
 
-    // Botones accion
-    html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">';
+    // Botones accion — todos en una fila
+    html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:nowrap;">';
     if(saldoReal > 0) {
-      html += '<button data-opid="'+op.id+'" data-cliente="'+encodeURIComponent(op.cliente_nombre||'')+'" data-auto="'+encodeURIComponent(op.vehiculo_texto||'')+'" data-saldo="'+saldoReal+'" data-moneda="'+moneda+'" onclick="abrirCobroParcial(this)" style="background:var(--ing);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">+ Cobro parcial</button>';
+      html += '<button data-opid="'+op.id+'" data-cliente="'+encodeURIComponent(op.cliente_nombre||'')+'" data-auto="'+encodeURIComponent(op.vehiculo_texto||'')+'" data-saldo="'+saldoReal+'" data-moneda="'+moneda+'" onclick="abrirCobroParcial(this)" style="background:var(--ing);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">+ Cobro parcial</button>';
     }
-    html += '<button onclick="registrarMovDesdeOp(\''+op.id+'\',\''+encodeURIComponent(op.cliente_nombre||'')+'\',\''+encodeURIComponent(op.vehiculo_texto||'')+'\','+saldoReal+',\''+moneda+'\')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;cursor:pointer;">+ Registrar ingreso</button>';
+    html += '<button onclick="registrarMovDesdeOp(\''+op.id+'\',\''+encodeURIComponent(op.cliente_nombre||'')+'\',\''+encodeURIComponent(op.vehiculo_texto||'')+'\','+saldoReal+',\''+moneda+'\')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;cursor:pointer;white-space:nowrap;">+ Registrar ingreso</button>';
     if(op.estado !== 'Entregado') {
-      html += '<button onclick="marcarEntregada(\''+op.id+'\')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">✓ Marcar como entregada</button>';
+      html += '<button onclick="marcarEntregada(\''+op.id+'\')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">✓ Marcar como entregada</button>';
     }
     html += '</div>';
     html += '</div>';
