@@ -1370,7 +1370,7 @@ function verCliente(id){
       <td style="padding:6px;border-bottom:1px solid var(--border);">${fmtF(r.fecha)}</td>
       <td style="padding:6px;border-bottom:1px solid var(--border);">${r.concepto||'—'}</td>
       <td style="padding:6px;border-bottom:1px solid var(--border);text-align:right;color:var(--ing);" class="mono">${fmt(r.monto,r.moneda||'ARS')}</td>
-      <td style="padding:6px;border-bottom:1px solid var(--border);"><button class="btn btn-g btn-sm" onclick="mostrarReciboById('${r.id}')">Ver</button></td>
+      <td style="padding:6px;border-bottom:1px solid var(--border);"><button class="btn btn-g btn-sm" onclick="mostrarReciboById(${r.id})">Ver</button></td>
     </tr>`);
     html+=`</tbody></table>`;
   }
@@ -1464,7 +1464,7 @@ function renderRecibos(){
       <td>${mon==='USD'?'<span class="badge busd">USD</span>':'<span class="badge bstock">ARS</span>'}</td>
       <td>${r.concepto||'—'}</td>
       <td style="text-align:right;color:var(--ing)" class="mono">${fmt(r.monto,mon)}</td>
-      <td><button class="btn btn-g btn-sm" onclick="mostrarReciboById('${r.id}')">Ver</button></td>`;
+      <td><button class="btn btn-g btn-sm" onclick="mostrarReciboById(${r.id})">Ver</button></td>`;
     tb.appendChild(tr);
   });
 }
@@ -1475,7 +1475,15 @@ async function mostrarReciboById(id){
     const raw = await sbGet('recibos','select=*&id=eq.'+id);
     if(raw && raw.length) r = raw[0];
   }
-  if(r) mostrarRecibo(r); 
+  if(!r) return;
+  // Normalizar campos para compatibilidad
+  r = {
+    nro: r.nro||0, fecha: r.fecha||hoy(), cliente: r.cliente||'',
+    monto: r.monto||0, moneda: r.moneda||'ARS', metodo: r.metodo||'',
+    concepto: r.concepto||'', dni: r.dni||'', dir: r.dir||'',
+    obs: r.obs||'', id: r.id
+  };
+  mostrarRecibo(r); 
 }
 
 const RSTYLES=`*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:white;color:#111;}.pagina{width:100%;display:flex;flex-direction:column;}.copia{width:100%;padding:18px 28px;height:50vh;display:flex;flex-direction:column;justify-content:center;}.copia:first-child{border-bottom:2px dashed #aaa;}.clbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:12px;text-align:right;}.rh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #111;}.rempresa{font-weight:700;font-size:1.2rem;}.n{font-family:monospace;font-size:1.1rem;font-weight:600;}.rrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:0.84rem;}.rlbl{color:#666;font-size:0.72rem;text-transform:uppercase;}.rtotal{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:10px 14px;background:#f5f5f5;border-radius:6px;}.tl{font-weight:600;font-size:0.85rem;}.tv{font-family:monospace;font-size:1.2rem;font-weight:700;}.rfooter{margin-top:10px;text-align:center;font-size:0.68rem;color:#999;border-top:1px solid #eee;padding-top:10px;}@media print{body{margin:0;}.copia{height:148mm;}}`;
