@@ -881,6 +881,7 @@ async function renderOpsEnCurso() {
 
   // Cargar operaciones activas desde Supabase
   const raw = await sbGet('operaciones', 'select=*&estado=neq.Entregado&estado=neq.Cancelada&estado=neq.Cancelado&order=created_at.desc');
+  const trfsRaw = await sbGet('transferencias', 'select=id,dominio,honorario,honorario_est&order=created_at.desc');
   const ops = raw || [];
 
   // Actualizar badge
@@ -925,7 +926,8 @@ async function renderOpsEnCurso() {
     // Calcular cobros parciales
     const cobrosParciales = op.cobros_parciales || [];
     const valorTransf = parseFloat(op.valor_transf||0);
-    const totalCobrado = cobrosParciales.reduce((s,c) => s + parseFloat(c.monto||0), 0) + senia + valorTransf;
+    const valorPermuta = parseFloat(op.permuta_valor||op.valor_permuta||0);
+    const totalCobrado = cobrosParciales.reduce((s,c) => s + parseFloat(c.monto||0), 0) + senia + valorTransf + valorPermuta;
     const saldoReal = precio - totalCobrado;
 
     // Montos — 3 cards en fila
@@ -958,6 +960,10 @@ async function renderOpsEnCurso() {
     html += '</div>';
     html += '</div>';
 
+    // Buscar transferencia asociada por dominio
+    const dominio = (op.vehiculo_texto||'').match(/·\s*([A-Z0-9]+)/)?.[1] || op.dominio || '';
+    const trf = trfsRaw ? trfsRaw.find(t => t.dominio && dominio && t.dominio.toUpperCase() === dominio.toUpperCase()) : null;
+
     // Formas de pago y fecha entrega
     html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:0.8rem;color:var(--muted);">';
     if(op.formas_pago && op.formas_pago.length) {
@@ -970,6 +976,16 @@ async function renderOpsEnCurso() {
       html += '<div style="width:100%;margin-top:4px;font-style:italic;">'+op.notas+'</div>';
     }
     html += '</div>';
+
+    // Badge de transferencia
+    if(trf && trf.honorario) {
+      const cobrado = trf.honorario_est === 'cobrado';
+      html += '<div style="display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:'+(cobrado?'#f0fdf4':'#fefce8')+';border:1px solid '+(cobrado?'#86efac':'#fde68a')+';border-radius:8px;padding:7px 12px;">';
+      html += '<span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.7px;color:'+(cobrado?'#065f46':'#92400e')+';font-weight:600;">Honorario transferencia</span>';
+      html += '<span style="font-weight:700;font-size:0.88rem;color:'+(cobrado?'#065f46':'#92400e')+';">'+fmtN(parseFloat(trf.honorario),'ARS')+'</span>';
+      html += '<span style="font-size:0.75rem;font-weight:600;color:'+(cobrado?'#065f46':'#92400e')+';background:'+(cobrado?'#dcfce7':'#fef9c3')+';border-radius:20px;padding:2px 9px;">'+(cobrado?'✓ Cobrado':'⏳ Pendiente')+'</span>';
+      html += '</div>';
+    }
 
     // Botones accion — todos en una fila
     html += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:nowrap;">';
