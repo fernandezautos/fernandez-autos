@@ -242,8 +242,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 2
       <div id="globalSearchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh-md);z-index:300;max-height:380px;overflow-y:auto;min-width:360px;"></div>
     </div>
     <div class="vendedor-badge">
-      <div class="vendedor-avatar" id="headerAvatar">JP</div>
-      <span id="headerNombre">Juan Pérez</span>
+      <div class="vendedor-avatar" id="headerAvatar">?</div>
+      <span id="headerNombre">—</span>
     </div>
   </div>
 </header>
@@ -1307,9 +1307,12 @@ let dragId=null, cierreProspectoId=null, prospectoDetalleId=null;
 async function cargarTodo(){
   mostrarCargando('Conectando con la base de datos...');
   try {
-    // Vendedores — usar el primero por ahora
-    const vends = await sbGet('vendedores','select=*&limit=1');
-    if(vends.length){ VENDEDOR={nombre:vends[0].nombre, iniciales:vends[0].iniciales}; }
+    // Vendedor — usar datos de la sesión activa
+    const sess = window._session;
+    if(sess && sess.nombre) {
+      const iniciales = sess.nombre.split(' ').slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+      VENDEDOR = { nombre: sess.nombre, iniciales };
+    }
 
     // Vehículos
     const aRaw = await sbGet('vehiculos','select=*,vehiculo_precios(*)');
