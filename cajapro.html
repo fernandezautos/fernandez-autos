@@ -2182,7 +2182,7 @@ async function cobrarHonorarioTrf(btn) {
   const trfId = btn.dataset.trfid;
   const monto = parseFloat(btn.dataset.monto)||0;
   const dom   = btn.dataset.dom;
-  if(!confirm('¿Confirmar cobro de honorario de transferencia por '+fmtARS(monto)+'?')) return;
+  if(!confirm('¿Confirmar cobro de honorario de transferencia por '+fmt(monto,'ARS')+'?')) return;
   mostrarCargando('Registrando cobro...');
   await sbInsert('movimientos',{
     fecha: hoy(), monto, tipo:'ingreso', moneda:'ARS',
