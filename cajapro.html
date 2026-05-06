@@ -880,7 +880,7 @@ async function renderOpsEnCurso() {
   cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;">Cargando...</div>';
 
   // Cargar operaciones activas desde Supabase
-  const raw = await sbGet('operaciones', 'select=*&estado=neq.Entregado&order=created_at.desc');
+  const raw = await sbGet('operaciones', 'select=*&estado=neq.Entregado&estado=neq.Cancelada&estado=neq.Cancelado&order=created_at.desc');
   const ops = raw || [];
 
   // Actualizar badge
@@ -977,7 +977,7 @@ async function renderOpsEnCurso() {
     }
     html += '<button onclick="registrarMovDesdeOp(\''+op.id+'\',\''+encodeURIComponent(op.cliente_nombre||'')+'\',\''+encodeURIComponent(op.vehiculo_texto||'')+'\','+saldoReal+',\''+moneda+'\')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;cursor:pointer;white-space:nowrap;">+ Registrar ingreso</button>';
     if(op.estado !== 'Entregado') {
-      html += '<button onclick="marcarEntregada(\''+op.id+'\')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">✓ Marcar como entregada</button>';
+      html += '<button onclick="marcarEntregada(\''+op.id+'\')" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">✓ Finalizar operación</button>';
     }
     html += '</div>';
     html += '</div>';
@@ -988,7 +988,7 @@ async function renderOpsEnCurso() {
 
 // Actualizar badge al cargar
 async function actualizarBadgeOps() {
-  const raw = await sbGet('operaciones', 'select=id&estado=neq.Entregado');
+  const raw = await sbGet('operaciones', 'select=id&estado=neq.Entregado&estado=neq.Cancelada&estado=neq.Cancelado');
   const badge = document.getElementById('dtab-ops-count');
   if(badge && raw && raw.length > 0) {
     badge.style.display = 'inline';
@@ -1132,6 +1132,7 @@ function renderMovs(){
 }
 
 async function eliminarMov(id){
+  if(!esAdmin()){ alert('Solo el administrador puede eliminar movimientos.'); return; }
   if(!confirm('¿Eliminar este movimiento?')) return;
   mostrarCargando('Eliminando...');
   await sbDelete('movimientos', id);
@@ -1194,7 +1195,7 @@ function renderAutos(){
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span class="badge ${a.estado==='stock'?'bstock':'bvendido'}">${a.estado==='stock'?'En Stock':'Vendido'}</span>
           <button class="btn btn-g btn-sm" onclick="verAuto('${a.id}')">Ver detalle</button>
-          ${a.estado==='stock'?`<button class="btn btn-d btn-sm" onclick="eliminarAuto('${a.id}')">✕</button>`:''}
+          ${esAdmin()&&a.estado==='stock'?`<button class="btn btn-d btn-sm" onclick="eliminarAuto('${a.id}')">✕</button>`:''}
         </div>
       </div>
       <div style="display:flex;gap:24px;margin-top:14px;flex-wrap:wrap;">
@@ -1240,6 +1241,7 @@ function verAuto(id){
 }
 
 async function eliminarAuto(id){
+  if(!esAdmin()){ alert('Solo el administrador puede eliminar vehículos.'); return; }
   if(!confirm('¿Eliminar este auto?')) return;
   mostrarCargando('Eliminando...');
   await sbDelete('vehiculos', id);
@@ -1373,6 +1375,7 @@ function verCliente(id){
 }
 
 async function eliminarCliente(id){
+  if(!esAdmin()){ alert('Solo el administrador puede eliminar clientes.'); return; }
   if(!confirm('¿Eliminar este cliente?')) return;
   mostrarCargando('Eliminando...');
   await sbDelete('clientes', id);
