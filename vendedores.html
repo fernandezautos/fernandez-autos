@@ -264,8 +264,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 2
       <div style="font-size:1rem;font-family:'IBM Plex Serif',serif;">Meta del mes</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:0.82rem;color:var(--muted);">Meta:</span>
-        <input type="number" id="metaMensual" value="8" min="1" max="99" onchange="renderDashboard()"
-          style="width:60px;padding:4px 8px;font-size:0.88rem;font-family:var(--mono);text-align:center;">
+        <span id="metaMensualLabel" style="font-size:0.88rem;font-family:var(--mono);font-weight:600;">—</span>
         <span style="font-size:0.82rem;color:var(--muted);">autos</span>
       </div>
     </div>
@@ -1367,6 +1366,16 @@ async function cargarTodo(){
     const presRaw = await sbGet('presupuestos','select=*&order=created_at.desc&limit=100');
     presupuestos = presRaw || [];
 
+    // Cargar datos del usuario logueado (meta mensual, etc.)
+    if(window._session && window._session.id) {
+      const uRaw = await sbGet('usuarios','select=*&id=eq.'+window._session.id);
+      if(uRaw && uRaw.length) {
+        window._usuarioData = uRaw[0];
+        const lbl = document.getElementById('metaMensualLabel');
+        if(lbl) lbl.textContent = uRaw[0].meta_mensual||'—';
+      }
+    }
+
   } catch(err){ console.error('Error cargando datos:',err); alert('Error al conectar con la base de datos.'); }
   ocultarCargando();
 }
@@ -1838,7 +1847,7 @@ function renderResumenPipeline(){
 
 // META MENSUAL
 function renderMetaMensual(){
-  const meta=parseInt(document.getElementById('metaMensual').value)||8;
+  const meta=parseInt((window._usuarioData&&window._usuarioData.meta_mensual)||0)||8;
   const ahora=new Date();
   const vendidosMes=operaciones.filter(o=>{
     const f=new Date(o.fecha);
