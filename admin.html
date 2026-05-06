@@ -453,7 +453,7 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
     </div>
     <div class="tw">
       <table>
-        <thead><tr><th>Vendedor</th><th>Ventas</th><th>Facturado</th><th>Operaciones activas</th></tr></thead>
+        <thead><tr><th>Vendedor</th><th>Ventas</th><th>Facturado</th><th>Operaciones activas</th><th>Meta mensual (autos)</th></tr></thead>
         <tbody id="v-rend-tabla">
           <tr class="empty-row"><td colspan="4">Cargando...</td></tr>
         </tbody>
@@ -1422,7 +1422,7 @@ function renderVendedores({stock, clientes, ops, reservados}) {
   if(tabla) {
     const vendedores = _usuarios.filter(u => u.rol === 'vendedor' && u.activo);
     if(!vendedores.length) {
-      tabla.innerHTML = '<tr class="empty-row"><td colspan="4">No hay vendedores activos en el sistema.</td></tr>';
+      tabla.innerHTML = '<tr class="empty-row"><td colspan="5">No hay vendedores activos en el sistema.</td></tr>';
     } else {
       const fmtM = n => n >= 1000000 ? '$'+(n/1000000).toFixed(1)+'M' : n >= 1000 ? '$'+(n/1000).toFixed(0)+'K' : '$'+n;
       tabla.innerHTML = vendedores.map(u => {
@@ -1431,7 +1431,9 @@ function renderVendedores({stock, clientes, ops, reservados}) {
         const ventasMes = opsVend.filter(o => o.created_at && o.created_at.slice(0,7) === new Date().toISOString().slice(0,7)).length;
         const facturado = opsVend.reduce((s,o) => s + (parseFloat(o.precio)||0), 0);
         const activas   = opsVend.filter(o => o.estado !== 'Entregado' && o.estado !== 'Cancelado').length;
-        const col = ventasMes >= 5 ? 'var(--green)' : ventasMes >= 2 ? 'var(--accent)' : ventasMes >= 1 ? 'var(--amber)' : 'var(--red)';
+        const meta = parseInt(u.meta_mensual)||0;
+        const pct = meta > 0 ? Math.min(Math.round(ventasMes/meta*100),100) : 0;
+        const col = meta > 0 ? (pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--accent)' : pct >= 30 ? 'var(--amber)' : 'var(--red)') : 'var(--muted)';
         return `<tr>
           <td><div style="display:flex;align-items:center;gap:9px;">
             <div class="vav">${iniciales}</div>
@@ -1441,6 +1443,17 @@ function renderVendedores({stock, clientes, ops, reservados}) {
           <td><span class="mono" style="color:${col};">${ventasMes}</span></td>
           <td><span class="mono" style="color:${col};">${fmtM(facturado)}</span></td>
           <td><span class="mono">${activas} activa${activas!==1?'s':''}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="flex:1;background:#e5e7eb;border-radius:20px;height:6px;min-width:60px;">
+                <div style="width:${pct}%;background:${col};height:6px;border-radius:20px;transition:width .3s;"></div>
+              </div>
+              <span class="mono" style="font-size:0.78rem;color:${col};min-width:36px;">${pct}%</span>
+              <input type="number" value="${meta}" min="0" max="99" data-uid="${u.id}"
+                onchange="guardarMetaVendedor(this)"
+                style="width:52px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:0.82rem;text-align:center;">
+            </div>
+          </td>
         </tr>`;
       }).join('');
     }
@@ -2179,6 +2192,17 @@ let _editUsuarioId = null;
 
 const ROL_LABEL = { admin:'Administrador', vendedor:'Vendedor', caja:'Caja / Administrativa', gestoria:'Gestoría' };
 const ROL_COLOR = { admin:'#2558a3', vendedor:'#1a7a4a', caja:'#b45309', gestoria:'#7c3aed' };
+
+async function guardarMetaVendedor(input) {
+  const uid = input.dataset.uid;
+  const meta = parseInt(input.value)||0;
+  await fetch(`${SB_URL}/rest/v1/usuarios?id=eq.${uid}`,{
+    method:'PATCH', headers:sbH,
+    body:JSON.stringify({meta_mensual: meta})
+  });
+  const u = _usuarios.find(x=>String(x.id)===String(uid));
+  if(u) u.meta_mensual = meta;
+}
 
 async function cargarUsuarios() {
   const raw = await sbGet('usuarios','select=*&order=created_at.asc');
