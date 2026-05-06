@@ -451,36 +451,9 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
     </div>
     <div class="tw">
       <table>
-        <thead><tr><th>Vendedor</th><th>Ventas</th><th>Clientes</th><th>Facturado</th><th>Meta</th></tr></thead>
+        <thead><tr><th>Vendedor</th><th>Ventas</th><th>Facturado</th><th>Operaciones activas</th></tr></thead>
         <tbody id="v-rend-tabla">
-          <tr>
-            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">LM</div><div><div style="font-weight:500;">Lucía Méndez</div><div style="font-size:0.71rem;color:var(--muted);">Senior</div></div></div></td>
-            <td><span class="mono" style="color:var(--green);">6</span></td>
-            <td><span class="mono">18</span></td>
-            <td><span class="mono" style="color:var(--green);">$22.4M</span></td>
-            <td><span class="mono" style="color:var(--green);">120%</span><span class="prog-bar"><span class="prog-fill" style="width:100%;background:var(--green);"></span></span></td>
-          </tr>
-          <tr>
-            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">RG</div><div><div style="font-weight:500;">Roberto García</div><div style="font-size:0.71rem;color:var(--muted);">Senior</div></div></div></td>
-            <td><span class="mono" style="color:var(--green);">4</span></td>
-            <td><span class="mono">14</span></td>
-            <td><span class="mono" style="color:var(--green);">$15.1M</span></td>
-            <td><span class="mono" style="color:var(--accent);">80%</span><span class="prog-bar"><span class="prog-fill" style="width:67%;background:var(--accent);"></span></span></td>
-          </tr>
-          <tr>
-            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">SP</div><div><div style="font-weight:500;">Sofía Paredes</div><div style="font-size:0.71rem;color:var(--muted);">Junior</div></div></div></td>
-            <td><span class="mono" style="color:var(--amber);">3</span></td>
-            <td><span class="mono">15</span></td>
-            <td><span class="mono" style="color:var(--amber);">$8.2M</span></td>
-            <td><span class="mono" style="color:var(--amber);">60%</span><span class="prog-bar"><span class="prog-fill" style="width:50%;background:var(--amber);"></span></span></td>
-          </tr>
-          <tr>
-            <td><div style="display:flex;align-items:center;gap:9px;"><div class="vav">MF</div><div><div style="font-weight:500;">Marcos Fernández</div><div style="font-size:0.71rem;color:var(--muted);">Junior</div></div></div></td>
-            <td><span class="mono" style="color:var(--red);">1</span></td>
-            <td><span class="mono">14</span></td>
-            <td><span class="mono" style="color:var(--red);">$2.5M</span></td>
-            <td><span class="mono" style="color:var(--red);">20%</span><span class="prog-bar"><span class="prog-fill" style="width:17%;background:var(--red);"></span></span></td>
-          </tr>
+          <tr class="empty-row"><td colspan="4">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1140,7 +1113,7 @@ const AGENDA_DEMO = [
 async function cargarDatos() {
   mostrarCargando('Cargando datos...');
   // Cargar todo desde Supabase
-  const [aRaw, cRaw, oRaw, mRaw, fRaw, agRaw, cuotasRaw, legsRaw, trfsRaw] = await Promise.all([
+  const [aRaw, cRaw, oRaw, mRaw, fRaw, agRaw, cuotasRaw, legsRaw, trfsRaw, usersRaw] = await Promise.all([
     sbGet('vehiculos','select=*&order=created_at.desc'),
     sbGet('clientes','select=*&order=created_at.desc'),
     sbGet('operaciones','select=*&order=created_at.desc'),
@@ -1150,7 +1123,9 @@ async function cargarDatos() {
     sbGet('cuotas','select=*&order=financiacion_id,numero'),
     sbGet('legajos','select=numero,libre&order=numero.asc'),
     sbGet('transferencias','select=*&order=created_at.desc'),
+    sbGet('usuarios','select=*&order=created_at.asc'),
   ]);
+  _usuarios = usersRaw || [];
 
   const stock = aRaw.map(v=>({
     id:v.id, marca:v.marca, modelo:v.modelo, tipo:v.tipo||'Usado',
@@ -1434,13 +1409,43 @@ function renderVendedores({stock, clientes, ops, reservados}) {
     if(el) el.style.color = diasColor(prom);
   }
 
-  // Mejor vendedor (desde ops)
+  // Mejor vendedor (desde ops reales)
   const porVend = {};
-  (ops||[]).forEach(o => { if(o.vendedor) porVend[o.vendedor] = (porVend[o.vendedor]||0)+1; });
+  (ops||[]).forEach(o => { if(o.vendedor_nombre) porVend[o.vendedor_nombre] = (porVend[o.vendedor_nombre]||0)+1; });
   const mejorVend = Object.entries(porVend).sort((a,b)=>b[1]-a[1])[0];
-  if(mejorVend) { setText('v-mejor', mejorVend[0].split(',')[0]); setText('v-mejor-sub', mejorVend[1] + ' operaciones'); }
+  if(mejorVend) { setText('v-mejor', mejorVend[0].split(' ')[0]); setText('v-mejor-sub', mejorVend[1] + ' operaciones'); }
 
-  // Tabla tiempo en stock
+  // Tabla rendimiento — desde usuarios reales con rol vendedor
+  const tabla = document.getElementById('v-rend-tabla');
+  if(tabla) {
+    const vendedores = _usuarios.filter(u => u.rol === 'vendedor' && u.activo);
+    if(!vendedores.length) {
+      tabla.innerHTML = '<tr class="empty-row"><td colspan="4">No hay vendedores activos en el sistema.</td></tr>';
+    } else {
+      const fmtM = n => n >= 1000000 ? '$'+(n/1000000).toFixed(1)+'M' : n >= 1000 ? '$'+(n/1000).toFixed(0)+'K' : '$'+n;
+      tabla.innerHTML = vendedores.map(u => {
+        const iniciales = (u.nombre||'').split(' ').slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || '?';
+        const opsVend = (ops||[]).filter(o => o.vendedor_nombre === u.nombre);
+        const ventasMes = opsVend.filter(o => o.created_at && o.created_at.slice(0,7) === new Date().toISOString().slice(0,7)).length;
+        const facturado = opsVend.reduce((s,o) => s + (parseFloat(o.precio)||0), 0);
+        const activas   = opsVend.filter(o => o.estado !== 'Entregado' && o.estado !== 'Cancelado').length;
+        const col = ventasMes >= 5 ? 'var(--green)' : ventasMes >= 2 ? 'var(--accent)' : ventasMes >= 1 ? 'var(--amber)' : 'var(--red)';
+        return `<tr>
+          <td><div style="display:flex;align-items:center;gap:9px;">
+            <div class="vav">${iniciales}</div>
+            <div><div style="font-weight:500;">${u.nombre}</div>
+            <div style="font-size:0.71rem;color:var(--muted);">${u.usuario||u.mail||''}</div></div>
+          </div></td>
+          <td><span class="mono" style="color:${col};">${ventasMes}</span></td>
+          <td><span class="mono" style="color:${col};">${fmtM(facturado)}</span></td>
+          <td><span class="mono">${activas} activa${activas!==1?'s':''}</span></td>
+        </tr>`;
+      }).join('');
+    }
+  }
+}
+
+// Tabla tiempo en stock
   const badge = $('v-stock-badge');
   const tabla = $('v-stock-tabla');
   if(badge) badge.textContent = vendidosConFechas.length + ' vehículo' + (vendidosConFechas.length!==1?'s':'') + ' vendido' + (vendidosConFechas.length!==1?'s':'');
@@ -1463,7 +1468,6 @@ function renderVendedores({stock, clientes, ops, reservados}) {
       }).join('');
     }
   }
-}
 
 // ═══════════════════════════════════════════════════════════
 //  CAJA
