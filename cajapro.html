@@ -176,7 +176,7 @@ tbody td{padding:11px 14px;font-size:0.85rem;}
     <div class="fc">
       <div class="fc-title">Últimos movimientos</div>
       <div class="tw"><table>
-        <thead><tr><th>Fecha</th><th>Tipo</th><th>Moneda</th><th>Concepto</th><th>Cliente/Prov</th><th>Método</th><th style="text-align:right">Monto</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Moneda</th><th>Categoría</th><th>Cliente/Prov</th><th>Detalle</th><th>Método</th><th style="text-align:right">Monto</th></tr></thead>
         <tbody id="dashMovs"></tbody>
       </table></div>
       <div id="dashMovsEmpty" class="empty">Sin movimientos aún</div>
@@ -254,7 +254,7 @@ tbody td{padding:11px 14px;font-size:0.85rem;}
       </div>
     </div>
     <div class="tw"><table>
-      <thead><tr><th>Fecha</th><th>Tipo</th><th>Mon.</th><th>Categoría</th><th>Auto</th><th>Cliente/Prov</th><th>Método</th><th style="text-align:right">Monto</th><th></th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Mon.</th><th>Categoría</th><th>Auto</th><th>Cliente/Prov</th><th>Concepto</th><th>Método</th><th style="text-align:right">Monto</th><th></th></tr></thead>
       <tbody id="tbMovs"></tbody>
     </table></div>
     <div id="tbMovsEmpty" class="empty">Sin movimientos</div>
@@ -1146,6 +1146,7 @@ function renderMovs(){
       <td>${m.catNombre||'—'}${m.subcat?'<br><span style="font-size:0.74rem;color:var(--muted)">'+m.subcat+'</span>':''}</td>
       <td>${m.autoId?'<span style="font-size:0.78rem;color:var(--muted)">'+autoNombre(m.autoId)+'</span>':'—'}</td>
       <td>${m.cliente||'—'}</td>
+      <td style="font-size:0.78rem;color:var(--muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.obs||m.concepto||'—'}</td>
       <td><span style="font-size:0.78rem;background:var(--surface2);padding:2px 8px;border-radius:20px;">${m.metodo||'—'}</span></td>
       <td style="text-align:right;color:${color}" class="mono">${fmt(m.monto,m.moneda)}</td>
       <td>${esAdmin()?'<button class="btn btn-g btn-sm" onclick="eliminarMov('+JSON.stringify(m.id)+')">✕</button>':''}</td>`;
@@ -1805,6 +1806,7 @@ function renderDash(){
       <td>${m.moneda==='USD'?'<span class="badge busd">USD</span>':'<span class="badge bstock">ARS</span>'}</td>
       <td>${m.catNombre||'—'}${m.subcat?' / <span style="color:var(--muted)">'+m.subcat+'</span>':''}</td>
       <td>${m.cliente||'—'}</td>
+      <td style="font-size:0.78rem;color:var(--muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.obs||m.concepto||'—'}</td>
       <td><span style="font-size:0.78rem;background:var(--surface2);padding:2px 8px;border-radius:20px;">${m.metodo||'—'}</span></td>
       <td style="text-align:right;color:${color}" class="mono">${fmt(m.monto,m.moneda)}</td>`;
     tb.appendChild(tr);
