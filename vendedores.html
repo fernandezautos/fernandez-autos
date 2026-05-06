@@ -1275,8 +1275,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 2
   if (session.rol !== ROL_REQUERIDO && session.rol !== 'admin') { window.location.href = 'login.html'; return; }
   window._session = session;
   document.addEventListener('DOMContentLoaded', function() {
-    var el = document.getElementById('headerUsuario');
+    var el = document.getElementById('headerNombre');
     if (el) el.textContent = session.nombre || session.usuario;
+    var av = document.getElementById('headerAvatar');
+    if (av) av.textContent = (session.nombre||session.usuario||'?').split(' ').slice(0,2).map(function(x){return x[0]||'';}).join('').toUpperCase();
   });
 })();
 function cerrarSesion() { localStorage.removeItem('fa_session'); window.location.href = 'login.html'; }
