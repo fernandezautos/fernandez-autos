@@ -387,12 +387,15 @@ select.filter:focus{border-color:var(--accent)}
   </div>
   <div class="stats-row" id="statsPend"></div>
   <div style="margin-bottom:24px;">
-    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:#991b1b;font-weight:600;margin-bottom:12px;">🔴 Autos sin legajo asignado</div>
-    <div id="pendSinLegajoLista"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div></div>
-  </div>
-  <div style="margin-bottom:24px;">
-    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text2);font-weight:600;margin-bottom:12px;">🚗 Autos a documentar</div>
-    <div id="pendAutosLista"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text2);font-weight:600;">Autos pendientes de documentación</div>
+      <div style="display:flex;gap:6px;" id="pendFiltros">
+        <button onclick="setPendFiltro('todos',this)" class="btn sm active" style="font-size:0.72rem;padding:3px 10px;">Todos</button>
+        <button onclick="setPendFiltro('sin_legajo',this)" class="btn sm" style="font-size:0.72rem;padding:3px 10px;">🔴 Sin legajo</button>
+        <button onclick="setPendFiltro('con_legajo',this)" class="btn sm" style="font-size:0.72rem;padding:3px 10px;">🚗 Con legajo</button>
+      </div>
+    </div>
+    <div id="pendUnificadoLista"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Cargando...</div></div>
   </div>
 
 </div>
@@ -1429,60 +1432,66 @@ async function cargarPendientes() {
 
   var cs='background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
 
-  // Sin legajo
-  var listaSinLeg=document.getElementById('pendSinLegajoLista');
-  if(listaSinLeg){
-    if(!sinLegajo.length){listaSinLeg.innerHTML='<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de asignacion de legajo</div>';}
-    else{
-      var html1='<div style="display:flex;flex-direction:column;gap:10px;">';
-      sinLegajo.forEach(function(v){
-        var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
-        var sub=v.sub_estado||'Pendiente a peritaje';
-        var col=SUB_COLOR[sub]||'#991b1b';
-        html1+='<div data-vid="'+v.id+'" onclick="abrirDetVehiculoSinLegajo(parseInt(this.dataset.vid))" style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid #991b1b;cursor:pointer;">';
-        html1+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
-        html1+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' · Sin legajo asignado</div></div>';
-        html1+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
-        html1+='<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
-        html1+='<button data-vid="'+v.id+'" data-mm="'+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'" data-dom="'+encodeURIComponent(v.dominio||'')+'" onclick="event.stopPropagation();irALegajosConAuto(parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
-        html1+='</div></div>';
-      });
-      html1+='</div>';
-      listaSinLeg.innerHTML=html1;
-    }
-  }
+  // Lista unificada
+  window._pendSinLegajo = sinLegajo;
+  window._pendConLegajo = conLegajo;
+  renderPendUnificado('todos');
 
-  // Con legajo
-  var listaAutos=document.getElementById('pendAutosLista');
-  if(listaAutos){
-    if(!conLegajo.length){listaAutos.innerHTML='<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes de documentacion</div>';}
-    else{
-      var html2='<div style="display:flex;flex-direction:column;gap:10px;">';
-      conLegajo.forEach(function(v){
-        var sub=v.sub_estado||'Pendiente a peritaje';
-        var col=SUB_COLOR[sub]||'#991b1b';
-        var idx2=SUB_ESTADOS_ORD.indexOf(sub);
-        if(idx2<0){idx2=0;sub=SUB_ESTADOS_ORD[0];}
-        var siguiente=(idx2<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx2+1]:null;
-        var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
-                var legNum2 = (function(dom){ var l=legs.find(function(x){return x.auto&&x.auto.dominio===dom;}); return l?l.num:null; })(v.dominio);
-        var cardAttr = legNum2 ? ' data-legnum="'+legNum2+'" onclick="abrirLegajoDesdePendiente(this)"' : '';
-        html2+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;'+(legNum2?'cursor:pointer;':'')+'"'+cardAttr+'>';
-        html2+='<div style="flex:1;"><div style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</div>';
-        html2+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' dia'+(dias!==1?'s':'')+' en sistema</div>';
-        if(v.obs) html2+='<div style="font-size:0.76rem;color:var(--text3);font-style:italic;">'+v.obs+'</div>';
-        html2+='</div>';
-        html2+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
-        html2+='<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
-        if(siguiente) html2+='<button data-vid="'+v.id+'" data-sub="'+siguiente+'" onclick="avanzarSubEstado(parseInt(this.dataset.vid),this.dataset.sub)" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>';
-        if(sub==='Documentacion lista') html2+='<button data-vid="'+v.id+'" onclick="pasarADisponible(parseInt(this.dataset.vid))" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Pasar a Disponible</button>';
-        html2+='</div></div>';
-      });
-      html2+='</div>';
-      listaAutos.innerHTML=html2;
-    }
-  }
+}
 
+var _pendFiltroActivo = 'todos';
+function setPendFiltro(filtro, btn) {
+  _pendFiltroActivo = filtro;
+  document.querySelectorAll('#pendFiltros .btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPendUnificado(filtro);
+}
+
+function renderPendUnificado(filtro) {
+  var cs='background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
+  var sinLegajo = window._pendSinLegajo||[];
+  var conLegajo = window._pendConLegajo||[];
+  var lista = document.getElementById('pendUnificadoLista');
+  if(!lista) return;
+  var items = [];
+  if(filtro==='todos'||filtro==='sin_legajo') sinLegajo.forEach(function(v){ items.push({v:v,tipo:'sin_legajo'}); });
+  if(filtro==='todos'||filtro==='con_legajo') conLegajo.forEach(function(v){ items.push({v:v,tipo:'con_legajo'}); });
+  if(!items.length){ lista.innerHTML='<div style="'+cs+'text-align:center;color:var(--text3);font-size:0.85rem;">Sin autos pendientes</div>'; return; }
+  var html='<div style="display:flex;flex-direction:column;gap:10px;">';
+  items.forEach(function(item){
+    var v=item.v, tipo=item.tipo;
+    var sub=v.sub_estado||'Pendiente a peritaje';
+    var col=SUB_COLOR[sub]||'#991b1b';
+    var dias=v.created_at?Math.floor((new Date()-new Date(v.created_at))/86400000):0;
+    var esSinLeg=tipo==='sin_legajo';
+    html+='<div style="'+cs+'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:3px solid '+(esSinLeg?'#991b1b':'var(--accent-mid)')+';cursor:pointer;"';
+    if(esSinLeg){
+      html+=' data-vid="'+v.id+'" onclick="abrirDetVehiculoSinLegajo(parseInt(this.dataset.vid))">';
+    } else {
+      var legNum2=(function(dom){ var l=legs.find(function(x){return x.auto&&x.auto.dominio===dom;}); return l?l.num:null; })(v.dominio);
+      html+=(legNum2?' data-legnum="'+legNum2+'" onclick="abrirLegajoDesdePendiente(this)"':'')+'>';
+    }
+    html+='<div style="flex:1;">';
+    html+='<div style="display:flex;align-items:center;gap:8px;">';
+    html+='<span style="font-weight:600;font-size:0.92rem;">'+v.marca+' '+v.modelo+' '+(v.anio||'')+(v.dominio?' · '+v.dominio:'')+'</span>';
+    html+='<span style="font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:20px;background:'+(esSinLeg?'#fee2e2':'#e0f2fe')+';color:'+(esSinLeg?'#991b1b':'#0369a1')+'">'+(esSinLeg?'Sin legajo':'Con legajo')+'</span>';
+    html+='</div>';
+    html+='<div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">'+v.procedencia+' · '+dias+' día'+(dias!==1?'s':'')+' · '+(esSinLeg?'Sin legajo asignado':'En documentación')+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;" onclick="event.stopPropagation();">';
+    html+='<span style="background:'+col+'18;color:'+col+';border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:600;">'+sub+'</span>';
+    if(esSinLeg){
+      html+='<button data-vid="'+v.id+'" data-mm="'+encodeURIComponent(v.marca+' '+v.modelo+' '+(v.anio||''))+'" data-dom="'+encodeURIComponent(v.dominio||'')+'" onclick="irALegajosConAuto(parseInt(this.dataset.vid),this.dataset.mm,this.dataset.dom)" style="background:#991b1b;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">Asignar legajo</button>';
+    } else {
+      var idx2=SUB_ESTADOS_ORD.indexOf(sub);
+      var siguiente=(idx2>=0&&idx2<SUB_ESTADOS_ORD.length-1)?SUB_ESTADOS_ORD[idx2+1]:null;
+      if(siguiente) html+='<button data-vid="'+v.id+'" data-sub="'+siguiente+'" onclick="avanzarSubEstado(parseInt(this.dataset.vid),this.dataset.sub)" style="background:'+col+';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">→ '+siguiente+'</button>';
+      if(sub==='Documentacion lista') html+='<button data-vid="'+v.id+'" onclick="pasarADisponible(parseInt(this.dataset.vid))" style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:var(--sans);font-size:0.78rem;font-weight:600;cursor:pointer;">✓ Disponible</button>';
+    }
+    html+='</div></div>';
+  });
+  html+='</div>';
+  lista.innerHTML=html;
 }
 
 function avanzarSubEstadoYCerrar(el){ avanzarSubEstado(parseInt(el.dataset.vid),el.dataset.sub); cerrar('ovDetLeg'); }
