@@ -2252,7 +2252,7 @@ function adminGlobalSearchFn(q) {
   ).slice(0,5).forEach(v => hits.push({
     tipo:'Vehículo', icon:'🚙',
     titulo: v.marca+' '+v.modelo+' '+v.anio+(v.dominio?' · '+v.dominio:''),
-    sub: v.estado+' · '+fmt(v.precio,'ARS'),
+    sub: v.estado+' · '+fmtARS(v.precio),
     onclick: "show('stock')"
   }));
 
