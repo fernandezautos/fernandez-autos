@@ -1155,14 +1155,18 @@ async function cargarDatos() {
     historialPrecios:[]
   }));
 
-  const clientes = cRaw.map(c=>({id:c.id,nombre:c.nombre,estado:c.estado||'Prospecto'}));
+  const clientes = cRaw.map(c=>({id:c.id,nombre:c.nombre,estado:c.estado||'Prospecto',dni:c.dni||'',tel:c.tel||''}));
 
   const ops = oRaw.map(o=>({
-    id:o.id, fecha:o.fecha, vehiculo:o.vehiculo_texto||'',
-    cliente:o.cliente_nombre||'', moneda:o.moneda||'ARS',
+    id:o.id, fecha:o.fecha, vehiculo_texto:o.vehiculo_texto||'',
+    cliente_nombre:o.cliente_nombre||'', moneda:o.moneda||'ARS',
     precio:parseFloat(o.precio||0), estado:o.estado||'Pendiente',
-    vendedor:o.vendedor_id?'Vendedor':''
+    vendedor_nombre:o.vendedor_nombre||''
   }));
+
+  // Guardar en global para buscador
+  _datos._ops = ops;
+  _datos._clientes = clientes;
 
   const movs = mRaw.map(m=>({
     id:m.id, tipo:m.tipo, concepto:m.obs||'', monto:parseFloat(m.monto||0),
@@ -1969,7 +1973,6 @@ function renderReportes() {
 
   // Usar datos ya cargados en memoria
   const stock = _datos.stock || [];
-  const ops   = _datos.ops   || [];
   const movs  = _datos.movs  || [];
   const trfs  = [];
 
@@ -2216,23 +2219,22 @@ function adminGlobalSearchFn(q) {
   const res = document.getElementById('adminSearchResults');
   if(!q || q.length < 2) { res.style.display='none'; return; }
   const ql = q.toLowerCase();
-
+  const ops = _datos._ops || [];
+  const clientes = _datos._clientes || [];
+  const stock = _datos.stock || [];
   const hits = [];
 
-  // Buscar en operaciones
-  (ops||[]).filter(o =>
+  ops.filter(o =>
     (o.vehiculo_texto||'').toLowerCase().includes(ql) ||
-    (o.cliente_nombre||'').toLowerCase().includes(ql) ||
-    (o.dominio||'').toLowerCase().includes(ql)
+    (o.cliente_nombre||'').toLowerCase().includes(ql)
   ).slice(0,5).forEach(o => hits.push({
     tipo:'Operación', icon:'🚗',
     titulo: o.vehiculo_texto||'—',
-    sub: o.cliente_nombre+' · '+o.estado,
+    sub: (o.cliente_nombre||'—')+' · '+(o.estado||'—'),
     onclick: "show('vendedores')"
   }));
 
-  // Buscar en clientes
-  (clientes||[]).filter(c =>
+  clientes.filter(c =>
     (c.nombre||'').toLowerCase().includes(ql) ||
     (c.dni||'').includes(q) ||
     (c.tel||'').includes(q)
@@ -2243,8 +2245,7 @@ function adminGlobalSearchFn(q) {
     onclick: "show('clientes')"
   }));
 
-  // Buscar en stock
-  (stock||[]).filter(v =>
+  stock.filter(v =>
     (v.dominio||'').toLowerCase().includes(ql) ||
     (v.marca||'').toLowerCase().includes(ql) ||
     (v.modelo||'').toLowerCase().includes(ql)
@@ -2271,6 +2272,7 @@ function adminGlobalSearchFn(q) {
   }
   res.style.display = 'block';
 }
+
 
 async function cargarUsuarios() {
   const raw = await sbGet('usuarios','select=*&order=created_at.asc');
