@@ -1426,8 +1426,17 @@ async function cargarPendientes() {
 
   var stats = document.getElementById('statsPend');
   if(stats){
-    var mkStat=function(lbl,val,col){return '<div style="background:#fff;border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div><div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>';};
-    stats.innerHTML=mkStat('Sin legajo',sinLegajo.length,'#991b1b')+mkStat('A documentar',conLegajo.length,'#1e40af')+mkStat('Ops activas',opsActivas.length,'#7c3aed');
+    var mkStat=function(lbl,val,col,filtro){
+      return '<div onclick="setPendFiltroCard(\''+filtro+'\')" id="statCard_'+filtro+'" style="background:#fff;border:2px solid var(--border2);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .15s;"'+
+        ' onmouseover="this.style.borderColor=\''+col+'\';this.style.background=\''+col+'10\'"'+
+        ' onmouseout="if(_pendFiltroActivo!==\''+filtro+'\'){this.style.borderColor=\'var(--border2)\';this.style.background=\'#fff\'}"'+
+        '><div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:4px;">'+lbl+'</div>'+
+        '<div style="font-size:1.5rem;font-weight:700;color:'+col+';">'+val+'</div></div>';
+    };
+    stats.innerHTML =
+      mkStat('Sin legajo', sinLegajo.length, '#991b1b', 'sin_legajo') +
+      mkStat('A documentar', conLegajo.length, '#1e40af', 'con_legajo') +
+      mkStat('Todos', sinLegajo.length+conLegajo.length, '#555', 'todos');
   }
 
   var cs='background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px 18px;';
@@ -1444,7 +1453,34 @@ function setPendFiltro(filtro, btn) {
   _pendFiltroActivo = filtro;
   document.querySelectorAll('#pendFiltros .btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  actualizarEstadoCardsFilter(filtro);
   renderPendUnificado(filtro);
+}
+
+function setPendFiltroCard(filtro) {
+  _pendFiltroActivo = filtro;
+  // Sync filter buttons
+  document.querySelectorAll('#pendFiltros .btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+filtro+"'"));
+  });
+  actualizarEstadoCardsFilter(filtro);
+  renderPendUnificado(filtro);
+}
+
+function actualizarEstadoCardsFilter(filtro) {
+  ['sin_legajo','con_legajo','todos'].forEach(function(f){
+    var card = document.getElementById('statCard_'+f);
+    if(!card) return;
+    var colMap = {'sin_legajo':'#991b1b','con_legajo':'#1e40af','todos':'#555'};
+    var col = colMap[f];
+    if(f === filtro) {
+      card.style.borderColor = col;
+      card.style.background = col+'15';
+    } else {
+      card.style.borderColor = 'var(--border2)';
+      card.style.background = '#fff';
+    }
+  });
 }
 
 function renderPendUnificado(filtro) {
