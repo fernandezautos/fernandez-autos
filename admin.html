@@ -242,6 +242,15 @@ tbody td{padding:12px 16px;font-size:0.88rem;font-weight:400;}
     <button onclick="show('sistemas',this)">Sistemas</button>
   </nav>
   <div class="header-right">
+    <!-- Buscador global -->
+    <div style="position:relative;">
+      <input id="adminGlobalSearch" type="text" placeholder="🔍 Buscar dominio, cliente, operación..." 
+        oninput="adminGlobalSearchFn(this.value)"
+        style="padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.1);color:#fff;font-family:Arial,sans-serif;font-size:0.8rem;width:280px;outline:none;"
+        onfocus="this.style.background='rgba(255,255,255,.15)'" 
+        onblur="setTimeout(()=>document.getElementById('adminSearchResults').style.display='none',200)">
+      <div id="adminSearchResults" style="display:none;position:absolute;top:36px;right:0;background:#fff;border:1px solid #e0ddd4;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);width:380px;max-height:400px;overflow-y:auto;z-index:999;"></div>
+    </div>
     <button onclick="cerrarSesion()" style="background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-family:Arial, sans-serif;font-size:0.72rem;padding:5px 13px;border-radius:20px;cursor:pointer;">Salir</button>
     <div style="display:flex;align-items:center;gap:8px;">
       <div class="admin-chip">Admin</div>
@@ -2199,6 +2208,66 @@ async function guardarMetaVendedor(input) {
   });
   const u = _usuarios.find(x=>String(x.id)===String(uid));
   if(u) u.meta_mensual = meta;
+}
+
+function adminGlobalSearchFn(q) {
+  const res = document.getElementById('adminSearchResults');
+  if(!q || q.length < 2) { res.style.display='none'; return; }
+  const ql = q.toLowerCase();
+
+  const hits = [];
+
+  // Buscar en operaciones
+  (ops||[]).filter(o =>
+    (o.vehiculo_texto||'').toLowerCase().includes(ql) ||
+    (o.cliente_nombre||'').toLowerCase().includes(ql) ||
+    (o.dominio||'').toLowerCase().includes(ql)
+  ).slice(0,5).forEach(o => hits.push({
+    tipo:'Operación', icon:'🚗',
+    titulo: o.vehiculo_texto||'—',
+    sub: o.cliente_nombre+' · '+o.estado,
+    onclick: "show('vendedores')"
+  }));
+
+  // Buscar en clientes
+  (clientes||[]).filter(c =>
+    (c.nombre||'').toLowerCase().includes(ql) ||
+    (c.dni||'').includes(q) ||
+    (c.tel||'').includes(q)
+  ).slice(0,5).forEach(c => hits.push({
+    tipo:'Cliente', icon:'👤',
+    titulo: c.nombre||'—',
+    sub: (c.dni?'DNI: '+c.dni+' · ':'')+( c.tel||''),
+    onclick: "show('clientes')"
+  }));
+
+  // Buscar en stock
+  (stock||[]).filter(v =>
+    (v.dominio||'').toLowerCase().includes(ql) ||
+    (v.marca||'').toLowerCase().includes(ql) ||
+    (v.modelo||'').toLowerCase().includes(ql)
+  ).slice(0,5).forEach(v => hits.push({
+    tipo:'Vehículo', icon:'🚙',
+    titulo: v.marca+' '+v.modelo+' '+v.anio+(v.dominio?' · '+v.dominio:''),
+    sub: v.estado+' · '+fmt(v.precio,'ARS'),
+    onclick: "show('stock')"
+  }));
+
+  if(!hits.length) {
+    res.innerHTML = '<div style="padding:16px;text-align:center;color:#9b9890;font-size:0.85rem;">Sin resultados para "'+q+'"</div>';
+  } else {
+    res.innerHTML = hits.map(h => `
+      <div onclick="${h.onclick};document.getElementById('adminGlobalSearch').value='';document.getElementById('adminSearchResults').style.display='none';"
+        style="padding:10px 16px;cursor:pointer;border-bottom:1px solid #f4f3ee;display:flex;align-items:center;gap:10px;"
+        onmouseover="this.style.background='#f9f8f5'" onmouseout="this.style.background=''">
+        <span style="font-size:1.1rem;">${h.icon}</span>
+        <div>
+          <div style="font-weight:600;font-size:0.85rem;">${h.titulo}</div>
+          <div style="font-size:0.75rem;color:#9b9890;">${h.tipo} · ${h.sub}</div>
+        </div>
+      </div>`).join('');
+  }
+  res.style.display = 'block';
 }
 
 async function cargarUsuarios() {
